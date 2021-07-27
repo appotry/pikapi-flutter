@@ -111,6 +111,24 @@ func ViewComic(comicId string) error {
 	).Error
 }
 
+func ViewComicUpdateFavourite(comicId string, favourite bool) error {
+	return db.Model(&ComicView{}).Where(
+		"id = ?", comicId,
+	).Update(
+		"is_favourite",
+		favourite,
+	).Error
+}
+
+func ViewComicUpdateLike(comicId string, like bool) error {
+	return db.Model(&ComicView{}).Where(
+		"id = ?", comicId,
+	).Update(
+		"is_like",
+		like,
+	).Error
+}
+
 func ViewEpAndPicture(comicId string, epOrder int, epTitle, pictureRank int) error {
 	return db.Model(&ComicView{}).Where("id", comicId).Updates(
 		map[string]interface{}{

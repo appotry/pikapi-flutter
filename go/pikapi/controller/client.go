@@ -7,18 +7,19 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	comic_center2 "pgo/pikapi/database/comic_center"
-	network_cache2 "pgo/pikapi/database/network_cache"
-	properties2 "pgo/pikapi/database/properties"
+	"pgo/pikapi/database/comic_center"
+	"pgo/pikapi/database/network_cache"
+	"pgo/pikapi/database/properties"
 	"pica"
 	"regexp"
+	"strings"
 	"time"
 )
 
 func InitClient() {
 	client.Timeout = time.Second * 60
-	switchAddress = properties2.LoadSwitchAddress()
-	changeProxyUrl(properties2.LoadProxy())
+	switchAddress = properties.LoadSwitchAddress()
+	changeProxyUrl(properties.LoadProxy())
 }
 
 var client = pica.Client{}
@@ -68,7 +69,7 @@ func changeProxyUrl(urlStr string) bool {
 func Categories() (string, error) {
 	key := "CATEGORIES"
 	expire := time.Hour * 24 * 5
-	cache := network_cache2.LoadCache(key, expire)
+	cache := network_cache.LoadCache(key, expire)
 	if cache != "" {
 		return cache, nil
 	}
@@ -76,9 +77,9 @@ func Categories() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var dbCategories []comic_center2.Category
+	var dbCategories []comic_center.Category
 	for _, c := range categories {
-		dbCategories = append(dbCategories, comic_center2.Category{
+		dbCategories = append(dbCategories, comic_center.Category{
 			ID:                c.Id,
 			Title:             c.Title,
 			Description:       c.Description,
@@ -90,20 +91,20 @@ func Categories() (string, error) {
 			ThumbPath:         c.Thumb.Path,
 		})
 	}
-	err = comic_center2.UpSetCategories(&dbCategories)
+	err = comic_center.UpSetCategories(&dbCategories)
 	if err != nil {
 		return "", err
 	}
 	buff, _ := json.Marshal(&categories)
 	cache = string(buff)
-	network_cache2.SaveCache(key, cache)
+	network_cache.SaveCache(key, cache)
 	return cache, nil
 }
 
 func Comics(category string, sort string, page int) (string, error) {
 	key := fmt.Sprintf("%s$%s$%d", category, sort, page)
 	expire := time.Hour * 2
-	cache := network_cache2.LoadCache(key, expire)
+	cache := network_cache.LoadCache(key, expire)
 	if cache != "" {
 		return cache, nil
 	}
@@ -111,18 +112,18 @@ func Comics(category string, sort string, page int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	buff, _ := json.Marshal(&comicPage)
+	buff, _ := json.Marshal(comicPage)
 	cache = string(buff)
-	network_cache2.SaveCache(key, cache)
+	network_cache.SaveCache(key, cache)
 	return cache, nil
 }
 
 func SearchComics(keyword string, sort string, page int) (string, error) {
-	comicPage, err := client.SearchComics(keyword, sort, int(page))
+	comicPage, err := client.SearchComics(keyword, sort, page)
 	if err != nil {
 		return "", err
 	}
-	buff, _ := json.Marshal(&comicPage)
+	buff, _ := json.Marshal(comicPage)
 	return string(buff), nil
 }
 
@@ -131,7 +132,7 @@ func SearchComicsInCategories(keyword string, sort string, page int, categories 
 	if err != nil {
 		return "", err
 	}
-	buff, _ := json.Marshal(&comicPage)
+	buff, _ := json.Marshal(comicPage)
 	return string(buff), nil
 }
 
@@ -139,9 +140,9 @@ func ComicInfo_(comicId string) (string, error) {
 	// cache
 	key := fmt.Sprintf("COMIC_INFO$%s", comicId)
 	expire := time.Hour * 24 * 7
-	cache := network_cache2.LoadCache(key, expire)
+	cache := network_cache.LoadCache(key, expire)
 	if cache != "" {
-		err := comic_center2.ViewComic(comicId)
+		err := comic_center.ViewComic(comicId)
 		if err != nil {
 			return "", err
 		}
@@ -153,7 +154,7 @@ func ComicInfo_(comicId string) (string, error) {
 		return "", err
 	}
 	// 标记历史记录
-	view := comic_center2.ComicView{}
+	view := comic_center.ComicView{}
 	view.ID = comicId
 	view.CreatedAt = comic.CreatedAt
 	view.UpdatedAt = comic.UpdatedAt
@@ -177,24 +178,29 @@ func ComicInfo_(comicId string) (string, error) {
 	view.IsFavourite = comic.IsFavourite
 	view.IsLiked = comic.IsLiked
 	view.CommentsCount = int32(comic.CommentsCount)
-	err = comic_center2.ViewComicUpdateInfo(&view)
+	err = comic_center.ViewComicUpdateInfo(&view)
 	if err != nil {
 		return "", err
 	}
 	// return
-	buff, _ := json.Marshal(&comic)
+	buff, _ := json.Marshal(comic)
 	cache = string(buff)
-	network_cache2.SaveCache(key, cache)
+	network_cache.SaveCache(key, cache)
 	return cache, nil
+}
+
+func ComicInfoCleanCache(comicId string) {
+	key := fmt.Sprintf("COMIC_INFO$%s", comicId)
+	network_cache.RemoveCache(key)
 }
 
 func EpPage(comicId string, page int) (string, error) {
 	// cache
 	key := fmt.Sprintf("COMIC_EP_PAGE$%s$%d", comicId, page)
 	expire := time.Hour * 2
-	cache := network_cache2.LoadCache(key, expire)
+	cache := network_cache.LoadCache(key, expire)
 	if cache != "" {
-		err := comic_center2.ViewComic(comicId)
+		err := comic_center.ViewComic(comicId)
 		if err != nil {
 			return "", err
 		}
@@ -205,13 +211,13 @@ func EpPage(comicId string, page int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	buff, err := json.Marshal(&epPage)
+	buff, err := json.Marshal(epPage)
 	if err != nil {
 		return "", err
 	}
 	// return
 	cache = string(buff)
-	network_cache2.SaveCache(key, cache)
+	network_cache.SaveCache(key, cache)
 	return cache, nil
 }
 
@@ -219,9 +225,9 @@ func ComicPicturePageWithQuality(comicId string, epOrder int, page int, quality 
 	// cache
 	key := fmt.Sprintf("COMIC_EP_PAGE$%s$%ds$%ds$%s", comicId, epOrder, page, quality)
 	expire := time.Hour * 24 * 10
-	cache := network_cache2.LoadCache(key, expire)
+	cache := network_cache.LoadCache(key, expire)
 	if cache != "" {
-		err := comic_center2.ViewComic(comicId)
+		err := comic_center.ViewComic(comicId)
 		if err != nil {
 			return "", err
 		}
@@ -232,12 +238,48 @@ func ComicPicturePageWithQuality(comicId string, epOrder int, page int, quality 
 	if err != nil {
 		return "", err
 	}
-	buff, err := json.Marshal(&ePage)
+	buff, err := json.Marshal(ePage)
 	if err != nil {
 		return "", err
 	}
 	// return
 	cache = string(buff)
-	network_cache2.SaveCache(key, cache)
+	network_cache.SaveCache(key, cache)
 	return cache, nil
+}
+
+func SwitchLike(comicId string) (string, error) {
+	point, err := client.SwitchLike(comicId)
+	if err != nil {
+		return "", err
+	}
+	// 更新viewLog里面的favour
+	comic_center.ViewComicUpdateLike(comicId, strings.HasPrefix(*point, "un"))
+	// 删除缓存
+	ComicInfoCleanCache(comicId)
+	return *point, nil
+}
+
+func SwitchFavourite(comicId string) (string, error) {
+	point, err := client.SwitchFavourite(comicId)
+	if err != nil {
+		return "", err
+	}
+	// 更新viewLog里面的favour
+	comic_center.ViewComicUpdateFavourite(comicId, strings.HasPrefix(*point, "un"))
+	// 删除缓存
+	ComicInfoCleanCache(comicId)
+	return *point, nil
+}
+
+func FavouriteComics(sort string, page int) (string, error) {
+	point, err := client.FavouriteComics(sort, page)
+	if err != nil {
+		return "", err
+	}
+	str, err := json.Marshal(point)
+	if err != nil {
+		return "", err
+	}
+	return string(str), nil
 }

@@ -241,6 +241,28 @@ class Pica {
       "zipPath": zipPath,
     });
   }
+
+  Future<String> switchLike(String comicId) async {
+    var rsp = await _channel.invokeMethod("switchLike", {
+      "comicId": comicId,
+    });
+    return rsp;
+  }
+
+  Future<ComicsPage> favouriteComics(String sort, int page) async {
+    var rsp = await _channel.invokeMethod("favouriteComics", {
+      "sort": sort,
+      "page": page,
+    });
+    return ComicsPage.fromJson(json.decode(rsp));
+  }
+
+  Future<String> switchFavourite(String comicId) async {
+    var rsp = await _channel.invokeMethod("switchFavourite", {
+      "comicId": comicId,
+    });
+    return rsp;
+  }
 }
 
 class DownloadPicture {

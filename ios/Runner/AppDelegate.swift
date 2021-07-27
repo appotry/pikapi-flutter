@@ -357,6 +357,49 @@ import Pikapi
                         result(FlutterError(code: "", message: "params error", details: ""))
                     }
                 }
+                else if call.method == "favouriteComics" {
+                    if let args = call.arguments as? Dictionary<String, Any>,
+                       let sort = args["sort"] as? String,
+                       let page = args["page"] as? NSNumber{
+                        var error: NSError?
+                        let data = MobileFavouriteComics(sort, page.intValue, &error)
+                        if error != nil {
+                            result(FlutterError(code: "", message: error?.localizedDescription, details: ""))
+                        }else{
+                            result(data)
+                        }
+                    }else{
+                        result(FlutterError(code: "", message: "params error", details: ""))
+                    }
+                }
+                else if call.method == "switchLike" {
+                    if let args = call.arguments as? Dictionary<String, Any>,
+                       let comicId = args["comicId"] as? String{
+                        var error: NSError?
+                        let data = MobileSwitchLike(comicId, &error)
+                        if error != nil {
+                            result(FlutterError(code: "", message: error?.localizedDescription, details: ""))
+                        }else{
+                            result(data)
+                        }
+                    }else{
+                        result(FlutterError(code: "", message: "params error", details: ""))
+                    }
+                }
+                else if call.method == "switchFavourite" {
+                    if let args = call.arguments as? Dictionary<String, Any>,
+                       let comicId = args["comicId"] as? String{
+                        var error: NSError?
+                        let data = MobileSwitchFavourite(comicId, &error)
+                        if error != nil {
+                            result(FlutterError(code: "", message: error?.localizedDescription, details: ""))
+                        }else{
+                            result(data)
+                        }
+                    }else{
+                        result(FlutterError(code: "", message: "params error", details: ""))
+                    }
+                }
                 else{
                     result(FlutterMethodNotImplemented)
                 }

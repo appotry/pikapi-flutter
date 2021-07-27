@@ -48,3 +48,11 @@ func SaveCache(key string, value string) {
 		V: value,
 	})
 }
+
+func RemoveCache(key string) error {
+	err := db.Unscoped().Delete(&NetworkCache{}, "k = ?", key).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	}
+	return err
+}

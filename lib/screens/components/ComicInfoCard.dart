@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/service/pica.dart';
 
 import 'images/RemoteImage.dart';
 
-class ComicInfoCard extends StatelessWidget {
+class ComicInfoCard extends StatefulWidget {
   final ComicSimple info;
 
   const ComicInfoCard({Key? key, required this.info}) : super(key: key);
 
   @override
+  State<StatefulWidget> createState() => _ComicInfoCard();
+}
+
+class _ComicInfoCard extends State<ComicInfoCard> {
+  bool favouriteLoading = false;
+
+  @override
   Widget build(BuildContext context) {
+    var info = widget.info;
     var theme = Theme.of(context);
     var textColor = theme.textTheme.bodyText1!.color!;
     var textColorSummary = textColor.withAlpha(0xCC);
@@ -30,7 +39,9 @@ class ComicInfoCard extends StatelessWidget {
       fontSize: 13,
       color: iconColor,
     );
-    var view = info is ComicInfo ? (info as ComicInfo).viewsCount : 0;
+    var view = info is ComicInfo ? info.viewsCount : 0;
+    bool? like = info is ComicInfo ? info.isLiked : null;
+    bool? favourite = info is ComicInfo ? (info).isFavourite : null;
     return Container(
       padding: EdgeInsets.all(5),
       decoration: BoxDecoration(
@@ -86,6 +97,7 @@ class ComicInfoCard extends StatelessWidget {
                                   )
                                 ]
                               : []),
+                          Expanded(child: Container()),
                         ],
                       ),
                     ],
@@ -96,9 +108,33 @@ class ComicInfoCard extends StatelessWidget {
                   height: imageHeight,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       buildFinished(info.finished),
+                      Expanded(child: Container()),
+                      ...(favourite == null
+                          ? []
+                          : [
+                              favouriteLoading
+                                  ? IconButton(
+                                      iconSize: iconSize * 2,
+                                      color: Colors.pink[400],
+                                      onPressed: (){},
+                                      icon: Icon(
+                                        Icons.sync,
+                                      ),
+                                    )
+                                  : IconButton(
+                                      iconSize: iconSize * 2,
+                                      color: Colors.pink[400],
+                                      onPressed: _changeFavourite,
+                                      icon: Icon(
+                                        favourite
+                                            ? Icons.bookmark
+                                            : Icons.bookmark_border,
+                                      ),
+                                    ),
+                            ]),
                     ],
                   ),
                 ),
@@ -108,6 +144,22 @@ class ComicInfoCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future _changeFavourite() async {
+    setState(() {
+      favouriteLoading = true;
+    });
+    try {
+      var rst = await pica.switchFavourite(widget.info.id);
+      setState(() {
+        (widget.info as ComicInfo).isFavourite = !rst.startsWith("un");
+      });
+    } finally {
+      setState(() {
+        favouriteLoading = false;
+      });
+    }
   }
 }
 

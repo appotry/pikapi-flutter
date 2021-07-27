@@ -137,6 +137,18 @@ func ImportComicDownload(zipPath string) error {
 	return controller.ImportZip(zipPath)
 }
 
+func SwitchLike(comicId string) (string, error) {
+	return controller.SwitchLike(comicId)
+}
+
+func SwitchFavourite(comicId string) (string, error) {
+	return controller.SwitchFavourite(comicId)
+}
+
+func FavouriteComics(sort string, page int) (string, error) {
+	return controller.FavouriteComics(sort, page)
+}
+
 func ExportingNotify(notify StringNotify) {
 	controller.ExportNameCallback = func(str string) {
 		notify.OnNotify(str)

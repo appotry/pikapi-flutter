@@ -294,6 +294,35 @@ func handleResetAllDownloads(arguments interface{}) (interface{}, error) {
 	return nil, comic_center.ResetAll()
 }
 
+func handleSwitchLike(arguments interface{}) (reply interface{}, err error) {
+	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
+		if comicId, ok := argumentsMap["comicId"].(string); ok {
+			return controller.SwitchLike(comicId)
+		}
+	}
+	return nil, errors.New("params error")
+}
+
+func handleSwitchFavourite(arguments interface{}) (reply interface{}, err error) {
+	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
+		if comicId, ok := argumentsMap["comicId"].(string); ok {
+			return controller.SwitchFavourite(comicId)
+		}
+	}
+	return nil, errors.New("params error")
+}
+
+func handleFavouriteComics(arguments interface{}) (reply interface{}, err error) {
+	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
+		if sort, ok := argumentsMap["sort"].(string); ok {
+			if page, ok := argumentsMap["page"].(int32); ok {
+				return controller.FavouriteComics(sort, int(page))
+			}
+		}
+	}
+	return nil, errors.New("params error")
+}
+
 const channelName = "pica"
 
 type Plugin struct {
@@ -342,6 +371,10 @@ func (p *Plugin) InitPlugin(messenger plugin.BinaryMessenger) error {
 	channel.HandleFunc("viewLogPage", handleViewLogPage)
 	channel.HandleFunc("exportComicDownload", handleExportDownload)
 	channel.HandleFunc("importComicDownload", handleImportDownload)
+
+	channel.HandleFunc("switchLike", handleSwitchLike)
+	channel.HandleFunc("switchFavourite", handleSwitchFavourite)
+	channel.HandleFunc("favouriteComics", handleFavouriteComics)
 
 	exporting := plugin.NewEventChannel(messenger, "exporting", plugin.StandardMethodCodec{})
 	exporting.Handle(&ExportingStreamHandler{})

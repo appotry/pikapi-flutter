@@ -182,6 +182,22 @@ class MainActivity : FlutterActivity() {
                                 call.argument("zipPath")!!
                         )
                     }
+                    "favouriteComics" -> {
+                        Mobile.favouriteComics(
+                                call.argument("sort")!!,
+                                call.argument("page")!!
+                        )
+                    }
+                    "switchFavourite" -> {
+                        Mobile.switchFavourite(
+                                call.argument("comicId")!!
+                        )
+                    }
+                    "switchLike" -> {
+                        Mobile.switchLike(
+                                call.argument("comicId")!!
+                        )
+                    }
                     else -> {
                         null
                     }

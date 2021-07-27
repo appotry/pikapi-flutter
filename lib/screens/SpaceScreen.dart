@@ -3,6 +3,7 @@ import 'package:pikapi/basic/Themes.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 import 'package:pikapi/screens/AccountScreen.dart';
 import 'package:pikapi/screens/DownloadListScreen.dart';
+import 'package:pikapi/screens/FavouritePaperScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
 import 'package:pikapi/service/pica.dart';
 
@@ -92,6 +93,16 @@ class _SpaceScreenState extends State<SpaceScreen> {
               );
             },
             title: Text('浏览记录'),
+          ),
+          Divider(),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FavouritePaperScreen()),
+              );
+            },
+            title: Text('我的收藏'),
           ),
           Divider(),
           ListTile(
