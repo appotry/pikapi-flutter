@@ -1,0 +1,3 @@
+[submodule "go/pica"]
+	path = go/pica
+	url = https://github.com/niuhuan/pica-golang.git
