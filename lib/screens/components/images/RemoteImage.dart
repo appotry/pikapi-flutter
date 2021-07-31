@@ -28,7 +28,8 @@ class _RemoteImageState extends State<RemoteImage> {
 
   @override
   void initState() {
-    _mock = widget.fileServer.contains("/wikawika.xyz/");
+    _mock =
+        widget.fileServer == "" || widget.fileServer.contains("/wikawika.xyz/");
     if (!_mock) {
       _future = pica.remoteImageData(widget.fileServer, widget.path);
     }

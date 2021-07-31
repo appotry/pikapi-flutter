@@ -16,5 +16,5 @@ func init() {
 func HashLock(key string) *sync.Mutex {
 	hash := fnv.New32()
 	hash.Write([]byte(key))
-	return hashMutex[int(hash.Sum32())%len(hashMutex)]
+	return hashMutex[int(hash.Sum32()%uint32(len(hashMutex)))]
 }

@@ -223,6 +223,20 @@ import Pikapi
                         result(FlutterError(code: "", message: "params error", details: ""))
                     }
                 }
+                else if call.method == "deleteDownloadComic" {
+                    if let args = call.arguments as? Dictionary<String, Any>,
+                       let comicId = args["comicId"] as? String{
+                        var error: NSError?
+                        MobileDeleteDownloadComic(comicId, &error)
+                        if error != nil {
+                            result(FlutterError(code: "", message: error?.localizedDescription, details: ""))
+                        }else{
+                            result(nil)
+                        }
+                    }else{
+                        result(FlutterError(code: "", message: "params error", details: ""))
+                    }
+                }
                 else if call.method == "downloadComic" {
                     if let args = call.arguments as? Dictionary<String, Any>,
                        let comicId = args["comicId"] as? String{
@@ -291,6 +305,18 @@ import Pikapi
                         }else{
                             result(data)
                         }
+                    }else{
+                        result(FlutterError(code: "", message: "params error", details: ""))
+                    }
+                }
+                else if call.method == "downloadRunning" {
+                        result(MobileDownloadRunning())
+                }
+                else if call.method == "setDownloadRunning" {
+                    if let args = call.arguments as? Dictionary<String, Any>,
+                       let status = args["status"] as? Bool{
+                        MobileSetDownloadRunning(status)
+                        result(nil)
                     }else{
                         result(FlutterError(code: "", message: "params error", details: ""))
                     }
@@ -400,6 +426,44 @@ import Pikapi
                         result(FlutterError(code: "", message: "params error", details: ""))
                     }
                 }
+                else if call.method == "clean" {
+                        var error: NSError?
+                        let data = MobileClean(&error)
+                        if error != nil {
+                            result(FlutterError(code: "", message: error?.localizedDescription, details: ""))
+                        }else{
+                            result(nil)
+                        }
+                }
+                else if call.method == "recommendation" {
+                    if let args = call.arguments as? Dictionary<String, Any>,
+                       let comicId = args["comicId"] as? String{
+                        var error: NSError?
+                        let data = MobileRecommendation(comicId, &error)
+                        if error != nil {
+                            result(FlutterError(code: "", message: error?.localizedDescription, details: ""))
+                        }else{
+                            result(data)
+                        }
+                    }else{
+                        result(FlutterError(code: "", message: "params error", details: ""))
+                    }
+                }
+                else if call.method == "comments" {
+                    if let args = call.arguments as? Dictionary<String, Any>,
+                       let comicId = args["comicId"] as? String,
+                       let page = args["page"] as? NSNumber{
+                        var error: NSError?
+                        let data = MobileComments(comicId, page.intValue, &error)
+                        if error != nil {
+                            result(FlutterError(code: "", message: error?.localizedDescription, details: ""))
+                        }else{
+                            result(data)
+                        }
+                    }else{
+                        result(FlutterError(code: "", message: "params error", details: ""))
+                    }
+                }
                 else{
                     result(FlutterMethodNotImplemented)
                 }
@@ -409,7 +473,7 @@ import Pikapi
         // 导出事件,没有使用
         // NOT USE BECAUSE IOS DO NOT EXPORT
         let exportingEventChannel = FlutterEventChannel.init(name: "exporting", binaryMessenger: controller as! FlutterBinaryMessenger)
-        class ExportingChannelHanlder:NSObject, FlutterStreamHandler {
+        class ExportingChannelHandler:NSObject, FlutterStreamHandler {
              func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
                 exportingSink = events
                 return nil
@@ -420,7 +484,7 @@ import Pikapi
                 return nil
             }
         }
-        exportingEventChannel.setStreamHandler(ExportingChannelHanlder.init())
+        exportingEventChannel.setStreamHandler(ExportingChannelHandler.init())
         class ExportingNotifyHandler:NSObject, MobileStringNotifyProtocol {
             func onNotify(_ s: String?) {
                 exportingSink?(s)

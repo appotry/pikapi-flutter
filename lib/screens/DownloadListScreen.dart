@@ -20,7 +20,8 @@ class DownloadListScreen extends StatefulWidget {
 class _DownloadListScreenState extends State<DownloadListScreen> {
   late Future<List<DownloadComicWithLogoPath>> _f = pica.allDownloads();
   late StreamSubscription<dynamic> _sub;
-  DownloadComic? downloading;
+  DownloadComic? _downloading;
+  late bool _downloadRunning = false;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
         if (event is String) {
           try {
             setState(() {
-              downloading = DownloadComic.fromJson(json.decode(event));
+              _downloading = DownloadComic.fromJson(json.decode(event));
             });
           } catch (e, s) {
             print(e);
@@ -41,6 +42,9 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
         }
       },
     );
+    pica
+        .downloadRunning()
+        .then((val) => setState(() => _downloadRunning = val));
     super.initState();
   }
 
@@ -93,8 +97,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
                     return AlertDialog(
                       title: Text('下载任务'),
                       content: Text(
-                        // downloader.running() ? "暂停下载吗?" : "启动下载吗?",
-                        '',
+                        _downloadRunning ? "暂停下载吗?" : "启动下载吗?",
                       ),
                       actions: [
                         MaterialButton(
@@ -106,17 +109,12 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
                         MaterialButton(
                           onPressed: () async {
                             Navigator.pop(context);
-                            // if (downloader.running()) {
-                            //   properties.saveDownloading(false);
-                            //   setState(() {
-                            //     downloader.stopService();
-                            //   });
-                            // } else {
-                            //   properties.saveDownloading(true);
-                            //   setState(() {
-                            //     downloader.startService();
-                            //   });
-                            // }
+                            var to = !_downloadRunning;
+                            // properties.saveDownloading(to);
+                            await pica.setDownloadRunning(to);
+                            setState(() {
+                              _downloadRunning = to;
+                            });
                           },
                           child: Text('确认'),
                         ),
@@ -129,18 +127,14 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
                 children: [
                   Expanded(child: Container()),
                   Icon(
-                    Icons.schedule_send,
-                    // downloader.running()
-                    //     ? Icons.compare_arrows_sharp
-                    //     : Icons.schedule_send,
+                    _downloadRunning
+                        ? Icons.compare_arrows_sharp
+                        : Icons.schedule_send,
                     size: 18,
                     color: Colors.white,
                   ),
                   Text(
-                    '下载中',
-                    // downloader.running()
-                    //     ? '下载中'
-                    //     : '暂停中',
+                    _downloadRunning ? '下载中' : '暂停中',
                     style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
                   Expanded(child: Container()),
@@ -196,14 +190,12 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
 
           var data = snapshot.data!;
 
-          if (downloading != null) {
-            print("DOWNLOADING");
-            print(downloading);
+          if (_downloading != null) {
+            print(_downloading);
             try {
               for (var i = 0; i < data.length; i++) {
-                if (downloading!.id == data[i].id) {
-                  print("ID ID ID");
-                  data[i].copy(downloading!);
+                if (_downloading!.id == data[i].id) {
+                  data[i].copy(_downloading!);
                 }
               }
             } catch (e, s) {
@@ -227,9 +219,8 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
                               color: Colors.red.shade500,
                               icon: Icons.delete_forever,
                               onTap: () async {
-                                // await downloadDb.deleteTask(e.id);
-                                // downloader.reset();
-                                // setState(() => e.deleting = 1);
+                                await pica.deleteDownloadComic(e.id);
+                                setState(() => e.deleting = true);
                               },
                             ),
                           ],
@@ -252,7 +243,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
                     child: DownloadInfoCard(
                       task: e,
                       downloading:
-                          downloading != null && downloading!.id == e.id,
+                          _downloading != null && _downloading!.id == e.id,
                     ),
                   ),
                 ),

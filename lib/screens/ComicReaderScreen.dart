@@ -6,7 +6,7 @@ import 'package:pikapi/service/pica.dart';
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 import 'components/ImageReader.dart';
-import 'components/images/ComicReaderImage.dart';
+import 'components/images/ReaderImage.dart';
 
 class ComicReaderScreen extends StatefulWidget {
   final ComicInfo comicInfo;
@@ -26,9 +26,9 @@ class ComicReaderScreen extends StatefulWidget {
 
 class _ComicReaderScreenState extends State<ComicReaderScreen> {
   late bool _fullScreen = false;
-  late Future<List<ComicReaderImage>> _future = _load();
+  late Future<List<RemoteReaderImage>> _future = _load();
 
-  Future<List<ComicReaderImage>> _load() async {
+  Future<List<RemoteReaderImage>> _load() async {
     var _quality = await pica.loadQuality();
     List<PicaImage> list = [];
     var _needLoadPage = 0;
@@ -43,7 +43,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
       list.addAll(page.docs.map((element) => element.media));
     } while (page.pages > page.page);
     return list
-        .map((e) => ComicReaderImage(
+        .map((e) => RemoteReaderImage(
               fileServer: e.fileServer,
               path: e.path,
             ))
@@ -66,7 +66,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     return FutureBuilder(
       future: _future,
       builder: (BuildContext context,
-          AsyncSnapshot<List<ComicReaderImage>> snapshot) {
+          AsyncSnapshot<List<RemoteReaderImage>> snapshot) {
         if (snapshot.hasError) {
           return ContentError(
               error: snapshot.error,

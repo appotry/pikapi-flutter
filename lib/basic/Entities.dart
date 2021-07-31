@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -136,6 +135,7 @@ class EpPage extends Page {
 
 class PicturePage extends Page {
   late List<Picture> docs;
+
   PicturePage.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     this.docs = List.from(json["docs"])
         .map((e) => Map<String, dynamic>.from(e))
@@ -163,6 +163,16 @@ class RemoteImageData {
   late int height;
   late Uint8List buff;
 
+  RemoteImageData.forData(
+    this.fileServer,
+    this.path,
+    this.fileSize,
+    this.format,
+    this.width,
+    this.height,
+    this.buff,
+  );
+
   RemoteImageData.fromJson(Map<String, dynamic> json) {
     this.fileServer = json["fileServer"];
     this.path = json["path"];
@@ -174,3 +184,65 @@ class RemoteImageData {
   }
 }
 
+class CommentPage extends Page {
+  late List<Comment> docs;
+
+  CommentPage.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    this.docs = List.from(json["docs"])
+        .map((e) => Map<String, dynamic>.from(e))
+        .map((e) => Comment.fromJson(e))
+        .toList();
+  }
+}
+
+class Comment {
+  late String id;
+  late String content;
+  late CommentUser user;
+  late String comic;
+  late bool isTop;
+  late bool hide;
+  late String createdAt;
+  late int likesCount;
+  late int commentsCount;
+  late bool isLiked;
+
+  Comment.fromJson(Map<String, dynamic> json) {
+    this.id = json["_id"];
+    this.content = json["content"];
+    this.user = CommentUser.fromJson(Map<String, dynamic>.of(json["_user"]));
+    this.comic = json["_comic"];
+    this.isTop = json["isTop"];
+    this.hide = json["hide"];
+    this.createdAt = json["created_at"];
+    this.likesCount = json["likesCount"];
+    this.commentsCount = json["commentsCount"];
+    this.isLiked = json["isLiked"];
+  }
+}
+
+class CommentUser {
+  late String id;
+  late String gender;
+  late String name;
+  late String title;
+  late bool verified;
+  late int exp;
+  late int level;
+  late List<String> characters;
+  late String role;
+  late PicaImage avatar;
+
+  CommentUser.fromJson(Map<String, dynamic> json) {
+    this.id = json["_id"];
+    this.gender = json["gender"];
+    this.name = json["name"];
+    this.title = json["title"];
+    this.verified = json["verified"];
+    this.exp = json["exp"];
+    this.level = json["level"];
+    this.characters = List.of(json["characters"]).map((e) => "$e").toList();
+    this.role = json["role"];
+    this.avatar = PicaImage.fromJson(Map<String, dynamic>.of(json["avatar"]));
+  }
+}

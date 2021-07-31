@@ -127,6 +127,17 @@ class MainActivity : FlutterActivity() {
                                 call.argument("quality")!!
                         )
                     }
+                    "downloadRunning" -> {
+                        Mobile.downloadRunning()
+                    }
+                    "setDownloadRunning" -> {
+                        Mobile.setDownloadRunning(call.argument("status")!!)
+                    }
+                    "deleteDownloadComic" -> {
+                        Mobile.deleteDownloadComic(
+                                call.argument("comicId")!!
+                        )
+                    }
                     "downloadComic" -> {
                         Mobile.loadDownloadComic(
                                 call.argument("comicId")!!
@@ -196,6 +207,20 @@ class MainActivity : FlutterActivity() {
                     "switchLike" -> {
                         Mobile.switchLike(
                                 call.argument("comicId")!!
+                        )
+                    }
+                    "clean" -> {
+                        Mobile.clean()
+                    }
+                    "recommendation" -> {
+                        Mobile.recommendation(
+                                call.argument("comicId")!!
+                        )
+                    }
+                    "comments" -> {
+                        Mobile.comments(
+                                call.argument("comicId")!!,
+                                call.argument("page")!!
                         )
                     }
                     else -> {

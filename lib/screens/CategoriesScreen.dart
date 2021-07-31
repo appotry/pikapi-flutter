@@ -6,6 +6,7 @@ import 'package:pikapi/service/pica.dart';
 import '../basic/Entities.dart' as models;
 import 'CategoryPaperScreen.dart';
 import 'components/ContentLoading.dart';
+import 'components/images/Common.dart';
 import 'components/images/RemoteImage.dart';
 
 TextStyle noneLabelStyle = TextStyle(
@@ -114,13 +115,43 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     var imageRs = imageSize / 10;
 
     List<Widget> list = [];
+
+    list.add(
+      GestureDetector(
+        onTap: () {
+          _navigateToCategory(null);
+        },
+        child: Container(
+          width: blockSize,
+          child: Column(
+            children: [
+              Card(
+                elevation: .5,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(imageRs)),
+                  child: buildMock(imageSize, imageSize),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(imageRs)),
+                ),
+              ),
+              Container(height: 5),
+              Center(
+                child: Text('全分类'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
     for (var i = 0; i < cList.length; i++) {
       var c = cList[i];
       if (c.isWeb) continue;
       list.add(
         GestureDetector(
           onTap: () {
-            _navigateToCategory(c);
+            _navigateToCategory(c.title);
           },
           child: Container(
             width: blockSize,
@@ -157,11 +188,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     return list;
   }
 
-  void _navigateToCategory(models.Category c) {
+  void _navigateToCategory(String? categoryTitle) {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => CategoryPaperScreen(category: c)),
+        builder: (context) => CategoryPaperScreen(categoryTitle: categoryTitle),
+      ),
     );
   }
 }

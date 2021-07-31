@@ -426,3 +426,48 @@ func ViewLogPage(page int, pageSize int) (*[]ComicView, error) {
 	err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("last_view_time DESC").Find(&list).Error
 	return &list, err
 }
+
+func DeletingComic() (*ComicDownload, error) {
+	var download ComicDownload
+	err := db.First(&download, "deleting = 1").Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	return &download, err
+}
+
+func TrueDelete(comicId string) error {
+	err := db.Transaction(func(tx *gorm.DB) error {
+		err := tx.Unscoped().Delete(&ComicDownload{}, "id = ?", comicId).Error
+		if err != nil {
+			return err
+		}
+		err = tx.Unscoped().Delete(&ComicDownloadEp{}, "comic_id = ?", comicId).Error
+		if err != nil {
+			return err
+		}
+		err = tx.Unscoped().Delete(&ComicDownloadPicture{}, "comic_id = ?", comicId).Error
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return db.Raw("VACUUM").Error
+}
+
+func Deleting(comicId string) error {
+	return db.Model(&ComicDownload{}).Where("id = ?", comicId).Updates(map[string]interface{}{
+		"deleting": true,
+	}).Error
+}
+
+func RemoveAllRemoteImage() error {
+	err := db.Unscoped().Delete(&RemoteImage{}, "1 = 1").Error
+	if err != nil {
+		return err
+	}
+	return db.Raw("VACUUM").Error
+}

@@ -56,3 +56,11 @@ func RemoveCache(key string) error {
 	}
 	return err
 }
+
+func RemoveAll() error {
+	err := db.Unscoped().Delete(&NetworkCache{}, "1 = 1").Error
+	if err != nil {
+		return err
+	}
+	return db.Raw("VACUUM").Error
+}

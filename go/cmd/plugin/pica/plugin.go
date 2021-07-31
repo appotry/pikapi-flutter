@@ -130,7 +130,7 @@ func handleSearch(arguments interface{}) (interface{}, error) {
 		if keyword, ok := argumentsMap["keyword"].(string); ok {
 			if sort, ok := argumentsMap["sort"].(string); ok {
 				if page, ok := argumentsMap["page"].(int32); ok {
-					return controller.SearchComics(keyword, sort, int(page))
+					return controller.SearchComics(nil, keyword, sort, int(page))
 				}
 			}
 		}
@@ -152,7 +152,7 @@ func handleSearchComicsInCategories(arguments interface{}) (interface{}, error) 
 								goto e
 							}
 						}
-						return controller.SearchComicsInCategories(keyword, sort, int(page), categories)
+						return controller.SearchComics(categories, keyword, sort, int(page))
 					}
 				}
 			}
@@ -223,6 +223,15 @@ func handleDownloadComic(arguments interface{}) (interface{}, error) {
 	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
 		if comicId, ok := argumentsMap["comicId"].(string); ok {
 			return controller.LoadDownloadComic(comicId)
+		}
+	}
+	return nil, errors.New("params error")
+}
+
+func handleDeleteDownloadComic(arguments interface{}) (interface{}, error) {
+	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
+		if comicId, ok := argumentsMap["comicId"].(string); ok {
+			return nil, controller.DeleteDownloadComic(comicId)
 		}
 	}
 	return nil, errors.New("params error")
@@ -323,74 +332,42 @@ func handleFavouriteComics(arguments interface{}) (reply interface{}, err error)
 	return nil, errors.New("params error")
 }
 
-const channelName = "pica"
-
-type Plugin struct {
+func handleDownloadRunning(arguments interface{}) (reply interface{}, err error) {
+	return controller.DownloadRunning(), nil
 }
 
-func (p *Plugin) InitPlugin(messenger plugin.BinaryMessenger) error {
+func handleSetDownloadRunning(arguments interface{}) (reply interface{}, err error) {
+	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
+		if status, ok := argumentsMap["status"].(bool); ok {
+			controller.SetDownloadRunning(status)
+			return nil, nil
+		}
+	}
+	return nil, errors.New("params error")
+}
 
-	channel := plugin.NewMethodChannel(messenger, channelName, plugin.StandardMethodCodec{})
+func handleClean(arguments interface{}) (reply interface{}, err error) {
+	return nil, controller.Clean()
+}
 
-	channel.HandleFunc("loadProperty", handleLoadProperty)
-	channel.HandleFunc("saveProperty", handleSaveProperty)
+func handleRecommendation(arguments interface{}) (reply interface{}, err error) {
+	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
+		if comicId, ok := argumentsMap["comicId"].(string); ok {
+			return controller.Recommendation(comicId)
+		}
+	}
+	return nil, errors.New("params error")
+}
 
-	channel.HandleFunc("setSwitchAddress", handleSetSwitchAddress)
-	channel.HandleFunc("getSwitchAddress", handleGetSwitchAddress)
-	channel.HandleFunc("setProxy", handleSetProxy)
-	channel.HandleFunc("getProxy", handleGetProxy)
-
-	channel.HandleFunc("setUsername", handleSetUsername)
-	channel.HandleFunc("getUsername", handleGetUsername)
-	channel.HandleFunc("setPassword", handleSetPassword)
-	channel.HandleFunc("getPassword", handleGetPassword)
-
-	channel.HandleFunc("preLogin", handlePreLogin)
-	channel.HandleFunc("login", handleLogin)
-
-	channel.HandleFunc("remoteImageData", handleRemoteImageData)
-	channel.HandleFunc("downloadComicThumb", handleDownloadComicThumb)
-
-	channel.HandleFunc("categories", handleCategories)
-	channel.HandleFunc("comics", handleComics)
-	channel.HandleFunc("searchComics", handleSearch)
-	channel.HandleFunc("searchComicsInCategories", handleSearchComicsInCategories)
-	channel.HandleFunc("comicInfo", handleComicInfo)
-	channel.HandleFunc("comicEpPage", handleComicEpPage)
-	channel.HandleFunc("comicPicturePageWithQuality", handleComicPicturePageWithQuality)
-
-	channel.HandleFunc("createDownload", handleCreateDownload)
-	channel.HandleFunc("addDownload", handleAddDownload)
-	channel.HandleFunc("downloadComic", handleDownloadComic)
-	channel.HandleFunc("allDownloads", handleAllDownloads)
-
-	channel.HandleFunc("downloadEpList", handleDownloadEpList)
-	channel.HandleFunc("downloadPicturesByEpId", handleDownloadPicturesByEpId)
-	channel.HandleFunc("resetAllDownloads", handleResetAllDownloads)
-
-	channel.HandleFunc("viewLogPage", handleViewLogPage)
-	channel.HandleFunc("exportComicDownload", handleExportDownload)
-	channel.HandleFunc("importComicDownload", handleImportDownload)
-
-	channel.HandleFunc("switchLike", handleSwitchLike)
-	channel.HandleFunc("switchFavourite", handleSwitchFavourite)
-	channel.HandleFunc("favouriteComics", handleFavouriteComics)
-
-	exporting := plugin.NewEventChannel(messenger, "exporting", plugin.StandardMethodCodec{})
-	exporting.Handle(&ExportingStreamHandler{})
-
-	downloadComic := plugin.NewEventChannel(messenger, "downloadingComic", plugin.StandardMethodCodec{})
-	downloadComic.Handle(&DownloadingComicStreamHandler{})
-	controller.ComicDownloadEvent = func(str string) {
-		for _, sink := range downloadComicEventSinkMap {
-			if sink != nil {
-				sink.Success(str)
+func handleComments(arguments interface{}) (reply interface{}, err error) {
+	if argumentsMap, ok := arguments.(map[interface{}]interface{}); ok {
+		if comicId, ok := argumentsMap["comicId"].(string); ok {
+			if page, ok := argumentsMap["page"].(int32); ok {
+				return controller.Comments(comicId, int(page))
 			}
 		}
 	}
-
-	return nil // no error
-
+	return nil, errors.New("params error")
 }
 
 type ExportingStreamHandler struct {
@@ -427,4 +404,82 @@ func (d *DownloadingComicStreamHandler) OnCancel(arguments interface{}) {
 			delete(downloadComicEventSinkMap, SCREEN)
 		}
 	}
+}
+
+const channelName = "pica"
+
+type Plugin struct {
+}
+
+func (p *Plugin) InitPlugin(messenger plugin.BinaryMessenger) error {
+
+	channel := plugin.NewMethodChannel(messenger, channelName, plugin.StandardMethodCodec{})
+
+	channel.HandleFunc("loadProperty", handleLoadProperty)
+	channel.HandleFunc("saveProperty", handleSaveProperty)
+
+	channel.HandleFunc("setSwitchAddress", handleSetSwitchAddress)
+	channel.HandleFunc("getSwitchAddress", handleGetSwitchAddress)
+	channel.HandleFunc("setProxy", handleSetProxy)
+	channel.HandleFunc("getProxy", handleGetProxy)
+
+	channel.HandleFunc("setUsername", handleSetUsername)
+	channel.HandleFunc("getUsername", handleGetUsername)
+	channel.HandleFunc("setPassword", handleSetPassword)
+	channel.HandleFunc("getPassword", handleGetPassword)
+
+	channel.HandleFunc("preLogin", handlePreLogin)
+	channel.HandleFunc("login", handleLogin)
+
+	channel.HandleFunc("remoteImageData", handleRemoteImageData)
+	channel.HandleFunc("downloadComicThumb", handleDownloadComicThumb)
+
+	channel.HandleFunc("categories", handleCategories)
+	channel.HandleFunc("comics", handleComics)
+	channel.HandleFunc("searchComics", handleSearch)
+	channel.HandleFunc("searchComicsInCategories", handleSearchComicsInCategories)
+	channel.HandleFunc("comicInfo", handleComicInfo)
+	channel.HandleFunc("comicEpPage", handleComicEpPage)
+	channel.HandleFunc("comicPicturePageWithQuality", handleComicPicturePageWithQuality)
+
+	channel.HandleFunc("downloadRunning", handleDownloadRunning)
+	channel.HandleFunc("setDownloadRunning", handleSetDownloadRunning)
+
+	channel.HandleFunc("createDownload", handleCreateDownload)
+	channel.HandleFunc("addDownload", handleAddDownload)
+	channel.HandleFunc("downloadComic", handleDownloadComic)
+	channel.HandleFunc("deleteDownloadComic", handleDeleteDownloadComic)
+	channel.HandleFunc("allDownloads", handleAllDownloads)
+
+	channel.HandleFunc("downloadEpList", handleDownloadEpList)
+	channel.HandleFunc("downloadPicturesByEpId", handleDownloadPicturesByEpId)
+	channel.HandleFunc("resetAllDownloads", handleResetAllDownloads)
+
+	channel.HandleFunc("viewLogPage", handleViewLogPage)
+	channel.HandleFunc("exportComicDownload", handleExportDownload)
+	channel.HandleFunc("importComicDownload", handleImportDownload)
+
+	channel.HandleFunc("switchLike", handleSwitchLike)
+	channel.HandleFunc("switchFavourite", handleSwitchFavourite)
+	channel.HandleFunc("favouriteComics", handleFavouriteComics)
+
+	channel.HandleFunc("clean", handleClean)
+	channel.HandleFunc("recommendation", handleRecommendation)
+	channel.HandleFunc("comments", handleComments)
+
+	exporting := plugin.NewEventChannel(messenger, "exporting", plugin.StandardMethodCodec{})
+	exporting.Handle(&ExportingStreamHandler{})
+
+	downloadComic := plugin.NewEventChannel(messenger, "downloadingComic", plugin.StandardMethodCodec{})
+	downloadComic.Handle(&DownloadingComicStreamHandler{})
+	controller.ComicDownloadEvent = func(str string) {
+		for _, sink := range downloadComicEventSinkMap {
+			if sink != nil {
+				sink.Success(str)
+			}
+		}
+	}
+
+	return nil // no error
+
 }

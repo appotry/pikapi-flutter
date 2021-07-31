@@ -65,6 +65,27 @@ func changeProxyUrl(urlStr string) bool {
 	}
 	return true
 }
+func cacheable(key string, expire time.Duration, reload func() (interface{}, error)) (string, error) {
+	// CACHE
+	cache := network_cache.LoadCache(key, expire)
+	if cache != "" {
+		return cache, nil
+	}
+	// obj
+	obj, err := reload()
+	if err != nil {
+		return "", err
+	}
+	buff, err := json.Marshal(obj)
+	// push to cache
+	if err != nil {
+		return "", err
+	}
+	// return
+	cache = string(buff)
+	network_cache.SaveCache(key, cache)
+	return cache, nil
+}
 
 func Categories() (string, error) {
 	key := "CATEGORIES"
@@ -102,38 +123,30 @@ func Categories() (string, error) {
 }
 
 func Comics(category string, sort string, page int) (string, error) {
-	key := fmt.Sprintf("%s$%s$%d", category, sort, page)
-	expire := time.Hour * 2
-	cache := network_cache.LoadCache(key, expire)
-	if cache != "" {
-		return cache, nil
-	}
-	comicPage, err := client.CategoryComics(category, sort, page)
-	if err != nil {
-		return "", err
-	}
-	buff, _ := json.Marshal(comicPage)
-	cache = string(buff)
-	network_cache.SaveCache(key, cache)
-	return cache, nil
+	return cacheable(
+		fmt.Sprintf("COMICS$%s$%s$%d", category, sort, page),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.Comics(category, sort, page)
+		},
+	)
 }
 
-func SearchComics(keyword string, sort string, page int) (string, error) {
-	comicPage, err := client.SearchComics(keyword, sort, page)
-	if err != nil {
-		return "", err
+func SearchComics(categories []string, keyword string, sort string, page int) (string, error) {
+	var categoriesInKey string
+	if len(categories) == 0 {
+		categoriesInKey = ""
+	} else {
+		b, _ := json.Marshal(categories)
+		categoriesInKey = string(b)
 	}
-	buff, _ := json.Marshal(comicPage)
-	return string(buff), nil
-}
-
-func SearchComicsInCategories(keyword string, sort string, page int, categories []string) (string, error) {
-	comicPage, err := client.SearchComicsInCategories(keyword, sort, page, categories)
-	if err != nil {
-		return "", err
-	}
-	buff, _ := json.Marshal(comicPage)
-	return string(buff), nil
+	return cacheable(
+		fmt.Sprintf("SEARCH$%s$%s$%s$%d", categoriesInKey, keyword, sort, page),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.SearchComics(categories, keyword, sort, page)
+		},
+	)
 }
 
 func ComicInfo_(comicId string) (string, error) {
@@ -195,57 +208,23 @@ func ComicInfoCleanCache(comicId string) {
 }
 
 func EpPage(comicId string, page int) (string, error) {
-	// cache
-	key := fmt.Sprintf("COMIC_EP_PAGE$%s$%d", comicId, page)
-	expire := time.Hour * 2
-	cache := network_cache.LoadCache(key, expire)
-	if cache != "" {
-		err := comic_center.ViewComic(comicId)
-		if err != nil {
-			return "", err
-		}
-		return cache, nil
-	}
-	// page
-	epPage, err := client.ComicEpPage(comicId, page)
-	if err != nil {
-		return "", err
-	}
-	buff, err := json.Marshal(epPage)
-	if err != nil {
-		return "", err
-	}
-	// return
-	cache = string(buff)
-	network_cache.SaveCache(key, cache)
-	return cache, nil
+	return cacheable(
+		fmt.Sprintf("COMIC_EP_PAGE$%s$%d", comicId, page),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.ComicEpPage(comicId, page)
+		},
+	)
 }
 
 func ComicPicturePageWithQuality(comicId string, epOrder int, page int, quality string) (string, error) {
-	// cache
-	key := fmt.Sprintf("COMIC_EP_PAGE$%s$%ds$%ds$%s", comicId, epOrder, page, quality)
-	expire := time.Hour * 24 * 10
-	cache := network_cache.LoadCache(key, expire)
-	if cache != "" {
-		err := comic_center.ViewComic(comicId)
-		if err != nil {
-			return "", err
-		}
-		return cache, nil
-	}
-	// page
-	ePage, err := client.ComicPicturePageWithQuality(comicId, epOrder, page, quality)
-	if err != nil {
-		return "", err
-	}
-	buff, err := json.Marshal(ePage)
-	if err != nil {
-		return "", err
-	}
-	// return
-	cache = string(buff)
-	network_cache.SaveCache(key, cache)
-	return cache, nil
+	return cacheable(
+		fmt.Sprintf("COMIC_EP_PAGE$%s$%ds$%ds$%s", comicId, epOrder, page, quality),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.ComicPicturePageWithQuality(comicId, epOrder, page, quality)
+		},
+	)
 }
 
 func SwitchLike(comicId string) (string, error) {
@@ -282,4 +261,24 @@ func FavouriteComics(sort string, page int) (string, error) {
 		return "", err
 	}
 	return string(str), nil
+}
+
+func Recommendation(comicId string) (string, error) {
+	return cacheable(
+		fmt.Sprintf("RECOMMENDATION$%s", comicId),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.ComicRecommendation(comicId)
+		},
+	)
+}
+
+func Comments(comicId string, page int) (string, error) {
+	return cacheable(
+		fmt.Sprintf("COMMENTS$%s$%d", comicId, page),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.ComicCommentsPage(comicId, page)
+		},
+	)
 }

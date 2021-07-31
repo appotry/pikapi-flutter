@@ -23,8 +23,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late TextEditingController _textEditController =
       TextEditingController(text: widget.keyword);
   late SearchBar _searchBar = SearchBar(
-    hintText:
-        '搜索' + (widget.category == null ? "" : (" - " + widget.category!)),
+    hintText: '搜索 ${widget.category ?? "全类型"}',
     controller: _textEditController,
     inBar: false,
     setState: setState,
@@ -43,7 +42,7 @@ class _SearchScreenState extends State<SearchScreen> {
     },
     buildDefaultAppBar: (BuildContext context) {
       return AppBar(
-        title: Text(widget.keyword),
+        title: Text((widget.category??"全类型")+" "+widget.keyword),
         actions: [_searchBar.getSearchAction(context)],
       );
     },

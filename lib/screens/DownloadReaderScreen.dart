@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
-import 'package:pikapi/screens/components/images/ComicReaderImage.dart';
+import 'package:pikapi/screens/components/images/ReaderImage.dart';
 import 'package:pikapi/service/pica.dart';
 
 import 'components/ContentError.dart';
@@ -42,11 +42,7 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
   }
 
   Future<List<Widget>> _buildImages(List<DownloadPicture> pictures) async {
-    return pictures
-        .map((e) => e.finalPath == ""
-            ? ComicReaderImage(fileServer: e.fileServer, path: e.path)
-            : ComicReaderImageFile(filePath: e.finalPath))
-        .toList();
+    return pictures.map((e) => DownloadReaderImage(e)).toList();
   }
 
   @override

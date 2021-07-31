@@ -11,6 +11,7 @@ import (
 	path2 "path"
 	"pgo/pikapi/const_value"
 	"pgo/pikapi/database/comic_center"
+	"pgo/pikapi/database/network_cache"
 	"pgo/pikapi/database/properties"
 	"pgo/pikapi/utils"
 )
@@ -81,7 +82,7 @@ func GetPassword() string {
 func PreLogin() (bool, error) {
 	token := properties.LoadToken()
 	tokenTime := properties.LoadTokenTime()
-	if token != "" && tokenTime > 0{
+	if token != "" && tokenTime > 0 {
 		if utils.Timestamp()-(1000*60*60*24) < tokenTime {
 			client.Token = token
 			return true, nil
@@ -250,6 +251,15 @@ func checkLogo(download comic_center.ComicDownload) ComicDownloadWithLogoPath {
 	return c
 }
 
+func DeleteDownloadComic(comicId string) error {
+	err := comic_center.Deleting(comicId)
+	if err != nil {
+		return err
+	}
+	downloadRestart = true
+	return nil
+}
+
 func LoadDownloadComic(comicId string) (string, error) {
 	download, err := comic_center.FindComicDownloadById(comicId)
 	if err != nil {
@@ -354,4 +364,31 @@ func DownloadPicturesByEpId(epId string) (string, error) {
 		return "", err
 	}
 	return string(buff), err
+}
+
+func DownloadRunning() bool {
+	return downloadRunning
+}
+
+func SetDownloadRunning(status bool) {
+	downloadRunning = status
+}
+
+func Clean() error {
+	var err error
+	notifyExport("清理网络缓存")
+	err = network_cache.RemoveAll()
+	if err != nil {
+		return err
+	}
+	notifyExport("清理图片缓存")
+	err = comic_center.RemoveAllRemoteImage()
+	if err != nil {
+		return err
+	}
+	notifyExport("清理图片文件")
+	os.RemoveAll(remoteDir)
+	utils.Mkdir(remoteDir)
+	notifyExport("清理结束")
+	return nil
 }

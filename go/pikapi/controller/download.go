@@ -55,7 +55,25 @@ func downloadHasStop() bool {
 	return false
 }
 
+func downloadDelete() bool {
+	c, e := comic_center.DeletingComic()
+	if e != nil {
+		panic(e)
+	}
+	if c != nil {
+		os.RemoveAll(downloadPath(c.ID))
+		e = comic_center.TrueDelete(c.ID)
+		if e != nil {
+			panic(e)
+		}
+		return true
+	}
+	return false
+}
+
 func downloadLoadComic() {
+	for downloadDelete() {
+	}
 	if downloadHasStop() {
 		return
 	}

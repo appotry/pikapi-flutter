@@ -7,9 +7,9 @@ import 'SearchScreen.dart';
 import 'components/ComicPager.dart';
 
 class CategoryPaperScreen extends StatefulWidget {
-  final Category category;
+  final String? categoryTitle;
 
-  const CategoryPaperScreen({Key? key, required this.category})
+  const CategoryPaperScreen({Key? key, required this.categoryTitle})
       : super(key: key);
 
   @override
@@ -18,7 +18,7 @@ class CategoryPaperScreen extends StatefulWidget {
 
 class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
   late SearchBar searchBar = SearchBar(
-    hintText: '搜索 - ${widget.category.title}',
+    hintText: '搜索 - ${widget.categoryTitle ?? "全分类"}',
     inBar: false,
     setState: setState,
     onSubmitted: (value) {
@@ -27,14 +27,14 @@ class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                SearchScreen(keyword: value, category: widget.category.title),
+                SearchScreen(keyword: value, category: widget.categoryTitle),
           ),
         );
       }
     },
     buildDefaultAppBar: (BuildContext context) {
       return AppBar(
-        title: new Text(widget.category.title),
+        title: new Text(widget.categoryTitle??"全分类"),
         actions: [searchBar.getSearchAction(context)],
       );
     },
@@ -52,7 +52,7 @@ class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
 
   void _load() {
     setState(() {
-      _future = pica.comics(widget.category.title, _currentSort, _currentPage);
+      _future = pica.comics(widget.categoryTitle??"", _currentSort, _currentPage);
     });
   }
 

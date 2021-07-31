@@ -72,13 +72,13 @@ func Comics(category string, sort string, page int) (string, error) {
 }
 
 func SearchComics(keyword string, sort string, page int) (string, error) {
-	return controller.SearchComics(keyword, sort, page)
+	return controller.SearchComics(nil, keyword, sort, page)
 }
 
 func SearchComicsInCategories(keyword string, sort string, page int, categories string) (string, error) {
 	var categoriesArray []string
 	json.Unmarshal([]byte(categories), &categoriesArray)
-	return controller.SearchComicsInCategories(keyword, sort, page, categoriesArray)
+	return controller.SearchComics(categoriesArray, keyword, sort, page)
 }
 
 func ComicInfo(comicId string) (string, error) {
@@ -91,6 +91,10 @@ func EpPage(comicId string, page int) (string, error) {
 
 func ComicPicturePageWithQuality(comicId string, epOrder int, page int, quality string) (string, error) {
 	return controller.ComicPicturePageWithQuality(comicId, epOrder, page, quality)
+}
+
+func DeleteDownloadComic(comicId string) error {
+	return controller.DeleteDownloadComic(comicId)
 }
 
 func LoadDownloadComic(comicId string) (string, error) {
@@ -125,6 +129,14 @@ func ResetAllDownloads() error {
 	return comic_center.ResetAll()
 }
 
+func DownloadRunning() bool {
+	return controller.DownloadRunning()
+}
+
+func SetDownloadRunning(status bool) {
+	controller.SetDownloadRunning(status)
+}
+
 func ViewLogPage(page int, pageSize int) (string, error) {
 	return controller.ViewLogPage(page, pageSize)
 }
@@ -147,6 +159,18 @@ func SwitchFavourite(comicId string) (string, error) {
 
 func FavouriteComics(sort string, page int) (string, error) {
 	return controller.FavouriteComics(sort, page)
+}
+
+func Clean() error {
+	return controller.Clean()
+}
+
+func Recommendation(comicId string) (string, error) {
+	return controller.Recommendation(comicId)
+}
+
+func Comments(comicId string, page int) (string, error) {
+	return controller.Comments(comicId, page)
 }
 
 func ExportingNotify(notify StringNotify) {

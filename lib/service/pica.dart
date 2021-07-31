@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
@@ -161,6 +162,12 @@ class Pica {
     return PicturePage.fromJson(json.decode(data));
   }
 
+  Future<dynamic> deleteDownloadComic(String comicId) async {
+    return _channel.invokeMethod("deleteDownloadComic", {
+      "comicId": comicId,
+    });
+  }
+
   Future<DownloadComicWithLogoPath?> loadDownloadComic(String comicId) async {
     var data = await _channel.invokeMethod("downloadComic", {
       "comicId": comicId,
@@ -200,6 +207,15 @@ class Pica {
       "comic": jsonEncode(comic.toJson()),
       "epList": jsonEncode(epList.map((e) => e.toJson()).toList()),
     });
+  }
+
+  Future<bool> downloadRunning() async {
+    return await _channel.invokeMethod("downloadRunning");
+  }
+
+  Future<dynamic> setDownloadRunning(bool status) async {
+    return await _channel
+        .invokeMethod("setDownloadRunning", {"status": status});
   }
 
   Future<List<DownloadComicWithLogoPath>> allDownloads() async {
@@ -263,6 +279,27 @@ class Pica {
     });
     return rsp;
   }
+
+  Future clean() {
+    return _channel.invokeMethod("clean");
+  }
+
+  Future<List<ComicSimple>> recommendation(String comicId) async {
+    var data = await _channel.invokeMethod("recommendation", {
+      "comicId": comicId,
+    });
+    List list = json.decode(data);
+    return list.map((e) => ComicSimple.fromJson(e)).toList();
+  }
+
+  Future<CommentPage> comments(String comicId, int page) async {
+    var rsp = await _channel.invokeMethod("comments", {
+      "comicId": comicId,
+      "page": page,
+    });
+    return CommentPage.fromJson(json.decode(rsp));
+  }
+
 }
 
 class DownloadPicture {
@@ -271,6 +308,9 @@ class DownloadPicture {
   late String path;
   late String localPath;
   late String finalPath;
+  late int width;
+  late int height;
+  late String format;
 
   DownloadPicture.fromJson(Map<String, dynamic> json) {
     this.rankInEp = json["rankInEp"];
@@ -278,6 +318,9 @@ class DownloadPicture {
     this.path = json["path"];
     this.localPath = json["localPath"];
     this.finalPath = json["finalPath"];
+    this.width = json["width"];
+    this.height = json["height"];
+    this.format = json["format"];
   }
 }
 
@@ -390,7 +433,7 @@ class DownloadComic {
     this.downloadFinished = other.downloadFinished;
     this.downloadFinishedTime = other.downloadFinishedTime;
     this.downloadFailed = other.downloadFailed;
-    this.deleting = other.deleting;
+    // this.deleting = other.deleting;
   }
 
   Map<String, dynamic> toJson() => {
