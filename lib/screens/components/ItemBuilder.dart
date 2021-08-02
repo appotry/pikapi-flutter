@@ -4,12 +4,14 @@ class ItemBuilder<T> extends StatelessWidget {
   final Future<T> future;
   final AsyncWidgetBuilder<T> successBuilder;
   final Future<dynamic> Function() onRefresh;
+  final double? loadingHeight;
 
   const ItemBuilder({
     Key? key,
     required this.future,
     required this.successBuilder,
     required this.onRefresh,
+    this.loadingHeight,
   }) : super(key: key);
 
   @override
@@ -17,6 +19,7 @@ class ItemBuilder<T> extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         var width = constraints.maxWidth;
+        var height = loadingHeight ?? (width / 2);
         return FutureBuilder(
             future: future,
             builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
@@ -25,9 +28,9 @@ class ItemBuilder<T> extends StatelessWidget {
                   onTap: onRefresh,
                   child: Container(
                     width: width,
-                    height: width / 2,
+                    height: height,
                     child: Center(
-                      child: Icon(Icons.sync_problem, size: width / 3),
+                      child: Icon(Icons.sync_problem, size: height / 1.5),
                     ),
                   ),
                 );
@@ -35,9 +38,9 @@ class ItemBuilder<T> extends StatelessWidget {
               if (snapshot.connectionState != ConnectionState.done) {
                 return Container(
                   width: width,
-                  height: width / 2,
+                  height: height,
                   child: Center(
-                    child: Icon(Icons.sync, size: width / 3),
+                    child: Icon(Icons.sync, size: height / 1.5),
                   ),
                 );
               }

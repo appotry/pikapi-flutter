@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/images/ReaderImage.dart';
 import 'package:pikapi/service/pica.dart';
 
@@ -46,6 +48,12 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
   }
 
   @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _fullScreen
@@ -80,6 +88,8 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
           onFullScreenChange: (fullScreen) {
             setState(() {
               _fullScreen = fullScreen;
+              SystemChrome.setEnabledSystemUIOverlays(
+                  fullScreen ? [] : SystemUiOverlay.values);
             });
           },
           onNextEp: _next,

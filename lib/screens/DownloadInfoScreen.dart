@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/service/pica.dart';
 import 'ComicInfoScreen.dart';
 import 'DownloadExportScreen.dart';
@@ -26,7 +27,7 @@ class DownloadInfoScreen extends StatefulWidget {
 }
 
 class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
-  late DownloadComicWithLogoPath _task;
+  late DownloadComic _task;
   late List<DownloadEp> _epList = [];
   late Future _future = _load();
 
@@ -41,7 +42,10 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
       appBar: AppBar(
         title: Text(widget.comicTitle),
         actions: [
-          ...(Platform.isMacOS || Platform.isWindows || Platform.isAndroid)
+          ...(Platform.isWindows ||
+                  Platform.isMacOS ||
+                  Platform.isLinux ||
+                  Platform.isAndroid)
               ? [
                   IconButton(
                     onPressed: () async {

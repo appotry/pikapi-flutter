@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/service/pica.dart';
 
 import 'Common.dart';
@@ -24,14 +23,14 @@ class RemoteImage extends StatefulWidget {
 
 class _RemoteImageState extends State<RemoteImage> {
   late bool _mock;
-  late Future<RemoteImageData> _future;
+  late Future<String> _future;
 
   @override
   void initState() {
     _mock =
         widget.fileServer == "" || widget.fileServer.contains("/wikawika.xyz/");
     if (!_mock) {
-      _future = pica.remoteImageData(widget.fileServer, widget.path);
+      _future = pica.remoteImageData(widget.fileServer, widget.path).then((value) => value.finalPath);
     }
     super.initState();
   }
@@ -41,6 +40,7 @@ class _RemoteImageState extends State<RemoteImage> {
     if (_mock) {
       return buildMock(widget.width, widget.height);
     }
-    return imageDataFutureBuilder(_future, widget.width, widget.height);
+    return pathFutureImage(_future, widget.width, widget.height);
   }
 }
+

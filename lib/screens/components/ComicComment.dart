@@ -4,6 +4,8 @@ import 'package:pikapi/screens/components/ItemBuilder.dart';
 import 'package:pikapi/screens/components/images/RemoteImage.dart';
 import 'package:pikapi/service/pica.dart';
 
+import 'PicaAvatar.dart';
+
 class ComicComment extends StatefulWidget {
   final String comicId;
 
@@ -98,25 +100,7 @@ class _ComicCommentState extends State<ComicComment> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            margin: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: theme.accentColor,
-                  style: BorderStyle.solid,
-                  width: 1.5,
-                )),
-            child: ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(50)),
-              child: RemoteImage(
-                width: 50,
-                height: 50,
-                fileServer: e.user.avatar.fileServer,
-                path: e.user.avatar.path,
-              ),
-            ),
-          ),
+          PicaAvatar(e.user.avatar),
           Container(width: 5),
           Expanded(
               child: Column(

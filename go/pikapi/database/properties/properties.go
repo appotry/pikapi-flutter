@@ -27,57 +27,57 @@ type Property struct {
 	V string
 }
 
-func LoadProperty(name string, defaultValue string) string {
+func LoadProperty(name string, defaultValue string) (string, error) {
 	var property Property
 	err := db.First(&property, "k", name).Error
 	if err == nil {
-		return property.V
+		return property.V, nil
 	}
 	if gorm.ErrRecordNotFound == err {
-		return defaultValue
+		return defaultValue, nil
 	}
 	panic(errors.New("?"))
 }
 
-func SaveProperty(name string, value string) {
-	db.Clauses(clause.OnConflict{
+func SaveProperty(name string, value string) error {
+	return db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "k"}},
 		DoUpdates: clause.AssignmentColumns([]string{"created_at", "updated_at", "v"}),
 	}).Create(&Property{
 		K: name,
 		V: value,
-	})
+	}).Error
 }
 
-func SaveSwitchAddress(value string) {
-	SaveProperty("switch_address", value)
+func SaveSwitchAddress(value string) error {
+	return SaveProperty("switch_address", value)
 }
 
-func LoadSwitchAddress() string {
+func LoadSwitchAddress() (string, error) {
 	return LoadProperty("switch_address", "")
 }
 
-func SaveProxy(value string) {
-	SaveProperty("proxy", value)
+func SaveProxy(value string) error{
+	return SaveProperty("proxy", value)
 }
 
-func LoadProxy() string {
+func LoadProxy() (string, error) {
 	return LoadProperty("proxy", "")
 }
 
-func SaveUsername(value string) {
-	SaveProperty("username", value)
+func SaveUsername(value string) error {
+	return SaveProperty("username", value)
 }
 
-func LoadUsername() string {
+func LoadUsername() (string, error) {
 	return LoadProperty("username", "")
 }
 
-func SavePassword(value string) {
-	SaveProperty("password", value)
+func SavePassword(value string) error {
+	return SaveProperty("password", value)
 }
 
-func LoadPassword() string {
+func LoadPassword() (string, error) {
 	return LoadProperty("password", "")
 }
 
@@ -85,15 +85,18 @@ func SaveToken(value string) {
 	SaveProperty("token", value)
 }
 
-func LoadToken() string {
+func LoadToken() (string, error) {
 	return LoadProperty("token", "")
 }
 
 func SaveTokenTime(value int64) {
-	SaveProperty("token_time", strconv.FormatInt(value,10))
+	SaveProperty("token_time", strconv.FormatInt(value, 10))
 }
 
-func LoadTokenTime() int64 {
-	r, _ := strconv.ParseInt(LoadProperty("token_time", "0"),10,64)
-	return r
+func LoadTokenTime() (int64, error) {
+	str, err := LoadProperty("token_time", "0")
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseInt(str, 10, 64)
 }

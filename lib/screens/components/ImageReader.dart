@@ -52,6 +52,7 @@ class _ImageReaderState extends State<ImageReader> {
 
   @override
   Widget build(BuildContext context) {
+    var scaffold = Scaffold.of(context);
     return Container(
       color: Colors.black,
       child: Stack(
@@ -59,7 +60,9 @@ class _ImageReaderState extends State<ImageReader> {
           ScrollablePositionedList.builder(
             padding: widget.fullScreen
                 ? EdgeInsets.only(
-                    top: Scaffold.of(context).appBarMaxHeight ?? 0)
+                    top: scaffold.appBarMaxHeight ?? 0,
+                    bottom: scaffold.appBarMaxHeight ?? 0,
+                  )
                 : null,
             itemScrollController: _itemScrollController,
             itemPositionsListener: _itemPositionsListener,
@@ -99,7 +102,8 @@ class _ImageReaderState extends State<ImageReader> {
               Material(
                 color: Color(0x0),
                 child: Container(
-                  padding: EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                  padding:
+                      EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(10),
@@ -155,7 +159,9 @@ class _ImageReaderState extends State<ImageReader> {
                 child: FlutterSlider(
                   axis: Axis.vertical,
                   values: [
-                    (slider > widget.images.length ? widget.images.length : slider)
+                    (slider > widget.images.length
+                            ? widget.images.length
+                            : slider)
                         .toDouble()
                   ],
                   max: widget.images.length.toDouble(),
@@ -188,8 +194,8 @@ class _ImageReaderState extends State<ImageReader> {
                     return Container(
                       padding: EdgeInsets.all(5),
                       color: Colors.white,
-                      child:
-                      Text('${a.toInt()}', style: TextStyle(color: Colors.black)),
+                      child: Text('${a.toInt()}',
+                          style: TextStyle(color: Colors.black)),
                     );
                   }),
                 ),
@@ -203,11 +209,16 @@ class _ImageReaderState extends State<ImageReader> {
 
   Widget _buildNextEp() {
     return Container(
-      padding: EdgeInsets.all(60),
+      padding: EdgeInsets.all(20),
       child: MaterialButton(
         onPressed: widget.onNextEp,
         textColor: Colors.white,
-        child: Text("下一章"),
+        child: Container(
+          padding: EdgeInsets.only(
+            top: 40, bottom: 40
+          ),
+          child: Text("下一章"),
+        ),
       ),
     );
   }

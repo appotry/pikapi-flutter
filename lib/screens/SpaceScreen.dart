@@ -8,6 +8,8 @@ import 'package:pikapi/screens/FavouritePaperScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
 import 'package:pikapi/service/pica.dart';
 
+import 'components/UserProfileCard.dart';
+
 class SpaceScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _SpaceScreenState();
@@ -51,6 +53,8 @@ class _SpaceScreenState extends State<SpaceScreen> {
       ),
       body: ListView(
         children: [
+          Divider(),
+          UserProfileCard(),
           Divider(),
           ListTile(
             onTap: () async {

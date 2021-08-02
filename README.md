@@ -1,6 +1,6 @@
 PIKAPI - 哔咔客户端
 ========
-一个全平台的, 无广告的, 哔咔漫画客户端, 能运行在 Windows/MacOS/Android/IOS中。
+一个全平台的, 无广告的, 哔咔漫画客户端, 能运行在 Windows/MacOS/Linux/Android/IOS中。
 
 ## 界面 / 功能
 
@@ -32,14 +32,12 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 - [x] 用户
   - [x] 登录
   - [ ] 注册
-  - [ ] 打卡
-  - [ ] 信息
+  - [x] 获取个人信息 / 自动打哔卡
 - [x] 漫画
   - [x] 分类 / 搜索 / 在分类中搜索
   - [x] 漫画详情 / 章节 / 看图
   - [x] 收藏
-  - [x] 获取评论
-  - [x] 看此本子的也在看 (未显示)
+  - [ ] 评论 / 看此本子的也在看
   - [ ] 排行榜
 - [x] 下载
   - [x] 导入导出 / 分享
@@ -59,8 +57,8 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 
 这个应用程序使用golang和dart(flutter)作为主要语言, 可以兼容Windows, linux, MacOS, Android, IOS
 
-他们使用框架桥接到桌面和移动平台上
-- go-flutter => Windows / MacOS
+他们使用框架桥接到桌面和移动平台上7
+- go-flutter => Windows / MacOS / Linux
 - gomobile => Android / IOS
 
 ![平台](images/platforms.png)

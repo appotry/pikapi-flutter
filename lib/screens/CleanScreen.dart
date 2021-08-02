@@ -28,7 +28,8 @@ class _CleanScreenState extends State<CleanScreen> {
 
   @override
   void initState() {
-    ls = exportingEventChannel.receiveBroadcastStream().listen(_onMessageChange);
+    ls = eventChannel.receiveBroadcastStream(
+        {"function": "EXPORT", "id": "DEFAULT"}).listen(_onMessageChange);
     super.initState();
   }
 

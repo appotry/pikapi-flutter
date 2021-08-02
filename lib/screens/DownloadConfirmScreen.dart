@@ -52,33 +52,34 @@ class _DownloadConfirmScreenState extends State<DownloadConfirmScreen> {
       return;
     }
 
-    var create = DownloadComic(
-      widget.comicInfo.id,
-      widget.comicInfo.createdAt,
-      widget.comicInfo.updatedAt,
-      widget.comicInfo.title,
-      widget.comicInfo.author,
-      widget.comicInfo.pagesCount,
-      widget.comicInfo.epsCount,
-      widget.comicInfo.finished,
-      json.encode(widget.comicInfo.categories),
-      widget.comicInfo.thumb.originalName,
-      widget.comicInfo.thumb.fileServer,
-      widget.comicInfo.thumb.path,
-      widget.comicInfo.description,
-      widget.comicInfo.chineseTeam,
-      json.encode(widget.comicInfo.tags),
-    );
-    List<DownloadEp> list = [];
+    Map<String, dynamic> create = {
+      "id":  widget.comicInfo.id,
+      "createdAt": widget.comicInfo.createdAt,
+      "updatedAt": widget.comicInfo.updatedAt,
+      "title":  widget.comicInfo.title,
+      "author": widget.comicInfo.author,
+      "pagesCount": widget.comicInfo.pagesCount,
+      "epsCount": widget.comicInfo.epsCount,
+      "finished": widget.comicInfo.finished,
+      "categories": json.encode(widget.comicInfo.categories),
+      "thumbOriginalName": widget.comicInfo.thumb.originalName,
+      "thumbFileServer": widget.comicInfo.thumb.fileServer,
+      "thumbPath": widget.comicInfo.thumb.path,
+      "description":  widget.comicInfo.description,
+      "chineseTeam": widget.comicInfo.chineseTeam,
+      "tags": json.encode(widget.comicInfo.tags),
+    };
+
+    List<Map<String, dynamic>> list = [];
     widget.epList.forEach((element) {
       if (selectedEps.contains(element.order)) {
-        list.add(DownloadEp(
-          widget.comicInfo.id,
-          element.id,
-          element.updatedAt,
-          element.order,
-          element.title,
-        ));
+        list.add({
+          "comicId": widget.comicInfo.id,
+          "id": element.id,
+          "updatedAt":  element.updatedAt,
+          "epOrder": element.order,
+          "title":  element.title,
+        });
       }
     });
     if (task != null) {

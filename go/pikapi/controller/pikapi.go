@@ -2,7 +2,6 @@ package controller
 
 import (
 	"crypto/md5"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +13,7 @@ import (
 	"pgo/pikapi/database/network_cache"
 	"pgo/pikapi/database/properties"
 	"pgo/pikapi/utils"
+	"strconv"
 )
 
 var (
@@ -37,67 +37,85 @@ func downloadPath(path string) string {
 	return path2.Join(downloadDir, path)
 }
 
-func SaveProperty(name string, value string) {
-	properties.LoadProperty(name, value)
+func saveProperty(params string) error {
+	var paramsStruct struct {
+		Name  string `json:"name"`
+		Value string `json:"value"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	return properties.SaveProperty(paramsStruct.Name, paramsStruct.Value)
 }
 
-func LoadProperty(name string, defaultValue string) string {
-	return properties.LoadProperty(name, defaultValue)
+func loadProperty(params string) (string, error) {
+	var paramsStruct struct {
+		Name         string `json:"name"`
+		DefaultValue string `json:"defaultValue"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	return properties.LoadProperty(paramsStruct.Name, paramsStruct.DefaultValue)
 }
 
-func SetSwitchAddress(nSwitchAddress string) {
-	properties.SaveSwitchAddress(nSwitchAddress)
+func setSwitchAddress(nSwitchAddress string) error {
+	err := properties.SaveSwitchAddress(nSwitchAddress)
+	if err != nil {
+		return err
+	}
 	switchAddress = nSwitchAddress
+	return nil
 }
 
-func GetSwitchAddress() string {
-	return switchAddress
+func getSwitchAddress() (string, error) {
+	return switchAddress, nil
 }
 
-func SetProxy(value string) {
-	properties.SaveProxy(value)
+func setProxy(value string) error {
+	err := properties.SaveProxy(value)
+	if err != nil {
+		return err
+	}
 	changeProxyUrl(value)
+	return nil
 }
 
-func GetProxy() string {
+func getProxy() (string, error) {
 	return properties.LoadProxy()
 }
 
-func SetUsername(value string) {
-	properties.SaveUsername(value)
+func setUsername(value string) error {
+	return properties.SaveUsername(value)
 }
 
-func GetUsername() string {
+func getUsername() (string, error) {
 	return properties.LoadUsername()
 }
 
-func SetPassword(value string) {
-	properties.SavePassword(value)
+func setPassword(value string) error {
+	return properties.SavePassword(value)
 }
 
-func GetPassword() string {
+func getPassword() (string, error) {
 	return properties.LoadPassword()
 }
 
-func PreLogin() (bool, error) {
-	token := properties.LoadToken()
-	tokenTime := properties.LoadTokenTime()
+func preLogin() (string, error) {
+	token, _ := properties.LoadToken()
+	tokenTime, _ := properties.LoadTokenTime()
 	if token != "" && tokenTime > 0 {
 		if utils.Timestamp()-(1000*60*60*24) < tokenTime {
 			client.Token = token
-			return true, nil
+			return "true", nil
 		}
 	}
-	err := Login()
+	err := login()
 	if err == nil {
-		return true, nil
+		return "true", nil
 	}
-	return false, nil
+	return "false", nil
 }
 
-func Login() error {
-	username := properties.LoadUsername()
-	password := properties.LoadPassword()
+func login() error {
+	username, _ := properties.LoadUsername()
+	password, _ := properties.LoadPassword()
 	if password == "" || username == "" {
 		return errors.New(" 需要设定用户名和密码 ")
 	}
@@ -110,7 +128,22 @@ func Login() error {
 	return nil
 }
 
-func loadRemoteImage(fileServer string, path string) (*DisplayImageData, error) {
+func userProfile() (string, error) {
+	return serialize(client.UserProfile())
+}
+
+func punchIn() (string, error) {
+	return serialize(client.PunchIn())
+}
+
+func remoteImageData(params string) (string, error) {
+	var paramsStruct struct {
+		FileServer string `json:"fileServer"`
+		Path       string `json:"path"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	fileServer := paramsStruct.FileServer
+	path := paramsStruct.Path
 	lock := utils.HashLock(fmt.Sprintf("%s$%s", fileServer, path))
 	lock.Lock()
 	defer lock.Unlock()
@@ -118,7 +151,7 @@ func loadRemoteImage(fileServer string, path string) (*DisplayImageData, error) 
 	if cache == nil {
 		buff, img, format, err := decodeFromUrl(fileServer, path)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		local :=
 			fmt.Sprintf("%x",
@@ -130,7 +163,7 @@ func loadRemoteImage(fileServer string, path string) (*DisplayImageData, error) 
 			buff, os.FileMode(0600),
 		)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		remote := comic_center.RemoteImage{
 			FileServer: fileServer,
@@ -143,48 +176,36 @@ func loadRemoteImage(fileServer string, path string) (*DisplayImageData, error) 
 		}
 		err = comic_center.SaveRemoteImage(&remote)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		cache = &remote
 	}
-	real := remotePath(cache.LocalPath)
-	buff, err := ioutil.ReadFile(real)
-	if err != nil {
-		return nil, err
+	display := DisplayImageData{
+		FileSize:  cache.FileSize,
+		Format:    cache.Format,
+		Width:     cache.Width,
+		Height:    cache.Height,
+		FinalPath: remotePath(cache.LocalPath),
 	}
-	var display DisplayImageData
-	display.RemoteImage = *cache
-	display.BuffBase64 = base64.StdEncoding.EncodeToString(buff)
-	return &display, nil
+	return serialize(&display, nil)
 }
 
-func RemoteImageData(fileServer string, path string) (string, error) {
-	display, err := loadRemoteImage(fileServer, path)
-	if err != nil {
-		return "", err
-	}
-	buff, err := json.Marshal(display)
-	if err != nil {
-		return "", err
-	}
-	return string(buff), nil
+func downloadImagePath(path string) (string, error) {
+	return downloadPath(path), nil
 }
 
-func CreateDownload(comicStr string, epListStr string) error {
-	var comic comic_center.ComicDownload
-	var epList []comic_center.ComicDownloadEp
-	err := json.Unmarshal([]byte(comicStr), &comic)
-	if err != nil {
-		return err
+func createDownload(params string) error {
+	var paramsStruct struct {
+		Comic  comic_center.ComicDownload `json:"comic"`
+		EpList []comic_center.ComicDownloadEp `json:"epList"`
 	}
-	err = json.Unmarshal([]byte(epListStr), &epList)
-	if err != nil {
-		return err
-	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	comic := paramsStruct.Comic
+	epList := paramsStruct.EpList
 	if comic.Title == "" || len(epList) == 0 {
 		return errors.New("params error")
 	}
-	err = comic_center.CreateDownload(&comic, &epList)
+	err := comic_center.CreateDownload(&comic, &epList)
 	if err != nil {
 		return err
 	}
@@ -225,33 +246,21 @@ func downloadComicLogo(comic *comic_center.ComicDownload) {
 	}
 }
 
-func AddDownload(comicStr string, epListStr string) error {
-	var comic comic_center.ComicDownload
-	var epList []comic_center.ComicDownloadEp
-	err := json.Unmarshal([]byte(comicStr), &comic)
-	if err != nil {
-		return err
+func addDownload(params string) error {
+	var paramsStruct struct {
+		Comic  comic_center.ComicDownload `json:"comic"`
+		EpList []comic_center.ComicDownloadEp `json:"epList"`
 	}
-	err = json.Unmarshal([]byte(epListStr), &epList)
-	if err != nil {
-		return err
-	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	comic := paramsStruct.Comic
+	epList := paramsStruct.EpList
 	if comic.Title == "" || len(epList) == 0 {
 		return errors.New("params error")
 	}
 	return comic_center.AddDownload(&comic, &epList)
 }
 
-func checkLogo(download comic_center.ComicDownload) ComicDownloadWithLogoPath {
-	var c ComicDownloadWithLogoPath
-	c.ComicDownload = download
-	if download.ThumbLocalPath != "" {
-		c.LogoPath = downloadPath(download.ThumbLocalPath)
-	}
-	return c
-}
-
-func DeleteDownloadComic(comicId string) error {
+func deleteDownloadComic(comicId string) error {
 	err := comic_center.Deleting(comicId)
 	if err != nil {
 		return err
@@ -260,7 +269,7 @@ func DeleteDownloadComic(comicId string) error {
 	return nil
 }
 
-func LoadDownloadComic(comicId string) (string, error) {
+func loadDownloadComic(comicId string) (string, error) {
 	download, err := comic_center.FindComicDownloadById(comicId)
 	if err != nil {
 		return "", err
@@ -268,113 +277,42 @@ func LoadDownloadComic(comicId string) (string, error) {
 	if download == nil {
 		return "", nil
 	}
-	c := checkLogo(*download)
-	buff, err := json.Marshal(&c)
-	if err != nil {
-		return "", err
-	}
-	// VIEW
-	comic_center.ViewComic(comicId)
-	//
-	return string(buff), nil
+	comic_center.ViewComic(comicId) // VIEW
+	return serialize(download, err)
 }
 
-func DownloadComicThumb(comicId string) (string, error) {
-	comic, _ := comic_center.FindComicDownloadById(comicId)
-	if comic != nil {
-		if comic.ThumbLocalPath == "" {
-			downloadComicLogo(comic)
-		}
-		if comic.ThumbLocalPath != "" {
-			buff, err := ioutil.ReadFile(downloadPath(comic.ThumbLocalPath))
-			if err != nil {
-				return "", err
-			}
-			var display DisplayImageData
-			display.FileSize = comic.ThumbFileSize
-			display.Width = comic.ThumbWidth
-			display.Height = comic.ThumbHeight
-			display.Format = comic.ThumbFormat
-			display.BuffBase64 = base64.StdEncoding.EncodeToString(buff)
-			//
-			buff, err = json.Marshal(display)
-			if err != nil {
-				return "", err
-			}
-			return string(buff), nil
-		}
-		return "", errors.New("not download thumb")
-	}
-	return "", errors.New("not download")
+func allDownloads() (string, error) {
+	return serialize(comic_center.AllDownloads())
 }
 
-func AllDownloads() (string, error) {
-	downloads, err := comic_center.AllDownloads()
-	if err != nil {
-		return "", err
-	}
-	var downloadWithLogoPaths = make([]ComicDownloadWithLogoPath, 0)
-	for _, download := range *downloads {
-		downloadWithLogoPaths = append(downloadWithLogoPaths, checkLogo(download))
-	}
-	buff, err := json.Marshal(downloadWithLogoPaths)
-	if err != nil {
-		return "", err
-	}
-	return string(buff), err
+func downloadEpList(comicId string) (string, error) {
+	return serialize(comic_center.ListDownloadEpByComicId(comicId))
 }
 
-func DownloadEpList(comicId string) (string, error) {
-	list, err := comic_center.ListDownloadEpByComicId(comicId)
-	if err != nil {
-		return "", err
+func viewLogPage(params string) (string, error) {
+	var paramsStruct struct {
+		Page     int `json:"page"`
+		PageSize int `json:"pageSize"`
 	}
-	buff, err := json.Marshal(&list)
-	if err != nil {
-		return "", err
-	}
-	return string(buff), err
+	json.Unmarshal([]byte(params), &paramsStruct)
+	page := paramsStruct.Page
+	pageSize := paramsStruct.PageSize
+	return serialize(comic_center.ViewLogPage(page, pageSize))
 }
 
-func ViewLogPage(page int, pageSize int) (string, error) {
-	viewLogPage, err := comic_center.ViewLogPage(int(page), int(pageSize))
-	if err != nil {
-		return "", err
-	}
-	buff, _ := json.Marshal(viewLogPage)
-	return string(buff), nil
+func downloadPicturesByEpId(epId string) (string, error) {
+	return serialize(comic_center.ListDownloadPictureByEpId(epId))
 }
 
-func DownloadPicturesByEpId(epId string) (string, error) {
-	pictures, err := comic_center.ListDownloadPictureByEpId(epId)
-	if err != nil {
-		return "", err
-	}
-	var list = make([]ComicDownloadPictureWithFinalPath, 0)
-	for _, picture := range pictures {
-		var f ComicDownloadPictureWithFinalPath
-		f.ComicDownloadPicture = picture
-		if f.LocalPath != "" {
-			f.FinalPath = downloadPath(f.LocalPath)
-		}
-		list = append(list, f)
-	}
-	buff, err := json.Marshal(list)
-	if err != nil {
-		return "", err
-	}
-	return string(buff), err
-}
-
-func DownloadRunning() bool {
+func getDownloadRunning() bool {
 	return downloadRunning
 }
 
-func SetDownloadRunning(status bool) {
+func setDownloadRunning(status bool) {
 	downloadRunning = status
 }
 
-func Clean() error {
+func clean() error {
 	var err error
 	notifyExport("清理网络缓存")
 	err = network_cache.RemoveAll()
@@ -391,4 +329,96 @@ func Clean() error {
 	utils.Mkdir(remoteDir)
 	notifyExport("清理结束")
 	return nil
+}
+
+func FlatInvoke(method string, params string) (string, error) {
+	switch method {
+	case "setSwitchAddress":
+		return "", setSwitchAddress(params)
+	case "getSwitchAddress":
+		return getSwitchAddress()
+	case "setProxy":
+		return "", setProxy(params)
+	case "getProxy":
+		return getProxy()
+	case "saveProperty":
+		return "", saveProperty(params)
+	case "loadProperty":
+		return loadProperty(params)
+	case "setUsername":
+		return "", setUsername(params)
+	case "setPassword":
+		return "", setPassword(params)
+	case "getUsername":
+		return getUsername()
+	case "getPassword":
+		return getPassword()
+	case "preLogin":
+		return preLogin()
+	case "login":
+		return "", login()
+	case "userProfile":
+		return userProfile()
+	case "punchIn":
+		return punchIn()
+	case "categories":
+		return categories()
+	case "comics":
+		return comics(params)
+	case "searchComics":
+		return searchComics(params)
+	case "comicInfo":
+		return comicInfo(params)
+	case "comicEpPage":
+		return epPage(params)
+	case "comicPicturePageWithQuality":
+		return comicPicturePageWithQuality(params)
+	case "switchLike":
+		return switchLike(params)
+	case "switchFavourite":
+		return switchFavourite(params)
+	case "favouriteComics":
+		return favouriteComics(params)
+	case "recommendation":
+		return recommendation(params)
+	case "comments":
+		return comments(params)
+	case "viewLogPage":
+		return viewLogPage(params)
+	case "clean":
+		return "", clean()
+	case "downloadRunning":
+		return strconv.FormatBool(getDownloadRunning()), nil
+	case "setDownloadRunning":
+		b, e := strconv.ParseBool(params)
+		if e != nil {
+			setDownloadRunning(b)
+		}
+		return "", e
+	case "createDownload":
+		return "", createDownload(params)
+	case "addDownload":
+		return "", addDownload(params)
+	case "loadDownloadComic":
+		return loadDownloadComic(params)
+	case "allDownloads":
+		return allDownloads()
+	case "deleteDownloadComic":
+		return "", deleteDownloadComic(params)
+	case "downloadEpList":
+		return downloadEpList(params)
+	case "downloadPicturesByEpId":
+		return downloadPicturesByEpId(params)
+	case "resetAllDownloads":
+		return "", comic_center.ResetAll()
+	case "exportComicDownload":
+		return "", exportComicDownload(params)
+	case "importComicDownload":
+		return "", importComicDownload(params)
+	case "remoteImageData":
+		return remoteImageData(params)
+	case "downloadImagePath":
+		return downloadImagePath(params)
+	}
+	return "", errors.New("method not found")
 }

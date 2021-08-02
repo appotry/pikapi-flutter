@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,20 +16,6 @@ var downloadRestart = false
 var downloadingComic *comic_center.ComicDownload
 var downloadingEp *comic_center.ComicDownloadEp
 var downloadingPicture *comic_center.ComicDownloadPicture
-
-var ComicDownloadEvent func(string)
-
-func downloadComicEventSend(comicDownload *comic_center.ComicDownload) {
-	event := ComicDownloadEvent
-	if event != nil {
-		buff, err := json.Marshal(comicDownload)
-		if err == nil {
-			event(string(buff))
-		} else {
-			print("SEND ERR?")
-		}
-	}
-}
 
 func downloadBackground() {
 	println("后台线程启动")

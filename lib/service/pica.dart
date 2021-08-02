@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
@@ -12,100 +11,115 @@ class Pica {
 
   MethodChannel _channel = MethodChannel("pica");
 
+  Future<dynamic> _flatInvoke(String method, dynamic params) {
+    return _channel.invokeMethod("flatInvoke", {
+      "method": method,
+      "params": params is String ? params : jsonEncode(params),
+    });
+  }
+
   Future<String> loadTheme() async {
-    return await _channel.invokeMethod("loadProperty", {
+    return await _flatInvoke("loadProperty", {
       "name": "theme",
       "defaultValue": "dark",
     });
   }
 
   Future<dynamic> saveTheme(String code) async {
-    return await _channel.invokeMethod("saveProperty", {
+    return await _flatInvoke("saveProperty", {
       "name": "theme",
       "value": code,
     });
   }
 
   Future<String> loadQuality() async {
-    return await _channel.invokeMethod("loadProperty", {
+    return await _flatInvoke("loadProperty", {
       "name": "quality",
       "defaultValue": ImageQualityOriginal,
     });
   }
 
   Future<dynamic> saveQuality(String code) async {
-    return await _channel.invokeMethod("saveProperty", {
-      "name": "value",
-      "value": code,
+    return await _flatInvoke("saveProperty", {
+      "name": "quality",
+      "defaultValue": {
+        "name": "quality",
+        "value": code,
+      },
     });
   }
 
   Future<String> getSwitchAddress() async {
-    return await _channel.invokeMethod("getSwitchAddress");
+    return await _flatInvoke("getSwitchAddress", "");
   }
 
   Future<dynamic> setSwitchAddress(String switchAddress) async {
-    return await _channel.invokeMethod("setSwitchAddress", {
-      "switchAddress": switchAddress,
-    });
+    return await _flatInvoke("setSwitchAddress", switchAddress);
   }
 
   Future<String> getProxy() async {
-    return await _channel.invokeMethod("getProxy");
+    return await _flatInvoke("getProxy", "");
   }
 
   Future<dynamic> setProxy(String proxy) async {
-    return await _channel.invokeMethod("setProxy", {
-      "proxy": proxy,
-    });
+    return await _flatInvoke("setProxy", proxy);
   }
 
   Future<String> getUsername() async {
-    return await _channel.invokeMethod("getUsername");
+    return await _flatInvoke("getUsername", "");
   }
 
   Future<dynamic> setUsername(String username) async {
-    return await _channel.invokeMethod("setUsername", {
-      "username": username,
-    });
+    return await _flatInvoke("setUsername", username);
   }
 
   Future<String> getPassword() async {
-    return await _channel.invokeMethod("getPassword");
+    return await _flatInvoke("getPassword", "");
   }
 
   Future<dynamic> setPassword(String password) async {
-    return await _channel.invokeMethod("setPassword", {
-      "password": password,
-    });
+    return await _flatInvoke("setPassword", password);
   }
 
   Future<bool> preLogin() async {
-    return await _channel.invokeMethod("preLogin");
+    String rsp = await _flatInvoke("preLogin", "");
+    return rsp == "true";
   }
 
   Future<dynamic> login() async {
-    return await _channel.invokeMethod("login");
+    return _flatInvoke("login", "");
+  }
+
+  Future<UserProfile> userProfile() async {
+    String rsp = await _flatInvoke("userProfile", "");
+    return UserProfile.fromJson(json.decode(rsp));
+  }
+
+  Future<dynamic> punchIn() {
+    return _flatInvoke("punchIn", "");
   }
 
   Future<RemoteImageData> remoteImageData(
       String fileServer, String path) async {
-    var responseMap = await _channel.invokeMethod("remoteImageData", {
+    var data = await _flatInvoke("remoteImageData", {
       "fileServer": fileServer,
       "path": path,
     });
-    var response = json.decode(responseMap);
-    return RemoteImageData.fromJson(response);
+    return RemoteImageData.fromJson(json.decode(data));
+  }
+
+  Future<String> downloadImagePath(String path) async {
+    return await _flatInvoke("downloadImagePath", path);
   }
 
   Future<List<Category>> categories() async {
-    String data = await _channel.invokeMethod("categories");
-    List list = json.decode(data);
+    String rsp = await _flatInvoke("categories", "");
+    List list = json.decode(rsp);
     return list.map((e) => Category.fromJson(e)).toList();
   }
 
   Future<ComicsPage> comics(String category, String sort, int page) async {
-    var rsp = await _channel.invokeMethod("comics", {
+    String rsp = await _flatInvoke("comics", {
       "category": category,
       "sort": sort,
       "page": page,
@@ -113,18 +127,13 @@ class Pica {
     return ComicsPage.fromJson(json.decode(rsp));
   }
 
-  Future<ComicsPage> searchComics(String keyword, String sort, int page) async {
-    var rsp = await _channel.invokeMethod("searchComics", {
-      "keyword": keyword,
-      "sort": sort,
-      "page": page,
-    });
-    return ComicsPage.fromJson(json.decode(rsp));
+  Future<ComicsPage> searchComics(String keyword, String sort, int page) {
+    return searchComicsInCategories(keyword, sort, page, []);
   }
 
   Future<ComicsPage> searchComicsInCategories(
       String keyword, String sort, int page, List<String> categories) async {
-    var rsp = await _channel.invokeMethod("searchComicsInCategories", {
+    String rsp = await _flatInvoke("searchComics", {
       "keyword": keyword,
       "sort": sort,
       "page": page,
@@ -134,14 +143,12 @@ class Pica {
   }
 
   Future<ComicInfo> comicInfo(String comicId) async {
-    var rsp = await _channel.invokeMethod("comicInfo", {
-      "comicId": comicId,
-    });
+    String rsp = await _flatInvoke("comicInfo", comicId);
     return ComicInfo.fromJson(json.decode(rsp));
   }
 
   Future<EpPage> comicEpPage(String comicId, int page) async {
-    var rsp = await _channel.invokeMethod("comicEpPage", {
+    String rsp = await _flatInvoke("comicEpPage", {
       "comicId": comicId,
       "page": page,
     });
@@ -150,94 +157,47 @@ class Pica {
 
   Future<PicturePage> comicPicturePageWithQuality(
       String comicId, int epOrder, int page, String quality) async {
-    var data = (await _channel.invokeMethod(
-      "comicPicturePageWithQuality",
-      {
-        "comicId": comicId,
-        "epOrder": epOrder,
-        "page": page,
-        "quality": quality,
-      },
-    ));
+    String data = await _flatInvoke("comicPicturePageWithQuality", {
+      "comicId": comicId,
+      "epOrder": epOrder,
+      "page": page,
+      "quality": quality,
+    });
     return PicturePage.fromJson(json.decode(data));
   }
 
-  Future<dynamic> deleteDownloadComic(String comicId) async {
-    return _channel.invokeMethod("deleteDownloadComic", {
+  Future<String> switchLike(String comicId) async {
+    return await _flatInvoke("switchLike", comicId);
+  }
+
+  Future<String> switchFavourite(String comicId) async {
+    return await _flatInvoke("switchFavourite", comicId);
+  }
+
+  Future<ComicsPage> favouriteComics(String sort, int page) async {
+    var rsp = await _flatInvoke("favouriteComics", {
+      "sort": sort,
+      "page": page,
+    });
+    return ComicsPage.fromJson(json.decode(rsp));
+  }
+
+  Future<List<ComicSimple>> recommendation(String comicId) async {
+    String rsp = await _flatInvoke("recommendation", comicId);
+    List list = json.decode(rsp);
+    return list.map((e) => ComicSimple.fromJson(e)).toList();
+  }
+
+  Future<CommentPage> comments(String comicId, int page) async {
+    var rsp = await _flatInvoke("comments", {
       "comicId": comicId,
+      "page": page,
     });
-  }
-
-  Future<DownloadComicWithLogoPath?> loadDownloadComic(String comicId) async {
-    var data = await _channel.invokeMethod("downloadComic", {
-      "comicId": comicId,
-    });
-    // 未找到 且 未异常
-    if (data == "") {
-      return null;
-    }
-    return DownloadComicWithLogoPath.fromJson(json.decode(data));
-  }
-
-  Future<RemoteImageData> downloadComicThumb(String comicId) async {
-    var responseMap = await _channel.invokeMethod("downloadComicThumb", {
-      "comicId": comicId,
-    });
-    var response = json.decode(responseMap);
-    return RemoteImageData.fromJson(response);
-  }
-
-  Future<List<DownloadEp>> downloadEpList(String comicId) async {
-    var data = await _channel.invokeMethod("downloadEpList", {
-      "comicId": comicId,
-    });
-    List list = json.decode(data);
-    return list.map((e) => DownloadEp.fromJson(e)).toList();
-  }
-
-  Future createDownload(DownloadComic comic, List<DownloadEp> epList) async {
-    await _channel.invokeMethod("createDownload", {
-      "comic": json.encode(comic.toJson()),
-      "epList": json.encode(epList.map((e) => e.toJson()).toList()),
-    });
-  }
-
-  Future addDownload(DownloadComic comic, List<DownloadEp> epList) async {
-    await _channel.invokeMethod("addDownload", {
-      "comic": jsonEncode(comic.toJson()),
-      "epList": jsonEncode(epList.map((e) => e.toJson()).toList()),
-    });
-  }
-
-  Future<bool> downloadRunning() async {
-    return await _channel.invokeMethod("downloadRunning");
-  }
-
-  Future<dynamic> setDownloadRunning(bool status) async {
-    return await _channel
-        .invokeMethod("setDownloadRunning", {"status": status});
-  }
-
-  Future<List<DownloadComicWithLogoPath>> allDownloads() async {
-    var data = await _channel.invokeMethod("allDownloads");
-    List list = json.decode(data);
-    return list.map((e) => DownloadComicWithLogoPath.fromJson(e)).toList();
-  }
-
-  Future<List<DownloadPicture>> downloadPicturesByEpId(String epId) async {
-    var data = await _channel.invokeMethod("downloadPicturesByEpId", {
-      "epId": epId,
-    });
-    List list = json.decode(data);
-    return list.map((e) => DownloadPicture.fromJson(e)).toList();
-  }
-
-  Future resetFailed() async {
-    await _channel.invokeMethod("resetAllDownloads");
+    return CommentPage.fromJson(json.decode(rsp));
   }
 
   Future<List<ViewLog>> viewLogPage(int page, int pageSize) async {
-    var data = await _channel.invokeMethod("viewLogPage", {
+    var data = await _flatInvoke("viewLogPage", {
       "page": page,
       "pageSize": pageSize,
     });
@@ -245,293 +205,77 @@ class Pica {
     return list.map((e) => ViewLog.fromJson(e)).toList();
   }
 
-  Future exportComicDownload(String comicId, String dir) async {
-    await _channel.invokeMethod("exportComicDownload", {
+  Future clean() {
+    return _flatInvoke("clean", "");
+  }
+
+  Future<bool> downloadRunning() async {
+    String rsp = await _flatInvoke("downloadRunning", "");
+    return rsp == "true";
+  }
+
+  Future<dynamic> setDownloadRunning(bool status) async {
+    return _flatInvoke("setDownloadRunning", "$status");
+  }
+
+  Future<dynamic> createDownload(Map<String, dynamic> comic, List<Map<String, dynamic>> epList) async {
+    return _flatInvoke("createDownload", {
+      "comic": comic,
+      "epList": epList,
+    });
+  }
+
+  Future<dynamic> addDownload(
+      Map<String, dynamic> comic, List<Map<String, dynamic>> epList) async {
+    await _flatInvoke("addDownload", {
+      "comic": comic,
+      "epList": epList,
+    });
+  }
+
+  Future<DownloadComic?> loadDownloadComic(String comicId) async {
+    var data = await _flatInvoke("loadDownloadComic", comicId);
+    // 未找到 且 未异常
+    if (data == "") {
+      return null;
+    }
+    return DownloadComic.fromJson(json.decode(data));
+  }
+
+  Future<List<DownloadComic>> allDownloads() async {
+    var data = await _flatInvoke("allDownloads", "");
+    List list = json.decode(data);
+    return list.map((e) => DownloadComic.fromJson(e)).toList();
+  }
+
+  Future<dynamic> deleteDownloadComic(String comicId) async {
+    return _flatInvoke("deleteDownloadComic", comicId);
+  }
+
+  Future<List<DownloadEp>> downloadEpList(String comicId) async {
+    var data = await _flatInvoke("downloadEpList", comicId);
+    List list = json.decode(data);
+    return list.map((e) => DownloadEp.fromJson(e)).toList();
+  }
+
+  Future<List<DownloadPicture>> downloadPicturesByEpId(String epId) async {
+    var data = await _flatInvoke("downloadPicturesByEpId", epId);
+    List list = json.decode(data);
+    return list.map((e) => DownloadPicture.fromJson(e)).toList();
+  }
+
+  Future<dynamic> resetFailed() async {
+    return _flatInvoke("resetAllDownloads", "");
+  }
+
+  Future<dynamic> exportComicDownload(String comicId, String dir) {
+    return _flatInvoke("exportComicDownload", {
       "comicId": comicId,
       "dir": dir,
     });
   }
 
-  Future importComicDownload(String zipPath) async {
-    await _channel.invokeMethod("importComicDownload", {
-      "zipPath": zipPath,
-    });
-  }
-
-  Future<String> switchLike(String comicId) async {
-    var rsp = await _channel.invokeMethod("switchLike", {
-      "comicId": comicId,
-    });
-    return rsp;
-  }
-
-  Future<ComicsPage> favouriteComics(String sort, int page) async {
-    var rsp = await _channel.invokeMethod("favouriteComics", {
-      "sort": sort,
-      "page": page,
-    });
-    return ComicsPage.fromJson(json.decode(rsp));
-  }
-
-  Future<String> switchFavourite(String comicId) async {
-    var rsp = await _channel.invokeMethod("switchFavourite", {
-      "comicId": comicId,
-    });
-    return rsp;
-  }
-
-  Future clean() {
-    return _channel.invokeMethod("clean");
-  }
-
-  Future<List<ComicSimple>> recommendation(String comicId) async {
-    var data = await _channel.invokeMethod("recommendation", {
-      "comicId": comicId,
-    });
-    List list = json.decode(data);
-    return list.map((e) => ComicSimple.fromJson(e)).toList();
-  }
-
-  Future<CommentPage> comments(String comicId, int page) async {
-    var rsp = await _channel.invokeMethod("comments", {
-      "comicId": comicId,
-      "page": page,
-    });
-    return CommentPage.fromJson(json.decode(rsp));
-  }
-
-}
-
-class DownloadPicture {
-  late int rankInEp;
-  late String fileServer;
-  late String path;
-  late String localPath;
-  late String finalPath;
-  late int width;
-  late int height;
-  late String format;
-
-  DownloadPicture.fromJson(Map<String, dynamic> json) {
-    this.rankInEp = json["rankInEp"];
-    this.fileServer = json["fileServer"];
-    this.path = json["path"];
-    this.localPath = json["localPath"];
-    this.finalPath = json["finalPath"];
-    this.width = json["width"];
-    this.height = json["height"];
-    this.format = json["format"];
-  }
-}
-
-class ViewLog {
-  late String id;
-  late String title;
-  late String author;
-  late int pagesCount;
-  late int epsCount;
-  late bool finished;
-  late String categories;
-  late String thumbOriginalName;
-  late String thumbFileServer;
-  late String thumbPath;
-  late String description;
-  late String chineseTeam;
-  late String tags;
-  late String lastViewTime;
-  late int lastViewEpOrder;
-  late String lastViewEpTitle;
-  late int lastViewPictureRank;
-
-  ViewLog.fromJson(Map<String, dynamic> json) {
-    this.id = json["id"];
-    this.title = json["title"];
-    this.author = json["author"];
-    this.pagesCount = json["pagesCount"];
-    this.epsCount = json["epsCount"];
-    this.finished = json["finished"];
-    this.categories = json["categories"];
-    this.thumbOriginalName = json["thumbOriginalName"];
-    this.thumbFileServer = json["thumbFileServer"];
-    this.thumbPath = json["thumbPath"];
-    this.description = json["description"];
-    this.chineseTeam = json["chineseTeam"];
-    this.tags = json["tags"];
-    this.lastViewTime = json["lastViewTime"];
-    this.lastViewEpOrder = json["lastViewEpOrder"];
-    this.lastViewEpTitle = json["lastViewEpTitle"];
-    this.lastViewPictureRank = json["lastViewPictureRank"];
-  }
-}
-
-class DownloadComic {
-  late String id;
-  late String createdAt;
-  late String updatedAt;
-  late String title;
-  late String author;
-  late int pagesCount;
-  late int epsCount;
-  late bool finished;
-
-  late String categories;
-  late String thumbOriginalName;
-  late String thumbFileServer;
-  late String thumbPath;
-
-  late String description;
-  late String chineseTeam;
-  late String tags;
-  late int selectedEpCount;
-  late int selectedPictureCount;
-  late int downloadEpCount;
-  late int downloadPictureCount;
-  late bool downloadFinished;
-  late String downloadFinishedTime;
-  late bool downloadFailed;
-
-  late bool deleting;
-
-  DownloadComic(
-    this.id,
-    this.createdAt,
-    this.updatedAt,
-    this.title,
-    this.author,
-    this.pagesCount,
-    this.epsCount,
-    this.finished,
-    this.categories,
-    this.thumbOriginalName,
-    this.thumbFileServer,
-    this.thumbPath,
-    this.description,
-    this.chineseTeam,
-    this.tags,
-  );
-
-  void copy(DownloadComic other) {
-    this.id = other.id;
-    this.createdAt = other.createdAt;
-    this.updatedAt = other.updatedAt;
-    this.title = other.title;
-    this.author = other.author;
-    this.pagesCount = other.pagesCount;
-    this.epsCount = other.epsCount;
-    this.finished = other.finished;
-    this.categories = other.categories;
-    this.thumbOriginalName = other.thumbOriginalName;
-    this.thumbFileServer = other.thumbFileServer;
-    this.thumbPath = other.thumbPath;
-    this.description = other.description;
-    this.chineseTeam = other.chineseTeam;
-    this.tags = other.tags;
-    this.selectedEpCount = other.selectedEpCount;
-    this.selectedPictureCount = other.selectedPictureCount;
-    this.downloadEpCount = other.downloadEpCount;
-    this.downloadPictureCount = other.downloadPictureCount;
-    this.downloadFinished = other.downloadFinished;
-    this.downloadFinishedTime = other.downloadFinishedTime;
-    this.downloadFailed = other.downloadFailed;
-    // this.deleting = other.deleting;
-  }
-
-  Map<String, dynamic> toJson() => {
-        "id": this.id,
-        "createdAt": this.createdAt,
-        "updatedAt": this.updatedAt,
-        "title": this.title,
-        "author": this.author,
-        "pagesCount": this.pagesCount,
-        "epsCount": this.epsCount,
-        "finished": this.finished,
-        "categories": this.categories,
-        "thumbOriginalName": this.thumbOriginalName,
-        "thumbFileServer": this.thumbFileServer,
-        "thumbPath": this.thumbPath,
-        "description": this.description,
-        "`chineseTeam": this.chineseTeam,
-        "tags": this.tags,
-      };
-
-  DownloadComic.fromJson(Map<String, dynamic> json) {
-    this.id = json["id"];
-    this.createdAt = (json["createdAt"]);
-    this.updatedAt = (json["updatedAt"]);
-    this.title = json["title"];
-    this.author = json["author"];
-    this.pagesCount = json["pagesCount"];
-    this.epsCount = json["epsCount"];
-    this.finished = json["finished"];
-    this.categories = json["categories"];
-    this.thumbOriginalName = json["thumbOriginalName"];
-    this.thumbFileServer = json["thumbFileServer"];
-    this.thumbPath = json["thumbPath"];
-    this.description = json["description"];
-    this.chineseTeam = json["chineseTeam"];
-    this.tags = json["tags"];
-    this.selectedEpCount = json["selectedEpCount"];
-    this.selectedPictureCount = json["selectedPictureCount"];
-    this.downloadEpCount = json["downloadEpCount"];
-    this.downloadPictureCount = json["downloadPictureCount"];
-    this.downloadFinished = json["downloadFinished"];
-    this.downloadFinishedTime = json["downloadFinishedTime"];
-    this.downloadFailed = json["downloadFailed"];
-    this.deleting = json["deleting"];
-  }
-}
-
-class DownloadEp {
-  late String comicId;
-  late String id;
-  late String updatedAt;
-
-  late int epOrder;
-  late String title;
-
-  late bool fetchedPictures;
-  late int selectedPictureCount;
-  late int downloadPictureCount;
-  late bool downloadFinish;
-  late String downloadFinishTime;
-  late bool downloadFailed;
-
-  DownloadEp(
-    this.comicId,
-    this.id,
-    this.updatedAt,
-    this.epOrder,
-    this.title,
-  );
-
-  Map<String, dynamic> toJson() => {
-        "comicId": comicId,
-        "id": id,
-        "updatedAt": updatedAt,
-        "epOrder": epOrder,
-        "title": title,
-      };
-
-  DownloadEp.fromJson(Map<String, dynamic> json) {
-    this.comicId = json["comicId"];
-    this.id = json["id"];
-    this.epOrder = json["epOrder"];
-    this.title = json["title"];
-
-    this.fetchedPictures = json["fetchedPictures"];
-    this.selectedPictureCount = json["selectedPictureCount"];
-    this.downloadPictureCount = json["downloadPictureCount"];
-    this.downloadFinish = json["downloadFinish"];
-    this.downloadFinishTime = json["downloadFinishTime"];
-    this.downloadFailed = json["downloadFailed"];
-  }
-}
-
-class DownloadComicWithLogoPath extends DownloadComic {
-  late String logoPath;
-
-  DownloadComicWithLogoPath.fromJson(Map<String, dynamic> json)
-      : super.fromJson(json) {
-    this.logoPath = json["logoPath"];
+  Future<dynamic> importComicDownload(String zipPath) {
+    return _flatInvoke("importComicDownload", zipPath);
   }
 }

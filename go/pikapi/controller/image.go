@@ -87,3 +87,4 @@ func decodeFromCache(fileServer string, path string) ([]byte, image.Image, strin
 	}
 	return nil, nil, "", errors.New("not found")
 }
+

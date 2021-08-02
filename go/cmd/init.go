@@ -18,8 +18,6 @@ func init() {
 		panic(err)
 	}
 	switch runtime.GOOS {
-	case "darwin":
-		applicationDir = path.Join(applicationDir, "Library", "Application Support")
 	case "windows":
 		// applicationDir = path.Join(applicationDir, "AppData", "Roaming")
 		file, err := exec.LookPath(os.Args[0])
@@ -38,6 +36,10 @@ func init() {
 			panic(errors.New(" can't find \"/\" or \"\\\""))
 		}
 		applicationDir = path2.Join(path[0:i+1], "data")
+	case "darwin":
+		applicationDir = path.Join(applicationDir, "Library", "Application Support")
+	case "linux":
+		applicationDir = path.Join(applicationDir)
 	default:
 		panic(errors.New("not supported system"))
 	}

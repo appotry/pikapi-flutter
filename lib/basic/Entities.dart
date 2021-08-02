@@ -13,6 +13,44 @@ class PicaImage {
   }
 }
 
+class BasicUser {
+  late String id;
+  late String gender;
+  late String name;
+  late String title;
+  late bool verified;
+  late int exp;
+  late int level;
+  late List<String> characters;
+  late PicaImage avatar;
+
+  BasicUser.fromJson(Map<String, dynamic> json) {
+    this.id = json["_id"];
+    this.gender = json["gender"];
+    this.name = json["name"];
+    this.title = json["title"];
+    this.verified = json["verified"];
+    this.exp = json["exp"];
+    this.level = json["level"];
+    this.characters = List.of(json["characters"]).map((e) => "$e").toList();
+    this.avatar = PicaImage.fromJson(Map<String, dynamic>.of(json["avatar"]));
+  }
+}
+
+class UserProfile extends BasicUser {
+  late String birthday;
+  late String email;
+  late String createdAt;
+  late bool isPunched;
+
+  UserProfile.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    this.birthday = json["birthday"];
+    this.email = json["email"];
+    this.createdAt = json["created_at"];
+    this.isPunched = json["isPunched"];
+  }
+}
+
 class Page {
   late int total;
   late int limit;
@@ -155,32 +193,26 @@ class Picture {
 }
 
 class RemoteImageData {
-  late String fileServer;
-  late String path;
   late int fileSize;
   late String format;
   late int width;
   late int height;
-  late Uint8List buff;
+  late String finalPath;
 
   RemoteImageData.forData(
-    this.fileServer,
-    this.path,
     this.fileSize,
     this.format,
     this.width,
     this.height,
-    this.buff,
+    this.finalPath,
   );
 
   RemoteImageData.fromJson(Map<String, dynamic> json) {
-    this.fileServer = json["fileServer"];
-    this.path = json["path"];
     this.fileSize = json["fileSize"];
     this.format = json["format"];
     this.width = json["width"];
     this.height = json["height"];
-    this.buff = base64Decode(json["buffBase64"]);
+    this.finalPath = json["finalPath"];
   }
 }
 
@@ -221,28 +253,186 @@ class Comment {
   }
 }
 
-class CommentUser {
-  late String id;
-  late String gender;
-  late String name;
-  late String title;
-  late bool verified;
-  late int exp;
-  late int level;
-  late List<String> characters;
+class CommentUser extends BasicUser {
   late String role;
-  late PicaImage avatar;
 
-  CommentUser.fromJson(Map<String, dynamic> json) {
-    this.id = json["_id"];
-    this.gender = json["gender"];
-    this.name = json["name"];
-    this.title = json["title"];
-    this.verified = json["verified"];
-    this.exp = json["exp"];
-    this.level = json["level"];
-    this.characters = List.of(json["characters"]).map((e) => "$e").toList();
+  CommentUser.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     this.role = json["role"];
-    this.avatar = PicaImage.fromJson(Map<String, dynamic>.of(json["avatar"]));
+  }
+}
+
+
+class DownloadPicture {
+  late int rankInEp;
+  late String fileServer;
+  late String path;
+  late String localPath;
+  late int width;
+  late int height;
+  late String format;
+  late int fileSize;
+
+  DownloadPicture.fromJson(Map<String, dynamic> json) {
+    this.rankInEp = json["rankInEp"];
+    this.fileServer = json["fileServer"];
+    this.path = json["path"];
+    this.localPath = json["localPath"];
+    this.width = json["width"];
+    this.height = json["height"];
+    this.format = json["format"];
+    this.fileSize = json["fileSize"];
+  }
+}
+
+class ViewLog {
+  late String id;
+  late String title;
+  late String author;
+  late int pagesCount;
+  late int epsCount;
+  late bool finished;
+  late String categories;
+  late String thumbOriginalName;
+  late String thumbFileServer;
+  late String thumbPath;
+  late String description;
+  late String chineseTeam;
+  late String tags;
+  late String lastViewTime;
+  late int lastViewEpOrder;
+  late String lastViewEpTitle;
+  late int lastViewPictureRank;
+
+  ViewLog.fromJson(Map<String, dynamic> json) {
+    this.id = json["id"];
+    this.title = json["title"];
+    this.author = json["author"];
+    this.pagesCount = json["pagesCount"];
+    this.epsCount = json["epsCount"];
+    this.finished = json["finished"];
+    this.categories = json["categories"];
+    this.thumbOriginalName = json["thumbOriginalName"];
+    this.thumbFileServer = json["thumbFileServer"];
+    this.thumbPath = json["thumbPath"];
+    this.description = json["description"];
+    this.chineseTeam = json["chineseTeam"];
+    this.tags = json["tags"];
+    this.lastViewTime = json["lastViewTime"];
+    this.lastViewEpOrder = json["lastViewEpOrder"];
+    this.lastViewEpTitle = json["lastViewEpTitle"];
+    this.lastViewPictureRank = json["lastViewPictureRank"];
+  }
+}
+
+class DownloadComic {
+  late String id;
+  late String createdAt;
+  late String updatedAt;
+  late String title;
+  late String author;
+  late int pagesCount;
+  late int epsCount;
+  late bool finished;
+
+  late String categories;
+  late String thumbOriginalName;
+  late String thumbFileServer;
+  late String thumbPath;
+  late String thumbLocalPath;
+
+  late String description;
+  late String chineseTeam;
+  late String tags;
+  late int selectedEpCount;
+  late int selectedPictureCount;
+  late int downloadEpCount;
+  late int downloadPictureCount;
+  late bool downloadFinished;
+  late String downloadFinishedTime;
+  late bool downloadFailed;
+  late bool deleting;
+
+  void copy(DownloadComic other) {
+    this.id = other.id;
+    this.createdAt = other.createdAt;
+    this.updatedAt = other.updatedAt;
+    this.title = other.title;
+    this.author = other.author;
+    this.pagesCount = other.pagesCount;
+    this.epsCount = other.epsCount;
+    this.finished = other.finished;
+    this.categories = other.categories;
+    this.thumbOriginalName = other.thumbOriginalName;
+    this.thumbFileServer = other.thumbFileServer;
+    this.thumbPath = other.thumbPath;
+    this.description = other.description;
+    this.chineseTeam = other.chineseTeam;
+    this.tags = other.tags;
+    this.selectedEpCount = other.selectedEpCount;
+    this.selectedPictureCount = other.selectedPictureCount;
+    this.downloadEpCount = other.downloadEpCount;
+    this.downloadPictureCount = other.downloadPictureCount;
+    this.downloadFinished = other.downloadFinished;
+    this.downloadFinishedTime = other.downloadFinishedTime;
+    this.downloadFailed = other.downloadFailed;
+    this.thumbLocalPath = other.thumbLocalPath;
+    // this.deleting = other.deleting;
+  }
+
+  DownloadComic.fromJson(Map<String, dynamic> json) {
+    this.id = json["id"];
+    this.createdAt = (json["createdAt"]);
+    this.updatedAt = (json["updatedAt"]);
+    this.title = json["title"];
+    this.author = json["author"];
+    this.pagesCount = json["pagesCount"];
+    this.epsCount = json["epsCount"];
+    this.finished = json["finished"];
+    this.categories = json["categories"];
+    this.thumbOriginalName = json["thumbOriginalName"];
+    this.thumbFileServer = json["thumbFileServer"];
+    this.thumbPath = json["thumbPath"];
+    this.description = json["description"];
+    this.chineseTeam = json["chineseTeam"];
+    this.tags = json["tags"];
+    this.selectedEpCount = json["selectedEpCount"];
+    this.selectedPictureCount = json["selectedPictureCount"];
+    this.downloadEpCount = json["downloadEpCount"];
+    this.downloadPictureCount = json["downloadPictureCount"];
+    this.downloadFinished = json["downloadFinished"];
+    this.downloadFinishedTime = json["downloadFinishedTime"];
+    this.downloadFailed = json["downloadFailed"];
+    this.deleting = json["deleting"];
+    this.thumbLocalPath = json["thumbLocalPath"];
+  }
+}
+
+class DownloadEp {
+  late String comicId;
+  late String id;
+  late String updatedAt;
+
+  late int epOrder;
+  late String title;
+
+  late bool fetchedPictures;
+  late int selectedPictureCount;
+  late int downloadPictureCount;
+  late bool downloadFinish;
+  late String downloadFinishTime;
+  late bool downloadFailed;
+
+  DownloadEp.fromJson(Map<String, dynamic> json) {
+    this.comicId = json["comicId"];
+    this.id = json["id"];
+    this.epOrder = json["epOrder"];
+    this.title = json["title"];
+
+    this.fetchedPictures = json["fetchedPictures"];
+    this.selectedPictureCount = json["selectedPictureCount"];
+    this.downloadPictureCount = json["downloadPictureCount"];
+    this.downloadFinish = json["downloadFinish"];
+    this.downloadFinishTime = json["downloadFinishTime"];
+    this.downloadFailed = json["downloadFailed"];
   }
 }

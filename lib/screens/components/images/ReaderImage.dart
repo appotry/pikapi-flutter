@@ -19,15 +19,13 @@ class DownloadReaderImage extends ReaderImage {
         downloadPicture.path,
       );
     }
-    var buff = await File(downloadPicture.finalPath).readAsBytes();
+    var finalPath = await pica.downloadImagePath(downloadPicture.localPath);
     return RemoteImageData.forData(
-      downloadPicture.fileServer,
-      downloadPicture.path,
-      buff.length,
+      downloadPicture.fileSize,
       downloadPicture.format,
       downloadPicture.width,
       downloadPicture.height,
-      buff,
+      finalPath,
     );
   }
 }
@@ -57,8 +55,7 @@ abstract class ReaderImage extends StatefulWidget {
   Future<RemoteImageData> imageData();
 }
 
-class _ReaderImageState extends State<ReaderImage>{
-
+class _ReaderImageState extends State<ReaderImage> {
   late Future<RemoteImageData> _future = widget.imageData();
 
   @override
@@ -83,8 +80,8 @@ class _ReaderImageState extends State<ReaderImage>{
             // data.width/data.height = width/ ?
             //  data.width * ? = width * data.height
             // ? = width * data.height / data.width
-            return Image.memory(
-              data.buff,
+            return Image.file(
+              File(data.finalPath),
               width: width,
               height: height,
               errorBuilder: (a, b, c) => Container(

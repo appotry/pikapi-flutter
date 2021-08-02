@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:pikapi/basic/Channels.dart';
+import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/service/pica.dart';
 
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -18,15 +20,15 @@ class DownloadListScreen extends StatefulWidget {
 }
 
 class _DownloadListScreenState extends State<DownloadListScreen> {
-  late Future<List<DownloadComicWithLogoPath>> _f = pica.allDownloads();
+  late Future<List<DownloadComic>> _f = pica.allDownloads();
   late StreamSubscription<dynamic> _sub;
   DownloadComic? _downloading;
   late bool _downloadRunning = false;
 
   @override
   void initState() {
-    _sub = downloadingComicEventChannel
-        .receiveBroadcastStream({"SCREEN": "DOWNLOAD_LIST"}).listen(
+    _sub = eventChannel.receiveBroadcastStream(
+        {"function": "DOWNLOAD", "id": "DOWNLOAD_LIST"}).listen(
       (event) {
         print("EVENT");
         print(event);
@@ -60,34 +62,41 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
       appBar: AppBar(
         title: Text('下载列表'),
         actions: [
-          MaterialButton(
-              minWidth: 0,
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DownloadImportScreen(),
-                  ),
-                );
-                setState(() {
-                  _f = pica.allDownloads();
-                });
-              },
-              child: Column(
-                children: [
-                  Expanded(child: Container()),
-                  Icon(
-                    Icons.label_important,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                  Text(
-                    '导入',
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                  ),
-                  Expanded(child: Container()),
-                ],
-              )),
+          ...(Platform.isWindows ||
+                  Platform.isMacOS ||
+                  Platform.isLinux ||
+                  Platform.isAndroid)
+              ? [
+                  MaterialButton(
+                      minWidth: 0,
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DownloadImportScreen(),
+                          ),
+                        );
+                        setState(() {
+                          _f = pica.allDownloads();
+                        });
+                      },
+                      child: Column(
+                        children: [
+                          Expanded(child: Container()),
+                          Icon(
+                            Icons.label_important,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                          Text(
+                            '导入',
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                          Expanded(child: Container()),
+                        ],
+                      )),
+                ]
+              : [],
           MaterialButton(
               minWidth: 0,
               onPressed: () {
@@ -177,7 +186,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
       body: FutureBuilder(
         future: _f,
         builder: (BuildContext context,
-            AsyncSnapshot<List<DownloadComicWithLogoPath>> snapshot) {
+            AsyncSnapshot<List<DownloadComic>> snapshot) {
           if (snapshot.hasError) {
             print("${snapshot.error}");
             print("${snapshot.stackTrace}");

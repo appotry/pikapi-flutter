@@ -3,20 +3,17 @@ package controller
 import "pgo/pikapi/database/comic_center"
 
 type DisplayImageData struct {
-	comic_center.RemoteImage
-	BuffBase64 string `json:"buffBase64"`
-}
-
-type ComicDownloadWithLogoPath struct {
-	comic_center.ComicDownload
-	LogoPath string `json:"logoPath"`
+	FileSize  int64  `json:"fileSize"`
+	Format    string `json:"format"`
+	Width     int32  `json:"width"`
+	Height    int32  `json:"height"`
+	FinalPath string `json:"finalPath"`
 }
 
 type ComicDownloadPictureWithFinalPath struct {
 	comic_center.ComicDownloadPicture
 	FinalPath string `json:"finalPath"`
 }
-
 
 type JsonComicDownload struct {
 	comic_center.ComicDownload
@@ -31,14 +28,4 @@ type JsonComicDownloadEp struct {
 type JsonComicDownloadPicture struct {
 	comic_center.ComicDownloadPicture
 	SrcPath string `json:"srcPath"`
-}
-
-
-var ExportNameCallback func(string)
-
-func notifyExport(str string) {
-	call := ExportNameCallback
-	if call != nil {
-		call(str)
-	}
 }

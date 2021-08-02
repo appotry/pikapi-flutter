@@ -1,14 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/images/Common.dart';
-import 'package:pikapi/screens/components/images/DownloadComicThumbImage.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/screens/components/images/DownloadImage.dart';
+import 'package:pikapi/screens/components/images/RemoteImage.dart';
 
 import 'ComicInfoCard.dart';
 
 class DownloadInfoCard extends StatelessWidget {
-  final DownloadComicWithLogoPath task;
+  final DownloadComic task;
   final bool downloading;
 
   DownloadInfoCard({Key? key, required this.task, this.downloading = false})
@@ -52,13 +53,17 @@ class DownloadInfoCard extends StatelessWidget {
         children: [
           Container(
             padding: EdgeInsets.only(right: 10),
-            child: task.logoPath != ""
-                ? buildFile(task.logoPath, imageWidth, imageHeight)
-                : // buildError(imageWidth, imageHeight),
-                DownloadComicThumbImage(
+            child: task.thumbLocalPath == ""
+                ? RemoteImage(
+                    fileServer: task.thumbFileServer,
+                    path: task.thumbPath,
                     width: imageWidth,
                     height: imageHeight,
-                    comicId: task.id,
+                  )
+                : DownloadImage(
+                    path: task.thumbLocalPath,
+                    width: imageWidth,
+                    height: imageHeight,
                   ),
           ),
           Expanded(

@@ -12,7 +12,15 @@ import (
 	"time"
 )
 
-func ExportComicDownload(comicId string, dir string) error {
+func exportComicDownload(params string) error {
+	var paramsStruct struct {
+		ComicId string `json:"comicId"`
+		Dir     string `json:"dir"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	comicId := paramsStruct.ComicId
+	dir := paramsStruct.Dir
+
 	println(fmt.Sprintf("导出 %s 到 %s", comicId, dir))
 	comic, err := comic_center.FindComicDownloadById(comicId)
 	if err != nil {
@@ -255,4 +263,3 @@ const indexHtml = `
 </body>
 </html>
 `
-

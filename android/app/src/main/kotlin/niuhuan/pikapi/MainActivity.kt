@@ -10,6 +10,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import mobile.Mobile
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -17,276 +18,6 @@ class MainActivity : FlutterActivity() {
 
     private val scope = CoroutineScope(EmptyCoroutineContext)
     private val uiThreadHandler = Handler(Looper.getMainLooper())
-
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
-        super.configureFlutterEngine(flutterEngine)
-        Mobile.initApplication(context!!.filesDir.absolutePath)
-
-        //
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "pica").setMethodCallHandler { call, result ->
-            result.withCoroutine {
-                when (call.method) {
-                    "loadProperty" -> {
-                        Mobile.loadProperty(
-                                call.argument("name")!!,
-                                call.argument("defaultValue")!!
-                        )
-                    }
-                    "saveProperty" -> {
-                        Mobile.saveProperty(
-                                call.argument("name")!!,
-                                call.argument("value")!!
-                        )
-                    }
-                    "getSwitchAddress" -> {
-                        Mobile.getSwitchAddress()
-                    }
-                    "setSwitchAddress" -> {
-                        Mobile.setSwitchAddress(
-                                call.argument("switchAddress")!!
-                        )
-                    }
-                    "getProxy" -> {
-                        Mobile.getProxy()
-                    }
-                    "setProxy" -> {
-                        Mobile.setProxy(
-                                call.argument("proxy")!!
-                        )
-                    }
-                    "getUsername" -> {
-                        Mobile.getUsername()
-                    }
-                    "setUsername" -> {
-                        Mobile.setUsername(
-                                call.argument("username")!!
-                        )
-                    }
-                    "getPassword" -> {
-                        Mobile.getPassword()
-                    }
-                    "setPassword" -> {
-                        Mobile.setPassword(
-                                call.argument("password")!!
-                        )
-                    }
-                    "preLogin" -> {
-                        Mobile.preLogin()
-                    }
-                    "login" -> {
-                        Mobile.login()
-                    }
-                    "remoteImageData" -> {
-                        Mobile.remoteImageData(
-                                call.argument("fileServer")!!,
-                                call.argument("path")!!
-                        )
-                    }
-                    "categories" -> {
-                        Mobile.categories()
-                    }
-                    "comics" -> {
-                        Mobile.comics(
-                                call.argument("category")!!,
-                                call.argument("sort")!!,
-                                call.argument("page")!!
-                        )
-                    }
-                    "searchComics" -> {
-                        Mobile.searchComics(
-                                call.argument("keyword")!!,
-                                call.argument("sort")!!,
-                                call.argument("page")!!
-                        )
-                    }
-                    "searchComicsInCategories" -> {
-                        val any: Any? = call.argument("categories")
-                        Mobile.searchComicsInCategories(
-                                call.argument("keyword")!!,
-                                call.argument("sort")!!,
-                                call.argument("page")!!,
-                                Gson().toJson(any)
-                        )
-                    }
-                    "comicInfo" -> {
-                        Mobile.comicInfo(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "comicEpPage" -> {
-                        Mobile.epPage(
-                                call.argument("comicId")!!,
-                                call.argument("page")!!
-                        )
-                    }
-                    "comicPicturePageWithQuality" -> {
-                        Mobile.comicPicturePageWithQuality(
-                                call.argument("comicId")!!,
-                                call.argument("epOrder")!!,
-                                call.argument("page")!!,
-                                call.argument("quality")!!
-                        )
-                    }
-                    "downloadRunning" -> {
-                        Mobile.downloadRunning()
-                    }
-                    "setDownloadRunning" -> {
-                        Mobile.setDownloadRunning(call.argument("status")!!)
-                    }
-                    "deleteDownloadComic" -> {
-                        Mobile.deleteDownloadComic(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "downloadComic" -> {
-                        Mobile.loadDownloadComic(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "downloadComicThumb" -> {
-                        Mobile.downloadComicThumb(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "downloadEpList" -> {
-                        Mobile.downloadEpList(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "createDownload" -> {
-                        Mobile.createDownload(
-                                call.argument("comic")!!,
-                                call.argument("epList")!!
-                        )
-                    }
-                    "addDownload" -> {
-                        Mobile.addDownload(
-                                call.argument("comic")!!,
-                                call.argument("epList")!!
-                        )
-                    }
-                    "allDownloads" -> {
-                        Mobile.allDownloads()
-                    }
-                    "downloadPicturesByEpId" -> {
-                        Mobile.downloadPicturesByEpId(
-                                call.argument("epId")!!
-                        )
-                    }
-                    "viewLogPage" -> {
-                        Mobile.viewLogPage(
-                                call.argument("page")!!,
-                                call.argument("pageSize")!!
-                        )
-                    }
-                    "resetAllDownloads" -> {
-                        Mobile.resetAllDownloads()
-                    }
-                    "exportComicDownload" -> {
-                        Mobile.exportComicDownload(
-                                call.argument("comicId")!!,
-                                call.argument("dir")!!
-                        )
-                    }
-                    "importComicDownload" -> {
-                        Mobile.importComicDownload(
-                                call.argument("zipPath")!!
-                        )
-                    }
-                    "favouriteComics" -> {
-                        Mobile.favouriteComics(
-                                call.argument("sort")!!,
-                                call.argument("page")!!
-                        )
-                    }
-                    "switchFavourite" -> {
-                        Mobile.switchFavourite(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "switchLike" -> {
-                        Mobile.switchLike(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "clean" -> {
-                        Mobile.clean()
-                    }
-                    "recommendation" -> {
-                        Mobile.recommendation(
-                                call.argument("comicId")!!
-                        )
-                    }
-                    "comments" -> {
-                        Mobile.comments(
-                                call.argument("comicId")!!,
-                                call.argument("page")!!
-                        )
-                    }
-                    else -> {
-                        null
-                    }
-                }
-            }
-        }
-
-        //
-        var exportingEventsReg: EventChannel.EventSink? = null
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "exporting")
-                .setStreamHandler(object : EventChannel.StreamHandler {
-                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                        exportingEventsReg = events
-                    }
-
-                    override fun onCancel(arguments: Any?) {
-                        exportingEventsReg = null
-                    }
-                })
-        Mobile.exportingNotify {
-            scope.launch {
-                uiThreadHandler.post {
-                    exportingEventsReg?.success(it)
-                }
-            }
-        }
-
-        //
-        val downloadingComicEventMap = HashMap<String, EventChannel.EventSink?>()
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "downloadingComic")
-                .setStreamHandler(object : EventChannel.StreamHandler {
-                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                        when (arguments) {
-                            is Map<*, *> -> {
-                                when (val screen = arguments["SCREEN"]){
-                                    is String ->{
-                                        downloadingComicEventMap[screen] = events
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    override fun onCancel(arguments: Any?) {
-                        when (arguments) {
-                            is Map<*, *> -> {
-                                when (val screen = arguments["SCREEN"]){
-                                    is String ->{
-                                        downloadingComicEventMap.remove(screen)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                })
-        Mobile.downloadingComicNotify { a ->
-            scope.launch {
-                uiThreadHandler.post {
-                    downloadingComicEventMap.forEach { (_, u) -> u?.success(a) }
-                }
-            }
-        }
-
-    }
 
     private fun MethodChannel.Result.withCoroutine(exec: () -> Any?) {
         scope.launch {
@@ -312,6 +43,100 @@ class MainActivity : FlutterActivity() {
             }
 
         }
+    }
+
+    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        Mobile.initApplication(context!!.filesDir.absolutePath)
+        // Method Channel
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "pica").setMethodCallHandler { call, result ->
+            result.withCoroutine {
+                when (call.method) {
+                    "flatInvoke" -> {
+                        Mobile.flatInvoke(
+                                call.argument("method")!!,
+                                call.argument("params")!!
+                        )
+                    }
+                    else -> {
+                        null
+                    }
+                }
+            }
+        }
+        //
+        var mutex = Mutex()
+        val eventSinkMap = HashMap<String, HashMap<String, EventChannel.EventSink>>()
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "event")
+                .setStreamHandler(object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        events?.also { events ->
+                            when (arguments) {
+                                is Map<*, *> -> {
+                                    val function = arguments["function"]
+                                    val id = arguments["id"]
+                                    when {
+                                        function is String && id is String -> {
+                                            scope.launch {
+                                                mutex.lock()
+                                                try {
+                                                    var map = eventSinkMap[function]
+                                                    if (map == null) {
+                                                        map = HashMap()
+                                                        eventSinkMap[function] = map
+                                                    }
+                                                    map[id] = events
+                                                } finally {
+                                                    mutex.unlock()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    override fun onCancel(arguments: Any?) {
+                        when (arguments) {
+                            is Map<*, *> -> {
+                                val function = arguments["function"]
+                                val id = arguments["id"]
+                                when {
+                                    function is String && id is String -> {
+                                        scope.launch {
+                                            mutex.lock()
+                                            try {
+                                                eventSinkMap[function]?.also {
+                                                    it.remove(id)
+                                                }
+                                            } finally {
+                                                mutex.unlock()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+        Mobile.eventNotify { function, value ->
+            scope.launch {
+                mutex.lock()
+                try {
+                    eventSinkMap[function]?.also {
+                        it.values.forEach {
+                            uiThreadHandler.post {
+                                it.success(value)
+                            }
+                        }
+                    }
+                } finally {
+                    mutex.unlock()
+                }
+            }
+        }
+
     }
 
 }

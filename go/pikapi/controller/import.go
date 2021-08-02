@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func ImportZip(zipPath string) error {
+func importComicDownload(zipPath string) error {
 	zip, err := zip.OpenReader(zipPath)
 	if err != nil {
 		return err

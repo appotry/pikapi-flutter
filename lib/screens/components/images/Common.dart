@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pikapi/basic/Entities.dart';
 
 Widget buildMock(double? width, double? height) {
   return Container(
@@ -43,16 +41,6 @@ Widget buildLoading(double? width, double? height) {
   );
 }
 
-Widget buildBuff(Uint8List file, double? width, double? height) {
-  return Image.memory(
-    file,
-    width: width,
-    height: height,
-    errorBuilder: (a, b, c) => buildError(width, height),
-    fit: BoxFit.cover,
-  );
-}
-
 Widget buildFile(String file, double? width, double? height) {
   return Image.file(
     File(file),
@@ -67,11 +55,10 @@ Widget buildFile(String file, double? width, double? height) {
   );
 }
 
-Widget imageDataFutureBuilder(
-    Future<RemoteImageData> future, double? width, double? height) {
+Widget pathFutureImage(Future<String> future, double? width, double? height) {
   return FutureBuilder(
       future: future,
-      builder: (BuildContext context, AsyncSnapshot<RemoteImageData> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
           print("${snapshot.error}");
           print("${snapshot.stackTrace}");
@@ -80,6 +67,6 @@ Widget imageDataFutureBuilder(
         if (snapshot.connectionState != ConnectionState.done) {
           return buildLoading(width, height);
         }
-        return buildBuff(snapshot.data!.buff, width, height);
+        return buildFile(snapshot.data!, width, height);
       });
 }

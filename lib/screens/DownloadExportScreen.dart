@@ -5,6 +5,7 @@ import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pikapi/basic/Channels.dart';
+import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/service/pica.dart';
 
 import 'components/ContentError.dart';
@@ -25,12 +26,12 @@ class DownloadExportScreen extends StatefulWidget {
 }
 
 class _DownloadExportScreenState extends State<DownloadExportScreen> {
-  late DownloadComicWithLogoPath _task;
+  late DownloadComic _task;
   late Future _future = _load();
   late bool exporting = false;
   late String exportMessage = "导出中";
   late String exportResult = "";
-  late StreamSubscription ls;
+  late StreamSubscription _listen;
 
   Future _load() async {
     _task = (await pica.loadDownloadComic(widget.comicId))!;
@@ -46,13 +47,14 @@ class _DownloadExportScreenState extends State<DownloadExportScreen> {
 
   @override
   void initState() {
-    ls = exportingEventChannel.receiveBroadcastStream().listen(_onMessageChange);
+    _listen = eventChannel.receiveBroadcastStream(
+        {"function": "EXPORT", "id": "DEFAULT"}).listen(_onMessageChange);
     super.initState();
   }
 
   @override
   void dispose() {
-    ls.cancel();
+    _listen.cancel();
     super.dispose();
   }
 
@@ -93,9 +95,11 @@ class _DownloadExportScreenState extends State<DownloadExportScreen> {
               MaterialButton(
                 onPressed: () async {
                   late String root;
-                  if (Platform.isMacOS) {
+                  if (Platform.isWindows) {
+                    root = '/';
+                  } else if (Platform.isMacOS) {
                     root = '/Users';
-                  } else if (Platform.isWindows) {
+                  } else if (Platform.isLinux) {
                     root = '/';
                   } else if (Platform.isAndroid) {
                     var p = await Permission.storage.request();
