@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 漫画tag
 class ComicTagsCard extends StatelessWidget {
   final List<String> tags;
 

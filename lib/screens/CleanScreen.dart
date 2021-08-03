@@ -2,21 +2,33 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Channels.dart';
-import 'package:pikapi/service/pica.dart';
-
+import 'package:pikapi/basic/Pica.dart';
 import 'components/ContentLoading.dart';
 
+// 清理
 class CleanScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _CleanScreenState();
 }
 
 class _CleanScreenState extends State<CleanScreen> {
-  
   late bool _cleaning = false;
   late String _cleaningMessage = "清理中";
   late String _cleanResult = "";
-  late StreamSubscription ls;
+  late StreamSubscription _listen;
+
+  @override
+  void initState() {
+    _listen = eventChannel.receiveBroadcastStream(
+        {"function": "EXPORT", "id": "DEFAULT"}).listen(_onMessageChange);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _listen.cancel();
+    super.dispose();
+  }
 
   void _onMessageChange(event) {
     if (event is String) {
@@ -27,19 +39,6 @@ class _CleanScreenState extends State<CleanScreen> {
   }
 
   @override
-  void initState() {
-    ls = eventChannel.receiveBroadcastStream(
-        {"function": "EXPORT", "id": "DEFAULT"}).listen(_onMessageChange);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    ls.cancel();
-    super.dispose();
-  }
-  
-  @override
   Widget build(BuildContext context) {
     if (_cleaning) {
       return Scaffold(
@@ -47,7 +46,9 @@ class _CleanScreenState extends State<CleanScreen> {
       );
     }
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text('清理'),
+      ),
       body: ListView(
         children: [
           MaterialButton(

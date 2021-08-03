@@ -2,14 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/screens/components/images/ReaderImage.dart';
-import 'package:pikapi/service/pica.dart';
+import 'components/Images.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 import 'components/ImageReader.dart';
 
+// 阅读下载的内容
 class DownloadReaderScreen extends StatefulWidget {
   final DownloadComic comicInfo;
   final List<DownloadEp> epList;
@@ -127,15 +129,7 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
         ),
       );
     } else {
-      showToast("找不到下一章啦",
-          context: context,
-          position: StyledToastPosition.center,
-          animation: StyledToastAnimation.scale,
-          reverseAnimation: StyledToastAnimation.fade,
-          duration: Duration(seconds: 4),
-          animDuration: Duration(seconds: 1),
-          curve: Curves.elasticOut,
-          reverseCurve: Curves.linear);
+      defaultToast(context, "找不到下一章啦");
     }
   }
 }

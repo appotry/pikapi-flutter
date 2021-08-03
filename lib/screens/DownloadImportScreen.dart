@@ -5,28 +5,20 @@ import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pikapi/basic/Channels.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'components/ContentLoading.dart';
 
+// 导入
 class DownloadImportScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _DownloadImportScreenState();
 }
 
 class _DownloadImportScreenState extends State<DownloadImportScreen> {
+  bool _importing = false;
+  String _importMessage = "";
   late StreamSubscription _listen;
-  String importMessage = "";
-  bool importing = false;
-
-
-  void _onMessageChange(event) {
-    if (event is String) {
-      setState(() {
-        importMessage = event;
-      });
-    }
-  }
 
   @override
   void initState() {
@@ -41,11 +33,19 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
     super.dispose();
   }
 
+  void _onMessageChange(event) {
+    if (event is String) {
+      setState(() {
+        _importMessage = event;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (importing) {
+    if (_importing) {
       return Scaffold(
-        body: ContentLoading(label: importMessage),
+        body: ContentLoading(label: _importMessage),
       );
     }
     return Scaffold(
@@ -82,19 +82,19 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
               if (path != null) {
                 try {
                   setState(() {
-                    importing = true;
+                    _importing = true;
                   });
                   await pica.importComicDownload(path);
                   setState(() {
-                    importMessage = "导入成功";
+                    _importMessage = "导入成功";
                   });
                 } catch (e) {
                   setState(() {
-                    importMessage = "导入失败 $e";
+                    _importMessage = "导入失败 $e";
                   });
                 } finally {
                   setState(() {
-                    importing = false;
+                    _importing = false;
                   });
                 }
               }
@@ -103,7 +103,7 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
           ),
           Container(
             padding: EdgeInsets.all(10),
-            child: Text(importMessage),
+            child: Text(_importMessage),
           ),
         ],
       ),

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 import 'components/ImageReader.dart';
-import 'components/images/ReaderImage.dart';
+import 'components/Images.dart';
 
+// 在线阅读漫画
 class ComicReaderScreen extends StatefulWidget {
   final ComicInfo comicInfo;
   final List<Ep> epList;
@@ -132,15 +134,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
         ),
       );
     } else {
-      showToast("找不到下一章啦",
-          context: context,
-          position: StyledToastPosition.center,
-          animation: StyledToastAnimation.scale,
-          reverseAnimation: StyledToastAnimation.fade,
-          duration: Duration(seconds: 4),
-          animDuration: Duration(seconds: 1),
-          curve: Curves.elasticOut,
-          reverseCurve: Curves.linear);
+      defaultToast(context, "找不到下一章啦");
     }
   }
 }

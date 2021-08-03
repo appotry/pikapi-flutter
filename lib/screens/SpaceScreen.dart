@@ -6,11 +6,14 @@ import 'package:pikapi/screens/CleanScreen.dart';
 import 'package:pikapi/screens/DownloadListScreen.dart';
 import 'package:pikapi/screens/FavouritePaperScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'components/UserProfileCard.dart';
 
+// 个人空间页面
 class SpaceScreen extends StatefulWidget {
+  const SpaceScreen();
+
   @override
   State<StatefulWidget> createState() => _SpaceScreenState();
 }
@@ -19,19 +22,19 @@ class _SpaceScreenState extends State<SpaceScreen> {
   String _theme = "";
   String _quality = "";
 
-  @override
-  void initState() {
-    init();
-    super.initState();
-  }
-
-  init() async {
+  Future<dynamic> init() async {
     var theme = await pica.loadTheme();
     var quality = await pica.loadQuality();
     setState(() {
       _theme = theme;
       _quality = quality;
     });
+  }
+
+  @override
+  void initState() {
+    init();
+    super.initState();
   }
 
   @override

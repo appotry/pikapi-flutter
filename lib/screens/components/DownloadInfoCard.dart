@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/screens/components/images/Common.dart';
-import 'package:pikapi/screens/components/images/DownloadImage.dart';
-import 'package:pikapi/screens/components/images/RemoteImage.dart';
+import 'package:pikapi/screens/components/Images.dart';
 
 import 'ComicInfoCard.dart';
 

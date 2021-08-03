@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"errors"
+	_ "golang.org/x/image/webp"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"

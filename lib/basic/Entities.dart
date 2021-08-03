@@ -261,7 +261,6 @@ class CommentUser extends BasicUser {
   }
 }
 
-
 class DownloadPicture {
   late int rankInEp;
   late String fileServer;
@@ -434,5 +433,77 @@ class DownloadEp {
     this.downloadFinish = json["downloadFinish"];
     this.downloadFinishTime = json["downloadFinishTime"];
     this.downloadFailed = json["downloadFailed"];
+  }
+}
+
+class GamePage extends Page {
+  late List<GameSimple> docs;
+
+  GamePage.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    this.docs = List.of(json["docs"])
+        .map((e) => Map<String, dynamic>.of(e))
+        .map((e) => GameSimple.fromJson(e))
+        .toList();
+  }
+}
+
+class GameSimple {
+  late String id;
+  late String title;
+  late String version;
+  late PicaImage icon;
+  late String publisher;
+  late bool adult;
+  late bool suggest;
+  late int likesCount;
+  late bool android;
+  late bool ios;
+
+  GameSimple.fromJson(Map<String, dynamic> json) {
+    this.id = json["_id"];
+    this.title = json["title"];
+    this.version = json["version"];
+    this.icon = PicaImage.fromJson(json["icon"]);
+    this.publisher = json["publisher"];
+    this.adult = json["adult"];
+    this.suggest = json["suggest"];
+    this.likesCount = json["likesCount"];
+    this.android = json["android"];
+    this.ios = json["ios"];
+  }
+}
+
+class GameInfo extends GameSimple {
+  late String description;
+  late String updateContent;
+  late String videoLink;
+  late List<PicaImage> screenshots;
+  late int commentsCount;
+  late int downloadsCount;
+  late bool isLiked;
+  late List<String> androidLinks;
+  late double androidSize;
+  late List<String> iosLinks;
+  late double iosSize;
+  late String updatedAt;
+  late String createdAt;
+
+  GameInfo.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    this.description = json["description"];
+    this.updateContent = json["updateContent"];
+    this.videoLink = json["videoLink"];
+    this.screenshots = List.of(json["screenshots"])
+        .map((e) => Map<String, dynamic>.of(e))
+        .map((e) => PicaImage.fromJson(e))
+        .toList();
+    this.commentsCount = json["commentsCount"];
+    this.downloadsCount = json["downloadsCount"];
+    this.isLiked = json["isLiked"];
+    this.androidLinks = List.of(json["androidLinks"]).map((e) => "$e").toList();
+    this.androidSize = double.parse(json["androidSize"].toString());
+    this.iosLinks = List.of(json["iosLinks"]).map((e) => "$e").toList();
+    this.iosSize = double.parse(json["iosSize"].toString());
+    this.updatedAt = json["updated_at"];
+    this.createdAt = json["created_at"];
   }
 }

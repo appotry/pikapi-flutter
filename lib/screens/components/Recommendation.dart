@@ -2,11 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/ComicInfoScreen.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'ItemBuilder.dart';
-import 'images/RemoteImage.dart';
+import 'Images.dart';
 
+// 看过此本子的也在看
 // pica 一直返回空数组, 所以没有使用
 class Recommendation extends StatefulWidget {
   final String comicId;

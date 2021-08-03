@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 漫画的说明
 class ComicDescriptionCard extends StatelessWidget {
   final String description;
 

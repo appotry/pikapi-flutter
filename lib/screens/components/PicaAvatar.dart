@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-
-import 'images/RemoteImage.dart';
+import 'Images.dart';
 
 const double _avatarMargin = 5;
 const double _avatarImageSize = 50;
 const double _avatarBorderSize = 1.5;
 
+// 头像
 class PicaAvatar extends StatelessWidget {
   final PicaImage avatarImage;
 

@@ -6,12 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pikapi/basic/Channels.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 import 'components/DownloadInfoCard.dart';
 
+// 导出
 class DownloadExportScreen extends StatefulWidget {
   final String comicId;
   final String comicTitle;
@@ -37,14 +38,6 @@ class _DownloadExportScreenState extends State<DownloadExportScreen> {
     _task = (await pica.loadDownloadComic(widget.comicId))!;
   }
 
-  void _onMessageChange(event) {
-    if (event is String) {
-      setState(() {
-        exportMessage = event;
-      });
-    }
-  }
-
   @override
   void initState() {
     _listen = eventChannel.receiveBroadcastStream(
@@ -56,6 +49,14 @@ class _DownloadExportScreenState extends State<DownloadExportScreen> {
   void dispose() {
     _listen.cancel();
     super.dispose();
+  }
+
+  void _onMessageChange(event) {
+    if (event is String) {
+      setState(() {
+        exportMessage = event;
+      });
+    }
   }
 
   @override

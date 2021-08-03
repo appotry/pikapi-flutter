@@ -9,6 +9,7 @@ import '../ComicInfoScreen.dart';
 import 'ComicInfoCard.dart';
 import 'ContentLoading.dart';
 
+// 漫画列页
 final TextEditingController _textEditController =
     TextEditingController(text: '');
 

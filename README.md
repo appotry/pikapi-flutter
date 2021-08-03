@@ -27,6 +27,11 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 ![导出下载](images/exporting.png)
 ![HTML预览](images/exporting2.png)
 
+### 游戏
+
+![games](images/games.png)
+![game](images/game.png)
+
 ## 特性
 
 - [x] 用户
@@ -39,6 +44,9 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
   - [x] 收藏
   - [ ] 评论 / 看此本子的也在看
   - [ ] 排行榜
+- [x] 游戏
+  - [x] 列表 / 详情
+  - [ ] 分页 / 下载
 - [x] 下载
   - [x] 导入导出 / 分享
   - [ ] 无线共享
@@ -86,6 +94,7 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 - 引入本软件部分内容为依赖/参考本软件/使用本软件内代码的同时, 包含本软件内一致内容或功能的软件。
 - 直接对本软件进行打包发布
 
-## 参考文档
+## 参考
 
-[picacomic](https://github.com/AnkiKong/picacomic)
+- [picacomic](https://github.com/AnkiKong/picacomic)
+- [picacg-windows](https://github.com/tonquer/picacg-windows)

@@ -12,6 +12,7 @@ import (
 	"pgo/pikapi/database/properties"
 	"pica"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -305,7 +306,7 @@ func switchFavourite(comicId string) (string, error) {
 func favouriteComics(params string) (string, error) {
 	var paramsStruct struct {
 		Sort string `json:"sort"`
-		Page    int    `json:"page"`
+		Page int    `json:"page"`
 	}
 	json.Unmarshal([]byte(params), &paramsStruct)
 	sort := paramsStruct.Sort
@@ -346,6 +347,30 @@ func comments(params string) (string, error) {
 		time.Hour*2,
 		func() (interface{}, error) {
 			return client.ComicCommentsPage(comicId, page)
+		},
+	)
+}
+
+func games(pageStr string) (string, error) {
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		return "", err
+	}
+	return cacheable(
+		fmt.Sprintf("GAMES$%d", page),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.GamePage(page)
+		},
+	)
+}
+
+func game(gameId string) (string, error) {
+	return cacheable(
+		fmt.Sprintf("GAME$%s", gameId),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.GameInfo(gameId)
 		},
 	)
 }

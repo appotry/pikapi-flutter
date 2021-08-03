@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 import 'ComicInfoScreen.dart';
 import 'DownloadExportScreen.dart';
 import 'DownloadReaderScreen.dart';
@@ -13,6 +13,7 @@ import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 import 'components/DownloadInfoCard.dart';
 
+// 下载详情
 class DownloadInfoScreen extends StatefulWidget {
   final String comicId;
   final String comicTitle;

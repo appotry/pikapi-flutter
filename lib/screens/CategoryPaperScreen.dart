@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/enum/Sort.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 import '../basic/Entities.dart';
 import 'SearchScreen.dart';
 import 'components/ComicPager.dart';
 
+// 分类详情 列表
 class CategoryPaperScreen extends StatefulWidget {
   final String? categoryTitle;
 
@@ -17,8 +19,9 @@ class CategoryPaperScreen extends StatefulWidget {
 }
 
 class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
+
   late SearchBar searchBar = SearchBar(
-    hintText: '搜索 - ${widget.categoryTitle ?? "全分类"}',
+    hintText: '搜索 - ${categoryTitle(widget.categoryTitle)}',
     inBar: false,
     setState: setState,
     onSubmitted: (value) {
@@ -34,26 +37,27 @@ class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
     },
     buildDefaultAppBar: (BuildContext context) {
       return AppBar(
-        title: new Text(widget.categoryTitle??"全分类"),
+        title: new Text(categoryTitle(widget.categoryTitle)),
         actions: [searchBar.getSearchAction(context)],
       );
     },
   );
 
-  late Future<ComicsPage> _future;
   late String _currentSort = SORT_DEFAULT;
   late int _currentPage = 1;
+  late Future<ComicsPage> _future;
+
+  void _load() {
+    setState(() {
+      _future =
+          pica.comics(widget.categoryTitle ?? "", _currentSort, _currentPage);
+    });
+  }
 
   @override
   void initState() {
     _load();
     super.initState();
-  }
-
-  void _load() {
-    setState(() {
-      _future = pica.comics(widget.categoryTitle??"", _currentSort, _currentPage);
-    });
   }
 
   @override

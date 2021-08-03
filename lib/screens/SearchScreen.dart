@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/enum/Sort.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 import '../basic/Entities.dart';
 import 'components/ComicPager.dart';
 
@@ -23,7 +24,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late TextEditingController _textEditController =
       TextEditingController(text: widget.keyword);
   late SearchBar _searchBar = SearchBar(
-    hintText: '搜索 ${widget.category ?? "全类型"}',
+    hintText: '搜索 ${categoryTitle(widget.category)}',
     controller: _textEditController,
     inBar: false,
     setState: setState,
@@ -42,12 +43,11 @@ class _SearchScreenState extends State<SearchScreen> {
     },
     buildDefaultAppBar: (BuildContext context) {
       return AppBar(
-        title: Text((widget.category??"全类型")+" "+widget.keyword),
+        title: Text("${categoryTitle(widget.category)} ${widget.keyword}"),
         actions: [_searchBar.getSearchAction(context)],
       );
     },
   );
-
   late Future<ComicsPage> _future;
   String _currentSort = SORT_DEFAULT;
   int _currentPage = 1;

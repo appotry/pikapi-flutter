@@ -4,7 +4,7 @@ import 'ContentLoading.dart';
 
 class ContentBuilder<T> extends StatelessWidget {
   final Future<T> future;
-  final Future<void> Function() onRefresh;
+  final Future<dynamic> Function() onRefresh;
   final AsyncWidgetBuilder<T> successBuilder;
 
   const ContentBuilder(

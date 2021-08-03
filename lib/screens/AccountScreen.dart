@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/enum/Address.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'AppScreen.dart';
 import 'DownloadListScreen.dart';
 import 'components/ContentLoading.dart';
 
+// 账户设置
 class AccountScreen extends StatefulWidget {
   @override
   _AccountScreenState createState() => _AccountScreenState();

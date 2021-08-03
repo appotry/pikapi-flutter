@@ -1,67 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/screens/components/images/RemoteImage.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/screens/components/Images.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'ComicInfoScreen.dart';
+import 'components/ComicWrap.dart';
 
+// 浏览记录
 class ViewLogsScreen extends StatefulWidget {
+  const ViewLogsScreen();
+
   @override
   State<StatefulWidget> createState() => _ViewLogsScreenState();
 }
 
 class _ViewLogsScreenState extends State<ViewLogsScreen> {
-  final _pageSize = 24;
-  final _scrollPhysics = AlwaysScrollableScrollPhysics();
-  final _scrollController = ScrollController();
-  final _comicList = <ViewLog>[];
+  static const _pageSize = 24;
+  static const _scrollPhysics = AlwaysScrollableScrollPhysics();
 
-  var over = false;
-  var needLoading = 1;
-  late bool loading = false;
+  final _scrollController = ScrollController();
+  final _comicList = <ComicWrapEntity>[];
+
+  var _isLoading = false; // 是否加载中
+  var _scrollOvered = false; // 滚动到最后
+  var _needLoadingPage = 1; // 加载到了第几页
+
+  // 加载一页
+  Future<dynamic> _loadPage() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      var page = await pica.viewLogPage(_needLoadingPage, _pageSize);
+      if (page.isEmpty) {
+        _scrollOvered = true;
+      } else {
+        _comicList.addAll(page.map((e) =>
+            ComicWrapEntity(e.id, e.title, e.thumbFileServer, e.thumbPath)));
+      }
+      _needLoadingPage++;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // 滚动事件
+  void _handScroll() {
+    if (_scrollController.position.pixels <
+        _scrollController.position.maxScrollExtent) {
+      return;
+    }
+    if (_isLoading || _scrollOvered) return;
+    _loadPage();
+  }
 
   @override
-  initState() {
+  void initState() {
     _loadPage();
     super.initState();
   }
 
   @override
-  dispose() {
+  void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
-
-  void _handLoad() {
-    if (_scrollController.position.pixels <
-        _scrollController.position.maxScrollExtent) {
-      return;
-    }
-    if (loading || over) return;
-    _loadPage();
-  }
-
-  _loadPage() {
-    setState(() {
-      loading = true;
-      _loading().whenComplete(() {
-        setState(() {
-          loading = false;
-        });
-      });
-    });
-  }
-
-  _loading() async {
-    var page = await pica.viewLogPage(needLoading, _pageSize);
-    if (page.isEmpty) {
-      over = true;
-    } else {
-      _comicList.addAll(page);
-    }
-    needLoading++;
-  }
-
-  //RefreshIndicator
 
   @override
   Widget build(BuildContext context) {
@@ -75,59 +80,20 @@ class _ViewLogsScreenState extends State<ViewLogsScreen> {
           controller: _scrollController,
           children: [
             Container(height: 10),
-            _buildBook(),
+            ComicWrap(onTapComic: _chooseComic, comics: _comicList),
           ],
         ),
       ),
       onNotification: (scrollNotification) {
         if (scrollNotification is ScrollStartNotification) {
-          _handLoad();
+          _handScroll();
         }
         return true;
       },
     );
   }
 
-  Widget _buildBook() {
-    var size = MediaQuery.of(context).size;
-    var min = size.width < size.height ? size.width : size.height;
-    var width = (min - 45) / 4;
-    return Wrap(
-      alignment: WrapAlignment.spaceAround,
-      children: _comicList
-          .map((e) => InkWell(
-                onTap: () {
-                  _gotoInfo(e.id);
-                },
-                child: Card(
-                  child: Container(
-                    width: width,
-                    child: Column(
-                      children: [
-                        LayoutBuilder(builder:
-                            (BuildContext context, BoxConstraints constraints) {
-                          return RemoteImage(
-                              width: constraints.maxWidth,
-                              fileServer: e.thumbFileServer,
-                              path: e.thumbPath);
-                        }),
-                        Text(
-                          e.title + '\n',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(height: 1.4),
-                          strutStyle: StrutStyle(height: 1.4),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ))
-          .toList(),
-    );
-  }
-
-  _gotoInfo(String comicId) {
+  void _chooseComic(String comicId) {
     Navigator.push(
       context,
       MaterialPageRoute(

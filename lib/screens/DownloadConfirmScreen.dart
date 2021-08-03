@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/ContentLoading.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 import 'components/ComicInfoCard.dart';
 
+// 确认下载
 class DownloadConfirmScreen extends StatefulWidget {
   final ComicInfo comicInfo;
   final List<Ep> epList;
@@ -22,41 +24,43 @@ class DownloadConfirmScreen extends StatefulWidget {
 }
 
 class _DownloadConfirmScreenState extends State<DownloadConfirmScreen> {
-  DownloadComic? task;
-  List<int> taskedEps = [];
-  List<int> selectedEps = [];
+  DownloadComic? _task; // 之前的下载任务
+  List<int> _taskedEps = []; // 已经下载的EP
+  List<int> _selectedEps = []; // 选中的EP
   late Future f = _load();
 
-  _load() async {
-    taskedEps.clear();
-    task = await pica.loadDownloadComic(widget.comicInfo.id);
-    if (task != null) {
+  Future<dynamic> _load() async {
+    _taskedEps.clear();
+    _task = await pica.loadDownloadComic(widget.comicInfo.id);
+    if (_task != null) {
       var epList = await pica.downloadEpList(widget.comicInfo.id);
-      taskedEps.addAll(epList.map((e) => e.epOrder));
+      _taskedEps.addAll(epList.map((e) => e.epOrder));
     }
   }
 
-  _selectAll() async {
+  void _selectAll() {
     setState(() {
-      selectedEps.clear();
+      _selectedEps.clear();
       widget.epList.forEach((element) {
-        if (!taskedEps.contains(element.order)) {
-          selectedEps.add(element.order);
+        if (!_taskedEps.contains(element.order)) {
+          _selectedEps.add(element.order);
         }
       });
     });
   }
 
-  _download() async {
-    if (selectedEps.isEmpty) {
+  Future<dynamic> _download() async {
+    // 必须选中才能下载
+    if (_selectedEps.isEmpty) {
+      defaultToast(context, "请选择下载的EP");
       return;
     }
-
+    // 下载对象
     Map<String, dynamic> create = {
-      "id":  widget.comicInfo.id,
+      "id": widget.comicInfo.id,
       "createdAt": widget.comicInfo.createdAt,
       "updatedAt": widget.comicInfo.updatedAt,
-      "title":  widget.comicInfo.title,
+      "title": widget.comicInfo.title,
       "author": widget.comicInfo.author,
       "pagesCount": widget.comicInfo.pagesCount,
       "epsCount": widget.comicInfo.epsCount,
@@ -65,64 +69,33 @@ class _DownloadConfirmScreenState extends State<DownloadConfirmScreen> {
       "thumbOriginalName": widget.comicInfo.thumb.originalName,
       "thumbFileServer": widget.comicInfo.thumb.fileServer,
       "thumbPath": widget.comicInfo.thumb.path,
-      "description":  widget.comicInfo.description,
+      "description": widget.comicInfo.description,
       "chineseTeam": widget.comicInfo.chineseTeam,
       "tags": json.encode(widget.comicInfo.tags),
     };
-
+    // 下载EP列表
     List<Map<String, dynamic>> list = [];
     widget.epList.forEach((element) {
-      if (selectedEps.contains(element.order)) {
+      if (_selectedEps.contains(element.order)) {
         list.add({
           "comicId": widget.comicInfo.id,
           "id": element.id,
-          "updatedAt":  element.updatedAt,
+          "updatedAt": element.updatedAt,
           "epOrder": element.order,
-          "title":  element.title,
+          "title": element.title,
         });
       }
     });
-    if (task != null) {
+    // 如果之前下载过就将EP加入下载
+    // 如果之前没有下载过就创建下载
+    if (_task != null) {
       await pica.addDownload(create, list);
     } else {
       await pica.createDownload(create, list);
     }
+    // 退出
+    defaultToast(context, "已经加入下载列表");
     Navigator.pop(context);
-  }
-
-  Color _colorOfEp(Ep e) {
-    if (taskedEps.contains(e.order)) {
-      return Colors.grey.shade300;
-    }
-    if (selectedEps.contains(e.order)) {
-      return Colors.blueGrey.shade300;
-    }
-    return Colors.grey.shade200;
-  }
-
-  Icon _iconOfEp(Ep e) {
-    if (taskedEps.contains(e.order)) {
-      return Icon(Icons.download_rounded, color: Colors.black);
-    }
-    if (selectedEps.contains(e.order)) {
-      return Icon(Icons.check_box, color: Colors.black);
-    }
-    return Icon(Icons.check_box_outline_blank, color: Colors.black);
-  }
-
-  void _clickOfEp(Ep e) {
-    if (taskedEps.contains(e.order)) {
-      return;
-    }
-    if (selectedEps.contains(e.order)) {
-      setState(() {
-        selectedEps.remove(e.order);
-      });
-    } else {
-      setState(() {
-        selectedEps.add(e.order);
-      });
-    }
   }
 
   @override
@@ -214,5 +187,40 @@ class _DownloadConfirmScreenState extends State<DownloadConfirmScreen> {
         ],
       ),
     );
+  }
+
+  Color _colorOfEp(Ep e) {
+    if (_taskedEps.contains(e.order)) {
+      return Colors.grey.shade300;
+    }
+    if (_selectedEps.contains(e.order)) {
+      return Colors.blueGrey.shade300;
+    }
+    return Colors.grey.shade200;
+  }
+
+  Icon _iconOfEp(Ep e) {
+    if (_taskedEps.contains(e.order)) {
+      return Icon(Icons.download_rounded, color: Colors.black);
+    }
+    if (_selectedEps.contains(e.order)) {
+      return Icon(Icons.check_box, color: Colors.black);
+    }
+    return Icon(Icons.check_box_outline_blank, color: Colors.black);
+  }
+
+  void _clickOfEp(Ep e) {
+    if (_taskedEps.contains(e.order)) {
+      return;
+    }
+    if (_selectedEps.contains(e.order)) {
+      setState(() {
+        _selectedEps.remove(e.order);
+      });
+    } else {
+      setState(() {
+        _selectedEps.add(e.order);
+      });
+    }
   }
 }

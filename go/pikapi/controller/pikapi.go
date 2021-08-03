@@ -151,6 +151,7 @@ func remoteImageData(params string) (string, error) {
 	if cache == nil {
 		buff, img, format, err := decodeFromUrl(fileServer, path)
 		if err != nil {
+			println(fmt.Sprintf("decode error : %s/static/%s %s", fileServer, path, err.Error()))
 			return "", err
 		}
 		local :=
@@ -196,7 +197,7 @@ func downloadImagePath(path string) (string, error) {
 
 func createDownload(params string) error {
 	var paramsStruct struct {
-		Comic  comic_center.ComicDownload `json:"comic"`
+		Comic  comic_center.ComicDownload     `json:"comic"`
 		EpList []comic_center.ComicDownloadEp `json:"epList"`
 	}
 	json.Unmarshal([]byte(params), &paramsStruct)
@@ -248,7 +249,7 @@ func downloadComicLogo(comic *comic_center.ComicDownload) {
 
 func addDownload(params string) error {
 	var paramsStruct struct {
-		Comic  comic_center.ComicDownload `json:"comic"`
+		Comic  comic_center.ComicDownload     `json:"comic"`
 		EpList []comic_center.ComicDownloadEp `json:"epList"`
 	}
 	json.Unmarshal([]byte(params), &paramsStruct)
@@ -383,6 +384,10 @@ func FlatInvoke(method string, params string) (string, error) {
 		return recommendation(params)
 	case "comments":
 		return comments(params)
+	case "game":
+		return game(params)
+	case "games":
+		return games(params)
 	case "viewLogPage":
 		return viewLogPage(params)
 	case "clean":

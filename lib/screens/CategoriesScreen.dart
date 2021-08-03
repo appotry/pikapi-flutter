@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
-import 'package:pikapi/service/pica.dart';
-import '../basic/Entities.dart' as models;
+import 'package:pikapi/basic/Pica.dart';
 import 'CategoryPaperScreen.dart';
+import 'GamePageScreen.dart';
 import 'components/ContentLoading.dart';
-import 'components/images/Common.dart';
-import 'components/images/RemoteImage.dart';
+import 'components/Images.dart';
 
-TextStyle noneLabelStyle = TextStyle(
-  fontSize: 30,
-);
-
+// 分类
 class CategoriesScreen extends StatefulWidget {
+  const CategoriesScreen();
+
   @override
   State<StatefulWidget> createState() => _CategoriesScreenState();
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
-  late SearchBar searchBar = SearchBar(
+  late SearchBar _searchBar = SearchBar(
     hintText: '搜索',
     inBar: false,
     setState: setState,
@@ -36,54 +35,43 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     buildDefaultAppBar: (BuildContext context) {
       return AppBar(
         title: new Text('分类'),
-        actions: [searchBar.getSearchAction(context)],
+        actions: [_searchBar.getSearchAction(context)],
       );
     },
   );
 
-  late Future<List<models.Category>> allFuture;
+  late Future<List<Category>> _categoriesFuture = pica.categories();
 
-  @override
-  void initState() {
-    _setLoad();
-    super.initState();
-  }
-
-  _setLoad() {
+  void _reloadCategories() {
     setState(() {
-      this.allFuture = _load();
+      this._categoriesFuture = pica.categories();
     });
-  }
-
-  Future<List<models.Category>> _load() async {
-    return pica.categories();
   }
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    var background = theme.scaffoldBackgroundColor;
-    var o = Color.fromARGB(
+    var themeBackground = theme.scaffoldBackgroundColor;
+    var shadeBackground = Color.fromARGB(
       0x11,
-      255 - background.red,
-      255 - background.green,
-      255 - background.blue,
+      255 - themeBackground.red,
+      255 - themeBackground.green,
+      255 - themeBackground.blue,
     );
-    print(o.value);
     return Scaffold(
-      appBar: searchBar.build(context),
+      appBar: _searchBar.build(context),
       body: Container(
-        color: o,
+        color: shadeBackground,
         child: FutureBuilder(
-          future: allFuture,
-          builder: ((BuildContext context,
-              AsyncSnapshot<List<models.Category>> snapshot) {
+          future: _categoriesFuture,
+          builder:
+              ((BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
             if (snapshot.hasError) {
               return ContentError(
                 error: snapshot.error,
                 stackTrace: snapshot.stackTrace,
                 onRefresh: () async {
-                  _setLoad();
+                  _reloadCategories();
                 },
               );
             }
@@ -94,9 +82,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               children: [
                 Container(height: 20),
                 Wrap(
-                  children: _buildList(snapshot.data!),
                   runSpacing: 20,
                   alignment: WrapAlignment.spaceAround,
+                  children: _buildList(snapshot.data!),
                 ),
                 Container(height: 20),
               ],
@@ -107,7 +95,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
-  _buildList(List<models.Category> cList) {
+  List<Widget> _buildList(List<Category> cList) {
     var size = MediaQuery.of(context).size;
     var min = size.width < size.height ? size.width : size.height;
     var blockSize = min / 3;
@@ -116,43 +104,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
     List<Widget> list = [];
 
-    list.add(
-      GestureDetector(
-        onTap: () {
-          _navigateToCategory(null);
-        },
-        child: Container(
-          width: blockSize,
-          child: Column(
-            children: [
-              Card(
-                elevation: .5,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(imageRs)),
-                  child: buildMock(imageSize, imageSize),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(imageRs)),
-                ),
-              ),
-              Container(height: 5),
-              Center(
-                child: Text('全分类'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    for (var i = 0; i < cList.length; i++) {
-      var c = cList[i];
-      if (c.isWeb) continue;
+    var append = (Widget widget, String title, Function() onTap) {
       list.add(
         GestureDetector(
-          onTap: () {
-            _navigateToCategory(c.title);
-          },
+          onTap: onTap,
           child: Container(
             width: blockSize,
             child: Column(
@@ -161,12 +116,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   elevation: .5,
                   child: ClipRRect(
                     borderRadius: BorderRadius.all(Radius.circular(imageRs)),
-                    child: RemoteImage(
-                      fileServer: c.thumb.fileServer,
-                      path: c.thumb.path,
-                      width: imageSize,
-                      height: imageSize,
-                    ),
+                    child: widget,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(imageRs)),
@@ -174,17 +124,47 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ),
                 Container(height: 5),
                 Center(
-                  child: Text(
-                    c.title,
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Text(title),
                 ),
               ],
             ),
           ),
         ),
       );
+    };
+
+    append(
+      buildMock(imageSize, imageSize),
+      "全分类",
+      () => _navigateToCategory(null),
+    );
+
+    for (var i = 0; i < cList.length; i++) {
+      var c = cList[i];
+      if (c.isWeb) continue;
+      append(
+        RemoteImage(
+          fileServer: c.thumb.fileServer,
+          path: c.thumb.path,
+          width: imageSize,
+          height: imageSize,
+        ),
+        c.title,
+        () => _navigateToCategory(c.title),
+      );
     }
+
+    append(
+      buildMock(imageSize, imageSize),
+      "游戏专区",
+      () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => GamesScreen()),
+        );
+      },
+    );
+
     return list;
   }
 

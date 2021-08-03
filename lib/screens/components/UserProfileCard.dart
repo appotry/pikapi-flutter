@@ -2,12 +2,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/ItemBuilder.dart';
 import 'package:pikapi/screens/components/PicaAvatar.dart';
-import 'package:pikapi/screens/components/images/RemoteImage.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/screens/components/Images.dart';
+import 'package:pikapi/basic/Pica.dart';
 
+// 用户信息卡
 class UserProfileCard extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _UserProfileCardState();
@@ -21,15 +23,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
     if (!profile.isPunched) {
       await pica.punchIn();
       profile.isPunched = true;
-      showToast("自动打了哔卡了",
-          context: context,
-          position: StyledToastPosition.center,
-          animation: StyledToastAnimation.scale,
-          reverseAnimation: StyledToastAnimation.fade,
-          duration: Duration(seconds: 4),
-          animDuration: Duration(seconds: 1),
-          curve: Curves.elasticOut,
-          reverseCurve: Curves.linear);
+      defaultToast(context, "自动打了哔卡了");
     }
     return profile;
   }

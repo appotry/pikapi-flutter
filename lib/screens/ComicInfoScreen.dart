@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/ItemBuilder.dart';
-import 'package:pikapi/screens/components/Recommendation.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
 import 'ComicReaderScreen.dart';
 import 'DownloadConfirmScreen.dart';
 import 'components/ComicComment.dart';
@@ -12,6 +11,7 @@ import 'components/ComicTagsCard.dart';
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 
+// 漫画详情
 class ComicInfoScreen extends StatefulWidget {
   final String comicId;
 

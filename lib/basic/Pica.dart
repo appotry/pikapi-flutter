@@ -205,6 +205,16 @@ class Pica {
     return list.map((e) => ViewLog.fromJson(e)).toList();
   }
 
+  Future<GamePage> games(int page) async {
+    var data = await _flatInvoke("games", "$page");
+    return GamePage.fromJson(json.decode(data));
+  }
+
+  Future<GameInfo> game(String gameId) async {
+    var data = await _flatInvoke("game", gameId);
+    return GameInfo.fromJson(json.decode(data));
+  }
+
   Future clean() {
     return _flatInvoke("clean", "");
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/service/pica.dart';
+import 'package:pikapi/basic/Pica.dart';
+import 'Images.dart';
 
-import 'images/RemoteImage.dart';
-
+// 漫画卡片
 class ComicInfoCard extends StatefulWidget {
   final ComicSimple info;
 
@@ -14,31 +14,13 @@ class ComicInfoCard extends StatefulWidget {
 }
 
 class _ComicInfoCard extends State<ComicInfoCard> {
-  bool favouriteLoading = false;
+  bool _favouriteLoading = false;
 
   @override
   Widget build(BuildContext context) {
     var info = widget.info;
     var theme = Theme.of(context);
-    var textColor = theme.textTheme.bodyText1!.color!;
-    var textColorSummary = textColor.withAlpha(0xCC);
-    var titleStyle = TextStyle(
-      color: textColor,
-      fontWeight: FontWeight.bold,
-    );
-    var categoriesStyle = TextStyle(
-      fontSize: 13,
-      color: textColorSummary,
-    );
-    var authorStyle = TextStyle(
-      fontSize: 13,
-      color: Colors.pink.shade300,
-    );
-    var iconColor = Colors.pink.shade400;
-    var iconLabelStyle = TextStyle(
-      fontSize: 13,
-      color: iconColor,
-    );
+    var categoriesStyle = makeCategoriesStyle(context);
     var view = info is ComicInfo ? info.viewsCount : 0;
     bool? like = info is ComicInfo ? info.isLiked : null;
     bool? favourite = info is ComicInfo ? (info).isFavourite : null;
@@ -78,19 +60,17 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                       Container(height: 5),
                       Row(
                         children: [
-                          Icon(Icons.favorite,
-                              size: iconSize, color: Colors.pink[400]),
-                          Container(width: 5),
+                          iconFavorite,
+                          iconSpacing,
                           Text(
                             '${info.likesCount}',
                             style: iconLabelStyle,
                           ),
-                          Container(width: 20),
+                          iconMargin,
                           ...(view > 0
                               ? [
-                                  Icon(Icons.visibility,
-                                      size: iconSize, color: Colors.pink[400]),
-                                  Container(width: 5),
+                                  iconVisibility,
+                                  iconSpacing,
                                   Text(
                                     '$view',
                                     style: iconLabelStyle,
@@ -115,17 +95,17 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                       ...(favourite == null
                           ? []
                           : [
-                              favouriteLoading
+                              _favouriteLoading
                                   ? IconButton(
-                                      iconSize: iconSize * 2,
+                                      iconSize: 26,
                                       color: Colors.pink[400],
-                                      onPressed: (){},
+                                      onPressed: () {},
                                       icon: Icon(
                                         Icons.sync,
                                       ),
                                     )
                                   : IconButton(
-                                      iconSize: iconSize * 2,
+                                      iconSize: 26,
                                       color: Colors.pink[400],
                                       onPressed: _changeFavourite,
                                       icon: Icon(
@@ -148,7 +128,7 @@ class _ComicInfoCard extends State<ComicInfoCard> {
 
   Future _changeFavourite() async {
     setState(() {
-      favouriteLoading = true;
+      _favouriteLoading = true;
     });
     try {
       var rst = await pica.switchFavourite(widget.info.id);
@@ -157,7 +137,7 @@ class _ComicInfoCard extends State<ComicInfoCard> {
       });
     } finally {
       setState(() {
-        favouriteLoading = false;
+        _favouriteLoading = false;
       });
     }
   }
@@ -165,7 +145,6 @@ class _ComicInfoCard extends State<ComicInfoCard> {
 
 double imageWidth = 210 / 3.15;
 double imageHeight = 315 / 3.15;
-double iconSize = 15;
 
 Widget buildFinished(bool comicFinished) {
   if (comicFinished) {
@@ -191,3 +170,31 @@ Widget buildFinished(bool comicFinished) {
   }
   return Container();
 }
+
+const double _iconSize = 15;
+
+final iconFavorite =
+Icon(Icons.favorite, size: _iconSize, color: Colors.pink[400]);
+final iconDownload =
+Icon(Icons.download_rounded, size: _iconSize, color: Colors.pink[400]);
+final iconVisibility =
+Icon(Icons.visibility, size: _iconSize, color: Colors.pink[400]);
+
+final iconLabelStyle = TextStyle(
+  fontSize: 13,
+  color: Colors.pink.shade400,
+);
+
+final iconMargin = Container(width: 20);
+final iconSpacing = Container(width: 5);
+
+final titleStyle = TextStyle(fontWeight: FontWeight.bold);
+final authorStyle = TextStyle(
+  fontSize: 13,
+  color: Colors.pink.shade300,
+);
+
+TextStyle makeCategoriesStyle(BuildContext context) => TextStyle(
+  fontSize: 13,
+  color: Theme.of(context).textTheme.bodyText1!.color!.withAlpha(0xCC),
+);

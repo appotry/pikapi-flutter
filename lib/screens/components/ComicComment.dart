@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/ItemBuilder.dart';
-import 'package:pikapi/screens/components/images/RemoteImage.dart';
-import 'package:pikapi/service/pica.dart';
-
+import 'package:pikapi/basic/Pica.dart';
 import 'PicaAvatar.dart';
 
+// 漫画的评论列表
 class ComicComment extends StatefulWidget {
   final String comicId;
 
