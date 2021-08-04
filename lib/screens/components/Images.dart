@@ -180,6 +180,24 @@ class _RemoteImageState extends State<RemoteImage> {
 
 // 通用方法
 
+final defaultSvgColor = Colors.grey.shade600;
+
+Widget buildSvg(String source, double? width, double? height, {Color? color}) {
+  return Container(
+    width: width,
+    height: height,
+    padding: EdgeInsets.all(10),
+    child: Center(
+      child: SvgPicture.asset(
+        source,
+        width: width,
+        height: height,
+        color: color ?? defaultSvgColor,
+      ),
+    ),
+  );
+}
+
 Widget buildMock(double? width, double? height) {
   return Container(
     width: width,

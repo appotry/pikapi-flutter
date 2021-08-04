@@ -118,9 +118,15 @@ class Pica {
     return list.map((e) => Category.fromJson(e)).toList();
   }
 
-  Future<ComicsPage> comics(String category, String sort, int page) async {
+  Future<ComicsPage> comics(
+    String sort,
+    int page, {
+    String category = "",
+    String tag = "",
+  }) async {
     String rsp = await _flatInvoke("comics", {
       "category": category,
+      "tag": tag,
       "sort": sort,
       "page": page,
     });
@@ -140,6 +146,14 @@ class Pica {
       "categories": categories,
     });
     return ComicsPage.fromJson(json.decode(rsp));
+  }
+
+  Future<List<ComicSimple>> randomComics() async {
+    String data = await _flatInvoke("randomComics", "");
+    return List.of(jsonDecode(data))
+        .map((e) => Map<String, dynamic>.of(e))
+        .map((e) => ComicSimple.fromJson(e))
+        .toList();
   }
 
   Future<ComicInfo> comicInfo(String comicId) async {
@@ -219,6 +233,24 @@ class Pica {
     return _flatInvoke("clean", "");
   }
 
+  Future storeViewEp(
+      String comicId, int epOrder, String epTitle, int pictureRank) {
+    return _flatInvoke("storeViewEp", {
+      "comicId": comicId,
+      "epOrder": epOrder,
+      "epTitle": epTitle,
+      "pictureRank": pictureRank,
+    });
+  }
+
+  Future<ViewLog?> loadView(String comicId) async {
+    String data = await _flatInvoke("loadView", comicId);
+    if (data == "") {
+      return null;
+    }
+    return ViewLog.fromJson(jsonDecode(data));
+  }
+
   Future<bool> downloadRunning() async {
     String rsp = await _flatInvoke("downloadRunning", "");
     return rsp == "true";
@@ -228,7 +260,8 @@ class Pica {
     return _flatInvoke("setDownloadRunning", "$status");
   }
 
-  Future<dynamic> createDownload(Map<String, dynamic> comic, List<Map<String, dynamic>> epList) async {
+  Future<dynamic> createDownload(
+      Map<String, dynamic> comic, List<Map<String, dynamic>> epList) async {
     return _flatInvoke("createDownload", {
       "comic": comic,
       "epList": epList,

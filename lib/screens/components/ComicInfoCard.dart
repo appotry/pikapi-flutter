@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/screens/SearchScreen.dart';
+import 'package:pikapi/screens/common/Navigatior.dart';
 import 'Images.dart';
 
 // 漫画卡片
@@ -22,7 +24,7 @@ class _ComicInfoCard extends State<ComicInfoCard> {
     var theme = Theme.of(context);
     var categoriesStyle = makeCategoriesStyle(context);
     var view = info is ComicInfo ? info.viewsCount : 0;
-    bool? like = info is ComicInfo ? info.isLiked : null;
+    // bool? like = info is ComicInfo ? info.isLiked : null;
     bool? favourite = info is ComicInfo ? (info).isFavourite : null;
     return Container(
       padding: EdgeInsets.all(5),
@@ -53,7 +55,13 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                     children: [
                       Text(info.title, style: titleStyle),
                       Container(height: 5),
-                      Text(info.author, style: authorStyle),
+                      InkWell(
+                        onTap: () {
+                          navPushOrReplace(context,
+                              (context) => SearchScreen(keyword: info.author));
+                        },
+                        child: Text(info.author, style: authorStyle),
+                      ),
                       Container(height: 5),
                       Text("分类: " + info.categories.join(" "),
                           style: categoriesStyle),
@@ -174,11 +182,11 @@ Widget buildFinished(bool comicFinished) {
 const double _iconSize = 15;
 
 final iconFavorite =
-Icon(Icons.favorite, size: _iconSize, color: Colors.pink[400]);
+    Icon(Icons.favorite, size: _iconSize, color: Colors.pink[400]);
 final iconDownload =
-Icon(Icons.download_rounded, size: _iconSize, color: Colors.pink[400]);
+    Icon(Icons.download_rounded, size: _iconSize, color: Colors.pink[400]);
 final iconVisibility =
-Icon(Icons.visibility, size: _iconSize, color: Colors.pink[400]);
+    Icon(Icons.visibility, size: _iconSize, color: Colors.pink[400]);
 
 final iconLabelStyle = TextStyle(
   fontSize: 13,
@@ -195,6 +203,6 @@ final authorStyle = TextStyle(
 );
 
 TextStyle makeCategoriesStyle(BuildContext context) => TextStyle(
-  fontSize: 13,
-  color: Theme.of(context).textTheme.bodyText1!.color!.withAlpha(0xCC),
-);
+      fontSize: 13,
+      color: Theme.of(context).textTheme.bodyText1!.color!.withAlpha(0xCC),
+    );

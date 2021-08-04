@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'components/Images.dart';
@@ -16,12 +15,14 @@ class DownloadReaderScreen extends StatefulWidget {
   final DownloadComic comicInfo;
   final List<DownloadEp> epList;
   final int currentEpOrder;
+  final int? initPictureRank;
 
   const DownloadReaderScreen({
     Key? key,
     required this.comicInfo,
     required this.epList,
     required this.currentEpOrder,
+    this.initPictureRank,
   }) : super(key: key);
 
   @override
@@ -29,12 +30,16 @@ class DownloadReaderScreen extends StatefulWidget {
 }
 
 class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
+  late DownloadEp _ep;
   late bool _fullScreen = false;
   late List<DownloadPicture> pictures = [];
   late List<Widget> images = [];
   late Future _future = _load();
 
   Future _load() async {
+    if (widget.initPictureRank == null) {
+      await pica.storeViewEp(widget.comicInfo.id, _ep.epOrder, _ep.title, 1);
+    }
     pictures.clear();
     images.clear();
     for (var ep in widget.epList) {
@@ -49,6 +54,22 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     return pictures.map((e) => DownloadReaderImage(e)).toList();
   }
 
+  Future _onPositionChange(int position) async {
+    return pica.storeViewEp(widget.comicInfo.id, _ep.epOrder, _ep.title, position);
+    // 暂时删除了+1
+  }
+
+  @override
+  void initState() {
+    widget.epList.forEach((element) {
+      if (element.epOrder == widget.currentEpOrder) {
+        _ep = element;
+      }
+    });
+    _future = _load();
+    super.initState();
+  }
+
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
@@ -61,7 +82,7 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
       appBar: _fullScreen
           ? null
           : AppBar(
-              title: Text("${_epName()} - ${widget.comicInfo.title}"),
+              title: Text("${_ep.title} - ${widget.comicInfo.title}"),
             ),
       body: _buildReader(),
     );
@@ -95,21 +116,13 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
             });
           },
           onNextEp: _next,
+          onPositionChange: _onPositionChange,
+          initPosition: widget.initPictureRank == null
+              ? null
+              : widget.initPictureRank! - 1,
         );
       },
     );
-  }
-
-  _epName() {
-    var map = Map<int, DownloadEp>();
-    widget.epList.forEach((element) {
-      map[element.epOrder] = element;
-    });
-    DownloadEp? ep = map[widget.currentEpOrder];
-    if (ep != null) {
-      return ep.title;
-    }
-    return "";
   }
 
   void _next() {

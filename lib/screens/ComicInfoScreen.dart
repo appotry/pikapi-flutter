@@ -10,6 +10,7 @@ import 'components/ComicInfoCard.dart';
 import 'components/ComicTagsCard.dart';
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
+import 'components/ContinueReadButton.dart';
 
 // 漫画详情
 class ComicInfoScreen extends StatefulWidget {
@@ -24,10 +25,15 @@ class ComicInfoScreen extends StatefulWidget {
 class _ComicInfoScreenState extends State<ComicInfoScreen> {
   late var _tabIndex = 0;
   late Future<ComicInfo> _comicFuture = _loadComic();
+  late Future<ViewLog?> _viewFuture = _loadViewLog();
   late Future<List<Ep>> _epListFuture = _loadEps();
 
   Future<ComicInfo> _loadComic() async {
     return await pica.comicInfo(widget.comicId);
+  }
+
+  Future<ViewLog?> _loadViewLog() {
+    return pica.loadView(widget.comicId);
   }
 
   Future<List<Ep>> _loadEps() async {
@@ -164,29 +170,64 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.spaceAround,
-          children: _epList.map((e) {
-            return Container(
-              child: MaterialButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ComicReaderScreen(
-                        comicInfo: _comicInfo,
-                        epList: _epList,
-                        currentEpOrder: e.order,
-                      ),
-                    ),
-                  );
-                },
-                color: Colors.white,
-                child: Text(e.title, style: TextStyle(color: Colors.black)),
-              ),
-            );
-          }).toList(),
+          children: [
+            ContinueReadButton(
+              viewFuture: _viewFuture,
+              onChoose: (int? epOrder, int? pictureRank) {
+                if (epOrder != null && pictureRank != null) {
+                  for (var i in _epList) {
+                    if (i.order == epOrder) {
+                      _push(_comicInfo, _epList, epOrder, pictureRank);
+                      return;
+                    }
+                  }
+                } else {
+                  // 遍历 从最小的epOrder开始
+                  int? epOrder;
+                  _epList.map((e) => e.order).forEach((element) {
+                    if (epOrder == null || epOrder! < element) {
+                      epOrder = element;
+                    }
+                  });
+                  if (epOrder != null) {
+                    _push(_comicInfo, _epList, epOrder!, null);
+                  }
+                }
+              },
+            ),
+            ..._epList.map((e) {
+              return Container(
+                child: MaterialButton(
+                  onPressed: () {
+                    _push(_comicInfo, _epList, e.order, null);
+                  },
+                  color: Colors.white,
+                  child: Text(e.title, style: TextStyle(color: Colors.black)),
+                ),
+              );
+            }),
+          ],
         );
       },
       onRefresh: () async => setState(() => _epListFuture = _loadEps()),
     );
+  }
+
+  void _push(ComicInfo comicInfo, List<Ep> epList, int order, int? rank) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ComicReaderScreen(
+          comicInfo: comicInfo,
+          epList: epList,
+          currentEpOrder: order,
+          initPictureRank: rank,
+        ),
+      ),
+    ).whenComplete(() {
+      setState(() {
+        _viewFuture = _loadViewLog();
+      });
+    });
   }
 }

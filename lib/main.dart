@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/screens/InitScreen.dart';
+import 'package:pikapi/screens/common/Navigatior.dart';
 
 import 'basic/Themes.dart';
 
@@ -39,6 +40,7 @@ class _PikachuAppState extends State<PikachuApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: _themeData,
+      navigatorObservers: [navigatorObserver],
       home: InitScreen(),
     );
   }

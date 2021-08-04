@@ -332,6 +332,37 @@ func clean() error {
 	return nil
 }
 
+func storeViewEp(params string) error {
+	var paramsStruct struct {
+		ComicId     string `json:"comicId"`
+		EpOrder     int    `json:"epOrder"`
+		EpTitle     string `json:"epTitle"`
+		PictureRank int    `json:"pictureRank"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	return comic_center.ViewEpAndPicture(
+		paramsStruct.ComicId,
+		paramsStruct.EpOrder,
+		paramsStruct.EpTitle,
+		paramsStruct.PictureRank,
+	)
+}
+
+func loadView(comicId string) (string, error) {
+	view, err := comic_center.LoadViewLog(comicId)
+	if err != nil {
+		return "", nil
+	}
+	if view != nil {
+		b, err := json.Marshal(view)
+		if err != nil {
+			return "", err
+		}
+		return string(b), nil
+	}
+	return "", nil
+}
+
 func FlatInvoke(method string, params string) (string, error) {
 	switch method {
 	case "setSwitchAddress":
@@ -368,6 +399,8 @@ func FlatInvoke(method string, params string) (string, error) {
 		return comics(params)
 	case "searchComics":
 		return searchComics(params)
+	case "randomComics":
+		return randomComics()
 	case "comicInfo":
 		return comicInfo(params)
 	case "comicEpPage":
@@ -392,6 +425,10 @@ func FlatInvoke(method string, params string) (string, error) {
 		return viewLogPage(params)
 	case "clean":
 		return "", clean()
+	case "storeViewEp":
+		return "", storeViewEp(params)
+	case "loadView":
+		return loadView(params)
 	case "downloadRunning":
 		return strconv.FormatBool(getDownloadRunning()), nil
 	case "setDownloadRunning":
@@ -425,5 +462,5 @@ func FlatInvoke(method string, params string) (string, error) {
 	case "downloadImagePath":
 		return downloadImagePath(params)
 	}
-	return "", errors.New("method not found")
+	return "", errors.New("method not found : " + method)
 }

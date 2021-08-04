@@ -8,20 +8,23 @@ import 'SearchScreen.dart';
 import 'components/ComicPager.dart';
 
 // 分类详情 列表
-class CategoryPaperScreen extends StatefulWidget {
-  final String? categoryTitle;
+class ComicsScreen extends StatefulWidget {
+  final String? category;
+  final String? tag;
 
-  const CategoryPaperScreen({Key? key, required this.categoryTitle})
-      : super(key: key);
+  const ComicsScreen({
+    Key? key,
+    this.category,
+    this.tag,
+  }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _CategoryPaperScreenState();
+  State<StatefulWidget> createState() => _ComicsScreenState();
 }
 
-class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
-
-  late SearchBar searchBar = SearchBar(
-    hintText: '搜索 - ${categoryTitle(widget.categoryTitle)}',
+class _ComicsScreenState extends State<ComicsScreen> {
+  late SearchBar _categorySearchBar = SearchBar(
+    hintText: '搜索分类 - ${categoryTitle(widget.category)}',
     inBar: false,
     setState: setState,
     onSubmitted: (value) {
@@ -30,15 +33,15 @@ class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                SearchScreen(keyword: value, category: widget.categoryTitle),
+                SearchScreen(keyword: value, category: widget.category),
           ),
         );
       }
     },
     buildDefaultAppBar: (BuildContext context) {
       return AppBar(
-        title: new Text(categoryTitle(widget.categoryTitle)),
-        actions: [searchBar.getSearchAction(context)],
+        title: new Text(categoryTitle(widget.category)),
+        actions: [_categorySearchBar.getSearchAction(context)],
       );
     },
   );
@@ -49,8 +52,12 @@ class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
 
   void _load() {
     setState(() {
-      _future =
-          pica.comics(widget.categoryTitle ?? "", _currentSort, _currentPage);
+      _future = pica.comics(
+        _currentSort,
+        _currentPage,
+        category: widget.category ?? "",
+        tag: widget.tag ?? "",
+      );
     });
   }
 
@@ -62,8 +69,23 @@ class _CategoryPaperScreenState extends State<CategoryPaperScreen> {
 
   @override
   Widget build(BuildContext context) {
+    PreferredSizeWidget? appBar;
+    if (widget.category != null && widget.tag == null) {
+      appBar = _categorySearchBar.build(context);
+    } else if (widget.category == null && widget.tag != null) {
+      appBar = AppBar(
+        title: Text("标签 : ${widget.tag}"),
+      );
+    } else {
+      appBar = AppBar(
+        title: Text(
+          "${widget.category ?? ""} ${widget.tag ?? ""}",
+        ),
+      );
+    }
+
     return Scaffold(
-      appBar: searchBar.build(context),
+      appBar: appBar,
       body: ComicPager(
         future: _future,
         onPageChange: (toPage) {

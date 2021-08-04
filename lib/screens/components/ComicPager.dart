@@ -4,15 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/enum/Sort.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
-
-import '../ComicInfoScreen.dart';
-import 'ComicInfoCard.dart';
+import 'ComicInfoCardLinked.dart';
 import 'ContentLoading.dart';
 
 // 漫画列页
-final TextEditingController _textEditController =
-    TextEditingController(text: '');
-
 class ComicPager extends StatelessWidget {
   final Future<ComicsPage> future;
   final String currentSort;
@@ -157,29 +152,17 @@ class ComicPager extends StatelessWidget {
           body: ListView(
             children: [
               ...comicPage.docs
-                  .map((comic) => InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ComicInfoScreen(
-                                comicId: comic.id,
-                              ),
-                            ),
-                          );
-                        },
-                        child: ComicInfoCard(info: comic),
-                      ))
+                  .map((comic) => LinkedComicInfoCard(comic))
                   .toList(),
               ...comicPage.page < comicPage.pages
                   ? [
                       MaterialButton(
-                          onPressed: () {
-                            onPageChange(comicPage.page + 1);
-                          },
-                          child: Container(
-                            padding: EdgeInsets.only(top: 30, bottom: 30),
-                            child: Text('下一页'),
+                        onPressed: () {
+                          onPageChange(comicPage.page + 1);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.only(top: 30, bottom: 30),
+                          child: Text('下一页'),
                         ),
                       ),
                     ]
@@ -191,3 +174,6 @@ class ComicPager extends StatelessWidget {
     );
   }
 }
+
+final TextEditingController _textEditController =
+TextEditingController(text: '');

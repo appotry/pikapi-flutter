@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Themes.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
+import 'package:pikapi/screens/AboutScreen.dart';
 import 'package:pikapi/screens/AccountScreen.dart';
 import 'package:pikapi/screens/CleanScreen.dart';
 import 'package:pikapi/screens/DownloadListScreen.dart';
@@ -46,6 +47,15 @@ class _SpaceScreenState extends State<SpaceScreen> {
           IconButton(
             onPressed: () {
               Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => AboutScreen()),
+              );
+            },
+            icon: Icon(Icons.grade),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AccountScreen()),
               );

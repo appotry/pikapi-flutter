@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -15,12 +14,14 @@ class ComicReaderScreen extends StatefulWidget {
   final ComicInfo comicInfo;
   final List<Ep> epList;
   final currentEpOrder;
+  final int? initPictureRank;
 
   const ComicReaderScreen({
     Key? key,
     required this.comicInfo,
     required this.epList,
     required this.currentEpOrder,
+    this.initPictureRank,
   }) : super(key: key);
 
   @override
@@ -28,10 +29,14 @@ class ComicReaderScreen extends StatefulWidget {
 }
 
 class _ComicReaderScreenState extends State<ComicReaderScreen> {
+  late Ep _ep;
   late bool _fullScreen = false;
-  late Future<List<RemoteReaderImage>> _future = _load();
+  late Future<List<RemoteReaderImage>> _future;
 
   Future<List<RemoteReaderImage>> _load() async {
+    if (widget.initPictureRank == null) {
+      await pica.storeViewEp(widget.comicInfo.id, _ep.order, _ep.title, 1);
+    }
     var _quality = await pica.loadQuality();
     List<PicaImage> list = [];
     var _needLoadPage = 0;
@@ -53,6 +58,23 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
         .toList();
   }
 
+  Future _onPositionChange(int position) async {
+    return pica.storeViewEp(
+        widget.comicInfo.id, _ep.order, _ep.title, position);
+    // 暂时删除了+1
+  }
+
+  @override
+  void initState() {
+    widget.epList.forEach((element) {
+      if (element.order == widget.currentEpOrder) {
+        _ep = element;
+      }
+    });
+    _future = _load();
+    super.initState();
+  }
+
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
@@ -65,7 +87,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
       appBar: _fullScreen
           ? null
           : AppBar(
-              title: Text("${_epName()} - ${widget.comicInfo.title}"),
+              title: Text("${_ep.title} - ${widget.comicInfo.title}"),
             ),
       body: _buildReader(),
     );
@@ -100,21 +122,13 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
             });
           },
           onNextEp: _next,
+          onPositionChange: _onPositionChange,
+          initPosition: widget.initPictureRank == null
+              ? null
+              : widget.initPictureRank! - 1,
         );
       },
     );
-  }
-
-  String _epName() {
-    var map = Map<int, Ep>();
-    widget.epList.forEach((element) {
-      map[element.order] = element;
-    });
-    Ep? ep = map[widget.currentEpOrder];
-    if (ep != null) {
-      return ep.title;
-    }
-    return "";
   }
 
   void _next() {

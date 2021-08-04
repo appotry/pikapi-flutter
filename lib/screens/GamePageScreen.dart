@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
@@ -17,6 +18,13 @@ class _GamesScreenState extends State<GamesScreen> {
 
   Future<GamePage> _loadPage() {
     return pica.games(_currentPage);
+  }
+
+  void _onPageChange(int number) {
+    setState(() {
+      _currentPage = number;
+      _future = _loadPage();
+    });
   }
 
   @override
@@ -51,11 +59,122 @@ class _GamesScreenState extends State<GamesScreen> {
               alignment: WrapAlignment.center,
             ));
           }
-
-          return ListView(
-            children: [
-              ...wraps,
-            ],
+          return Scaffold(
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(40),
+              child: Container(
+                padding: EdgeInsets.only(left: 10, right: 10),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      width: .5,
+                      style: BorderStyle.solid,
+                      color: Colors.grey[200]!,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        _textEditController.clear();
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              content: Card(
+                                child: Container(
+                                  child: TextField(
+                                    controller: _textEditController,
+                                    decoration: new InputDecoration(
+                                      labelText: "请输入页数：",
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: <TextInputFormatter>[
+                                      FilteringTextInputFormatter.allow(
+                                          RegExp(r'\d+')),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              actions: <Widget>[
+                                MaterialButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('取消'),
+                                ),
+                                MaterialButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    var text = _textEditController.text;
+                                    if (text.length == 0 || text.length > 5) {
+                                      return;
+                                    }
+                                    var num = int.parse(text);
+                                    if (num == 0 || num > page.pages) {
+                                      return;
+                                    }
+                                    _onPageChange(num);
+                                  },
+                                  child: Text('确定'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          Text("第 ${page.page} / ${page.pages} 页"),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        MaterialButton(
+                          minWidth: 0,
+                          onPressed: () {
+                            if (page.page > 1) {
+                              _onPageChange(page.page - 1);
+                            }
+                          },
+                          child: Text('上一页'),
+                        ),
+                        MaterialButton(
+                          minWidth: 0,
+                          onPressed: () {
+                            if (page.page < page.pages) {
+                              _onPageChange(page.page + 1);
+                            }
+                          },
+                          child: Text('下一页'),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            body: ListView(
+              children: [
+                ...wraps,
+                ...page.page < page.pages
+                    ? [
+                        MaterialButton(
+                          onPressed: () {
+                            _onPageChange(page.page + 1);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.only(top: 30, bottom: 30),
+                            child: Text('下一页'),
+                          ),
+                        ),
+                      ]
+                    : [],
+              ],
+            ),
           );
         },
       ),
@@ -72,19 +191,9 @@ class GameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var textColor = theme.textTheme.bodyText1!.color!;
-    var textColorAlpha = textColor.withAlpha(0x33);
-    var textColorSummary = textColor.withAlpha(0xCC);
-    var titleStyle = TextStyle(
-      color: textColor,
-      fontWeight: FontWeight.bold,
-    );
     var categoriesStyle = TextStyle(
       fontSize: 13,
-      color: textColorSummary,
-    );
-    var authorStyle = TextStyle(
-      fontSize: 13,
-      color: Colors.pink.shade300,
+      color: textColor.withAlpha(0xCC),
     );
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -139,3 +248,6 @@ class GameCard extends StatelessWidget {
     );
   }
 }
+
+final TextEditingController _textEditController =
+    TextEditingController(text: '');

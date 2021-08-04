@@ -7,6 +7,8 @@ class ImageReader extends StatefulWidget {
   final bool fullScreen;
   final void Function(bool fullScreen) onFullScreenChange;
   final void Function() onNextEp;
+  final void Function(int) onPositionChange;
+  final int? initPosition;
 
   const ImageReader({
     Key? key,
@@ -14,6 +16,8 @@ class ImageReader extends StatefulWidget {
     required this.fullScreen,
     required this.onFullScreenChange,
     required this.onNextEp,
+    required this.onPositionChange,
+    this.initPosition,
   }) : super(key: key);
 
   @override
@@ -21,16 +25,24 @@ class ImageReader extends StatefulWidget {
 }
 
 class _ImageReaderState extends State<ImageReader> {
-  final ItemScrollController _itemScrollController = ItemScrollController();
-  final ItemPositionsListener _itemPositionsListener =
-      ItemPositionsListener.create();
+  late final ItemScrollController _itemScrollController;
+  late final ItemPositionsListener _itemPositionsListener;
+  late final int _initialPosition;
 
   var current = 1;
   var slider = 1;
 
   @override
   void initState() {
+    _itemScrollController = ItemScrollController();
+    _itemPositionsListener = ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onCurrentChange);
+    if (widget.initPosition != null &&
+        widget.images.length > widget.initPosition!) {
+      _initialPosition = widget.initPosition!;
+    } else {
+      _initialPosition = 0;
+    }
     super.initState();
   }
 
@@ -40,12 +52,13 @@ class _ImageReaderState extends State<ImageReader> {
     super.dispose();
   }
 
-  _onCurrentChange() {
+  void _onCurrentChange() {
     var to = _itemPositionsListener.itemPositions.value.first.index + 1;
     if (current != to) {
       setState(() {
         current = to;
         slider = to;
+        widget.onPositionChange(to);
       });
     }
   }
@@ -58,6 +71,7 @@ class _ImageReaderState extends State<ImageReader> {
       child: Stack(
         children: [
           ScrollablePositionedList.builder(
+            initialScrollIndex: _initialPosition,
             padding: widget.fullScreen
                 ? EdgeInsets.only(
                     top: scaffold.appBarMaxHeight ?? 0,
@@ -214,9 +228,7 @@ class _ImageReaderState extends State<ImageReader> {
         onPressed: widget.onNextEp,
         textColor: Colors.white,
         child: Container(
-          padding: EdgeInsets.only(
-            top: 40, bottom: 40
-          ),
+          padding: EdgeInsets.only(top: 40, bottom: 40),
           child: Text("下一章"),
         ),
       ),

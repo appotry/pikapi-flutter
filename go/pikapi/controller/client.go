@@ -128,18 +128,16 @@ func categories() (string, error) {
 func comics(params string) (string, error) {
 	var paramsStruct struct {
 		Category string `json:"category"`
+		Tag      string `json:"tag"`
 		Sort     string `json:"sort"`
 		Page     int    `json:"page"`
 	}
 	json.Unmarshal([]byte(params), &paramsStruct)
-	category := paramsStruct.Category
-	sort := paramsStruct.Sort
-	page := paramsStruct.Page
 	return cacheable(
-		fmt.Sprintf("COMICS$%s$%s$%d", category, sort, page),
+		fmt.Sprintf("COMICS$%s$%s$%s$%d", paramsStruct.Category, paramsStruct.Tag, paramsStruct.Sort, paramsStruct.Page),
 		time.Hour*2,
 		func() (interface{}, error) {
-			return client.Comics(category, sort, page)
+			return client.Comics(paramsStruct.Category, paramsStruct.Tag, paramsStruct.Sort, paramsStruct.Page)
 		},
 	)
 }
@@ -169,6 +167,16 @@ func searchComics(params string) (string, error) {
 		time.Hour*2,
 		func() (interface{}, error) {
 			return client.SearchComics(categories, keyword, sort, page)
+		},
+	)
+}
+
+func randomComics() (string, error) {
+	return cacheable(
+		fmt.Sprintf("RANDOM"),
+		time.Millisecond*1,
+		func() (interface{}, error) {
+			return client.RandomComics()
 		},
 	)
 }

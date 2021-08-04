@@ -11,6 +11,7 @@ import 'components/ComicDescriptionCard.dart';
 import 'components/ComicTagsCard.dart';
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
+import 'components/ContinueReadButton.dart';
 import 'components/DownloadInfoCard.dart';
 
 // 下载详情
@@ -28,6 +29,7 @@ class DownloadInfoScreen extends StatefulWidget {
 }
 
 class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
+  late Future<ViewLog?> _viewFuture = pica.loadView(widget.comicId);
   late DownloadComic _task;
   late List<DownloadEp> _epList = [];
   late Future _future = _load();
@@ -107,27 +109,44 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
                 spacing: 10,
                 runSpacing: 10,
                 alignment: WrapAlignment.spaceAround,
-                children: _epList.map((e) {
-                  return Container(
-                    child: MaterialButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DownloadReaderScreen(
-                              comicInfo: _task,
-                              epList: _epList,
-                              currentEpOrder: e.epOrder,
-                            ),
-                          ),
-                        );
-                      },
-                      color: Colors.white,
-                      child:
-                          Text(e.title, style: TextStyle(color: Colors.black)),
-                    ),
-                  );
-                }).toList(),
+                children: [
+                  ContinueReadButton(
+                    viewFuture: _viewFuture,
+                    onChoose: (int? epOrder, int? pictureRank) {
+                      if (epOrder != null && pictureRank != null) {
+                        for (var i in _epList) {
+                          if (i.epOrder == epOrder) {
+                            _push(_task, _epList, epOrder, pictureRank);
+                            return;
+                          }
+                        }
+                      } else {
+                        // 遍历 从最小的epOrder开始
+                        int? epOrder;
+                        _epList.map((e) => e.epOrder).forEach((element) {
+                          if (epOrder == null || epOrder! < element) {
+                            epOrder = element;
+                          }
+                        });
+                        if (epOrder != null) {
+                          _push(_task, _epList, epOrder!, null);
+                        }
+                      }
+                    },
+                  ),
+                  ..._epList.map((e) {
+                    return Container(
+                      child: MaterialButton(
+                        onPressed: () {
+                          _push(_task, _epList, e.epOrder, null);
+                        },
+                        color: Colors.white,
+                        child: Text(e.title,
+                            style: TextStyle(color: Colors.black)),
+                      ),
+                    );
+                  }),
+                ],
               ),
             ],
           );
@@ -135,4 +154,23 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
       ),
     );
   }
+
+  void _push(DownloadComic task, List<DownloadEp> epList, int epOrder, int? rank) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DownloadReaderScreen(
+          comicInfo: _task,
+          epList: _epList,
+          currentEpOrder: epOrder,
+          initPictureRank: rank,
+        ),
+      ),
+    ).whenComplete(() {
+      setState(() {
+        _viewFuture = pica.loadView(widget.comicId);
+      });
+    });
+  }
 }
+

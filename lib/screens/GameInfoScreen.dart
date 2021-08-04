@@ -68,9 +68,6 @@ class _GameInfoScreenState extends State<GameInfoScreen> {
 
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            var min = constraints.maxWidth < constraints.maxHeight
-                ? constraints.maxWidth
-                : constraints.maxHeight;
             var info = snapshot.data!;
             return Scaffold(
               appBar: AppBar(

@@ -129,15 +129,27 @@ func ViewComicUpdateLike(comicId string, like bool) error {
 	).Error
 }
 
-func ViewEpAndPicture(comicId string, epOrder int, epTitle, pictureRank int) error {
+func ViewEpAndPicture(comicId string, epOrder int, epTitle string, pictureRank int) error {
 	return db.Model(&ComicView{}).Where("id", comicId).Updates(
 		map[string]interface{}{
 			"last_view_time":         time.Now(),
-			"last_ep_order":          epOrder,
-			"last_view_ep_name":      epTitle,
+			"last_view_ep_order":     epOrder,
+			"last_view_ep_title":     epTitle,
 			"last_view_picture_rank": pictureRank,
 		},
 	).Error
+}
+
+func LoadViewLog(comicId string) (*ComicView, error) {
+	var view ComicView
+	err := db.First(&view, "id = ?", comicId).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &view, nil
 }
 
 func FindRemoteImage(fileServer string, path string) *RemoteImage {

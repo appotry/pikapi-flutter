@@ -4,8 +4,9 @@ import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'CategoryPaperScreen.dart';
+import 'ComicsScreen.dart';
 import 'GamePageScreen.dart';
+import 'RandomComicsScreen.dart';
 import 'components/ContentLoading.dart';
 import 'components/Images.dart';
 
@@ -84,7 +85,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 Wrap(
                   runSpacing: 20,
                   alignment: WrapAlignment.spaceAround,
-                  children: _buildList(snapshot.data!),
+                  children: _buildCategories(snapshot.data!),
+                ),
+                Divider(),
+                Wrap(
+                  runSpacing: 20,
+                  alignment: WrapAlignment.spaceAround,
+                  children: _buildChannels(),
                 ),
                 Container(height: 20),
               ],
@@ -95,7 +102,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
-  List<Widget> _buildList(List<Category> cList) {
+  List<Widget> _buildCategories(List<Category> cList) {
     var size = MediaQuery.of(context).size;
     var min = size.width < size.height ? size.width : size.height;
     var blockSize = min / 3;
@@ -154,13 +161,67 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       );
     }
 
+    return list;
+  }
+
+  List<Widget> _buildChannels() {
+    var size = MediaQuery.of(context).size;
+    var min = size.width < size.height ? size.width : size.height;
+    var blockSize = min / 3;
+    var imageSize = blockSize - 15;
+    var imageRs = imageSize / 10;
+
+    List<Widget> list = [];
+
+    var append = (Widget widget, String title, Function() onTap) {
+      list.add(
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: blockSize,
+            child: Column(
+              children: [
+                Card(
+                  elevation: .5,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(imageRs)),
+                    child: widget,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(imageRs)),
+                  ),
+                ),
+                Container(height: 5),
+                Center(
+                  child: Text(title),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    };
+
     append(
-      buildMock(imageSize, imageSize),
+      buildSvg('lib/assets/gamepad.svg', imageSize, imageSize,
+          color: Colors.blue.shade500),
       "游戏专区",
-      () {
+          () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => GamesScreen()),
+        );
+      },
+    );
+
+    append(
+      buildSvg('lib/assets/random.svg', imageSize, imageSize,
+          color: Colors.orangeAccent.shade700),
+      "随机本子",
+          () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RandomComicsScreen()),
         );
       },
     );
@@ -172,7 +233,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CategoryPaperScreen(categoryTitle: categoryTitle),
+        builder: (context) => ComicsScreen(category: categoryTitle),
       ),
     );
   }
