@@ -325,4 +325,13 @@ class Pica {
   Future<dynamic> open(String url) {
     return _flatInvoke("open", url);
   }
+
+  Future<List<String>> downloadGame(String url) async {
+    if (url.startsWith("https://game.eroge.xyz/hhh.php")){
+      var data = await _flatInvoke("downloadGame", url);
+      return List.of(jsonDecode(data)).map((e) => e.toString()).toList();
+    }
+    return [url];
+  }
+
 }

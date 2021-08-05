@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -47,7 +48,7 @@ class AboutScreen extends StatelessWidget {
                     ),
                     text: url,
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => _openUrl(url),
+                      ..onTap = () => openUrl(url),
                   ),
                 ],
               ),
@@ -59,15 +60,3 @@ class AboutScreen extends StatelessWidget {
   }
 }
 
-Future<dynamic> _openUrl(String url) async {
-  if (Platform.isAndroid || Platform.isIOS) {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: false,
-      );
-    }
-  } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-    await pica.open(url);
-  }
-}

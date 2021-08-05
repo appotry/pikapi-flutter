@@ -51,7 +51,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
                 MaterialPageRoute(builder: (context) => AboutScreen()),
               );
             },
-            icon: Icon(Icons.grade),
+            icon: Icon(Icons.info_outline),
           ),
           IconButton(
             onPressed: () {

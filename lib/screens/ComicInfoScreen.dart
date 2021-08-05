@@ -221,16 +221,8 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                     }
                   }
                 } else {
-                  // 遍历 从最小的epOrder开始
-                  int? epOrder;
-                  _epList.map((e) => e.order).forEach((element) {
-                    if (epOrder == null || epOrder! < element) {
-                      epOrder = element;
-                    }
-                  });
-                  if (epOrder != null) {
-                    _push(_comicInfo, _epList, epOrder!, null);
-                  }
+                  _push(_comicInfo, _epList, _epList.reversed.first.order, null);
+                  return;
                 }
               },
             ),

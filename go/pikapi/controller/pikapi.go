@@ -481,6 +481,8 @@ func FlatInvoke(method string, params string) (string, error) {
 		return downloadImagePath(params)
 	case "open":
 		return "", open(params)
+	case "downloadGame":
+		return downloadGame(params)
 	}
 	return "", errors.New("method not found : " + method)
 }

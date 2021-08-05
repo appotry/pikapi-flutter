@@ -7,6 +7,9 @@ import 'package:pikapi/screens/components/ContentError.dart';
 import 'package:pikapi/screens/components/ContentLoading.dart';
 import 'package:pikapi/screens/components/Images.dart';
 
+import 'GamedownloadScreen.dart';
+import 'components/GameTitleCard.dart';
+
 class GameInfoScreen extends StatefulWidget {
   final String gameId;
 
@@ -48,18 +51,7 @@ class _GameInfoScreenState extends State<GameInfoScreen> {
           );
         }
 
-        double iconMargin = 20;
-        double iconSize = 60;
         BorderRadius iconRadius = BorderRadius.all(Radius.circular(6));
-        TextStyle titleStyle =
-            TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-        TextStyle publisherStyle = TextStyle(
-          color: Theme.of(context).accentColor,
-          fontSize: 12.5,
-        );
-        TextStyle versionStyle = TextStyle(
-          fontSize: 12.5,
-        );
         double screenShootMargin = 10;
         double screenShootHeight = 200;
         double platformMargin = 10;
@@ -75,34 +67,7 @@ class _GameInfoScreenState extends State<GameInfoScreen> {
               ),
               body: ListView(
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(iconMargin),
-                        child: ClipRRect(
-                          borderRadius: iconRadius,
-                          child: RemoteImage(
-                            width: iconSize,
-                            height: iconSize,
-                            fileServer: info.icon.fileServer,
-                            path: info.icon.path,
-                          ),
-                        ),
-                      ),
-                      Container(width: 10),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(info.title, style: titleStyle),
-                            Text(info.publisher, style: publisherStyle),
-                            Text(info.version, style: versionStyle),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  GameTitleCard(info),
                   Container(
                     height: platformSize,
                     margin: EdgeInsets.only(bottom: platformMargin),
@@ -113,26 +78,34 @@ class _GameInfoScreenState extends State<GameInfoScreen> {
                       ),
                       scrollDirection: Axis.horizontal,
                       children: [
-                        Container(
-                          width: platformMargin,
-                        ),
-                        SvgPicture.asset(
-                          'lib/assets/android.svg',
-                          fit: BoxFit.contain,
-                          width: platformSize,
-                          height: platformSize ,
-                          color: Colors.green.shade500,
-                        ),
-                        Container(
-                          width: platformMargin,
-                        ),
-                        SvgPicture.asset(
-                          'lib/assets/apple.svg',
-                          fit: BoxFit.contain,
-                          width: platformSize,
-                          height: platformSize,
-                          color: Colors.grey.shade500,
-                        ),
+                        ...info.android
+                            ? [
+                                Container(
+                                  width: platformMargin,
+                                ),
+                                SvgPicture.asset(
+                                  'lib/assets/android.svg',
+                                  fit: BoxFit.contain,
+                                  width: platformSize,
+                                  height: platformSize,
+                                  color: Colors.green.shade500,
+                                ),
+                              ]
+                            : [],
+                        ...info.ios
+                            ? [
+                                Container(
+                                  width: platformMargin,
+                                ),
+                                SvgPicture.asset(
+                                  'lib/assets/apple.svg',
+                                  fit: BoxFit.contain,
+                                  width: platformSize,
+                                  height: platformSize,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ]
+                            : [],
                       ],
                     ),
                   ),
@@ -167,14 +140,18 @@ class _GameInfoScreenState extends State<GameInfoScreen> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.all(iconMargin),
+                    padding: EdgeInsets.all(20),
                     child: Text(info.description, style: descriptionStyle),
                   ),
                   Container(
                     color: Colors.grey.shade500.withOpacity(.1),
                     child: MaterialButton(
                       onPressed: () {
-                        defaultToast(context, '通宵制作中');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => GameDownloadScreen(info)),
+                        );
                       },
                       child: Container(
                         padding: EdgeInsets.all(30),

@@ -121,16 +121,7 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
                           }
                         }
                       } else {
-                        // 遍历 从最小的epOrder开始
-                        int? epOrder;
-                        _epList.map((e) => e.epOrder).forEach((element) {
-                          if (epOrder == null || epOrder! < element) {
-                            epOrder = element;
-                          }
-                        });
-                        if (epOrder != null) {
-                          _push(_task, _epList, epOrder!, null);
-                        }
+                        _push(_task, _epList, _epList.first.epOrder, null);
                       }
                     },
                   ),

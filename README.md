@@ -45,8 +45,7 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
   - [ ] 评论 / 看此本子的也在看
   - [ ] 排行榜
 - [x] 游戏
-  - [x] 列表 / 详情
-  - [ ] 分页 / 下载
+  - [x] 列表 / 详情 / 下载
 - [x] 下载
   - [x] 导入导出 / 分享
   - [ ] 无线共享
@@ -56,8 +55,9 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 ## 其他说明
 
 - 在ios/android环境 数据文件将会保存在程序自身数据目录中, 删除就会清理
-- 在windows 数据文件将会保存在程序同一目录
-- 在macos 数据文件将会"~/Library/Application Support/pikapi"
+- 在 windows 数据文件将会保存在程序同一目录
+- 在 macos 数据文件将会"~/Library/Application Support/pikapi"
+- 在 linux 数据文件将会"~/.pikapi"
 
 ## 运行 / 构建
 
@@ -65,7 +65,7 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 
 这个应用程序使用golang和dart(flutter)作为主要语言, 可以兼容Windows, linux, MacOS, Android, IOS
 
-他们使用框架桥接到桌面和移动平台上7
+他们使用框架桥接到桌面和移动平台上
 - go-flutter => Windows / MacOS / Linux
 - gomobile => Android / IOS
 
