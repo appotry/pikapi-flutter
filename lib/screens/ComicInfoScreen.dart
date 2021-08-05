@@ -83,6 +83,22 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
           ComicComment(_comicInfo.id),
         ];
 
+        add0(int num, int len) {
+          var rsp = "$num";
+          while (rsp.length < len) {
+            rsp = "0$rsp";
+          }
+          return rsp;
+        }
+
+        formatTime(String str) {
+          try {
+            var c = DateTime.parse(str);
+            return "${add0(c.year, 4)}-${add0(c.month, 2)}-${add0(c.day, 2)}";
+          } catch (e) {}
+          return "";
+        }
+
         return DefaultTabController(
           length: _tabs.length,
           child: Scaffold(
@@ -97,6 +113,29 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                 ComicInfoCard(info: _comicInfo),
                 ComicTagsCard(tags: _comicInfo.tags),
                 ComicDescriptionCard(description: _comicInfo.description),
+                Container(
+                  padding: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: theme.dividerColor,
+                      ),
+                    ),
+                  ),
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        "${formatTime(_comicInfo.createdAt)}  ${formatTime(_comicInfo.updatedAt)}",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 Container(height: 5),
                 Container(
                   height: 40,

@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	path2 "path"
 	"pgo/pikapi/const_value"
 	"pgo/pikapi/database/comic_center"
 	"pgo/pikapi/database/network_cache"
 	"pgo/pikapi/database/properties"
 	"pgo/pikapi/utils"
+	"runtime"
 	"strconv"
 )
 
@@ -363,6 +365,22 @@ func loadView(comicId string) (string, error) {
 	return "", nil
 }
 
+var commands = map[string]string{
+	"windows": "cmd /c start",
+	"darwin":  "open",
+	"linux":   "xdg-open",
+}
+
+// Open calls the OS default program for uri
+func open(uri string) error {
+	run, ok := commands[runtime.GOOS]
+	if !ok {
+		return fmt.Errorf("don't know how to open things on %s platform", runtime.GOOS)
+	}
+	cmd := exec.Command(run, uri)
+	return cmd.Start()
+}
+
 func FlatInvoke(method string, params string) (string, error) {
 	switch method {
 	case "setSwitchAddress":
@@ -461,6 +479,8 @@ func FlatInvoke(method string, params string) (string, error) {
 		return remoteImageData(params)
 	case "downloadImagePath":
 		return downloadImagePath(params)
+	case "open":
+		return "", open(params)
 	}
 	return "", errors.New("method not found : " + method)
 }

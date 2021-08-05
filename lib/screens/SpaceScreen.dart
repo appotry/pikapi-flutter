@@ -46,7 +46,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AboutScreen()),
               );
@@ -55,7 +55,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
           ),
           IconButton(
             onPressed: () {
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => AccountScreen()),
               );

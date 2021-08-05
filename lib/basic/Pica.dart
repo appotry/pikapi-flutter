@@ -321,4 +321,8 @@ class Pica {
   Future<dynamic> importComicDownload(String zipPath) {
     return _flatInvoke("importComicDownload", zipPath);
   }
+
+  Future<dynamic> open(String url) {
+    return _flatInvoke("open", url);
+  }
 }
