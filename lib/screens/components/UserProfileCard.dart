@@ -46,7 +46,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
     return ItemBuilder(
       future: _future,
       onRefresh: () async => setState(() => _future = pica.userProfile()),
-      loadingHeight: 150,
+      height: 150,
       successBuilder:
           (BuildContext context, AsyncSnapshot<UserProfile> snapshot) {
         UserProfile profile = snapshot.data!;

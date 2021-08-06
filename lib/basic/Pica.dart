@@ -303,7 +303,7 @@ class Pica {
     if (data == null) {
       return [];
     }
-    List list = json.decode(data);
+    List list = data;
     return list.map((e) => DownloadComic.fromJson(e)).toList();
   }
 

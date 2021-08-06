@@ -50,12 +50,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
       );
       list.addAll(page.docs.map((element) => element.media));
     } while (page.pages > page.page);
-    return list
-        .map((e) => RemoteReaderImage(
-              fileServer: e.fileServer,
-              path: e.path,
-            ))
-        .toList();
+    return list.map((e) => RemoteReaderImage(e.fileServer, e.path)).toList();
   }
 
   Future _onPositionChange(int position) async {

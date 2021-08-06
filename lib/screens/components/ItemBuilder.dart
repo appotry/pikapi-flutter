@@ -5,12 +5,14 @@ class ItemBuilder<T> extends StatelessWidget {
   final AsyncWidgetBuilder<T> successBuilder;
   final Future<dynamic> Function() onRefresh;
   final double? loadingHeight;
+  final double? height;
 
   const ItemBuilder({
     Key? key,
     required this.future,
     required this.successBuilder,
     required this.onRefresh,
+    this.height,
     this.loadingHeight,
   }) : super(key: key);
 
@@ -18,8 +20,8 @@ class ItemBuilder<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        var width = constraints.maxWidth;
-        var height = loadingHeight ?? (width / 2);
+        var _maxWidth = constraints.maxWidth;
+        var _loadingHeight = height ?? loadingHeight ?? _maxWidth / 2;
         return FutureBuilder(
             future: future,
             builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
@@ -29,25 +31,27 @@ class ItemBuilder<T> extends StatelessWidget {
                 return InkWell(
                   onTap: onRefresh,
                   child: Container(
-                    width: width,
-                    height: height,
+                    width: _maxWidth,
+                    height: _loadingHeight,
                     child: Center(
-                      child: Icon(Icons.sync_problem, size: height / 1.5),
+                      child:
+                          Icon(Icons.sync_problem, size: _loadingHeight / 1.5),
                     ),
                   ),
                 );
               }
               if (snapshot.connectionState != ConnectionState.done) {
                 return Container(
-                  width: width,
-                  height: height,
+                  width: _maxWidth,
+                  height: _loadingHeight,
                   child: Center(
-                    child: Icon(Icons.sync, size: height / 1.5),
+                    child: Icon(Icons.sync, size: _loadingHeight / 1.5),
                   ),
                 );
               }
               return Container(
-                width: width,
+                width: _maxWidth,
+                height: height,
                 child: successBuilder(context, snapshot),
               );
             });

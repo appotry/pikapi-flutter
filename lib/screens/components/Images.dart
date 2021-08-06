@@ -8,7 +8,15 @@ import 'dart:io';
 class DownloadReaderImage extends ReaderImage {
   final DownloadPicture downloadPicture;
 
-  DownloadReaderImage(this.downloadPicture);
+  DownloadReaderImage(this.downloadPicture)
+      : super(
+          proportionWidth: downloadPicture.width == 0
+              ? null
+              : downloadPicture.width.toDouble(),
+          proportionHeight: downloadPicture.height == 0
+              ? null
+              : downloadPicture.height.toDouble(),
+        );
 
   @override
   Future<RemoteImageData> imageData() async {
@@ -34,11 +42,7 @@ class RemoteReaderImage extends ReaderImage {
   final String fileServer;
   final String path;
 
-  RemoteReaderImage({
-    Key? key,
-    required this.fileServer,
-    required this.path,
-  }) : super(key: key);
+  RemoteReaderImage(this.fileServer, this.path);
 
   @override
   Future<RemoteImageData> imageData() async {
@@ -48,7 +52,11 @@ class RemoteReaderImage extends ReaderImage {
 
 // 平铺到整个页面的图片
 abstract class ReaderImage extends StatefulWidget {
-  ReaderImage({Key? key}) : super(key: key);
+  final double? proportionWidth;
+  final double? proportionHeight;
+
+  ReaderImage({Key? key, this.proportionWidth, this.proportionHeight})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ReaderImageState();
@@ -59,10 +67,19 @@ abstract class ReaderImage extends StatefulWidget {
 class _ReaderImageState extends State<ReaderImage> {
   late Future<RemoteImageData> _future = widget.imageData();
 
+  // data.width/data.height = width/ ?
+  // data.width * ? = width * data.height
+  // ? = width * data.height / data.width
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        late double proportion;
+        if (widget.proportionWidth != null && widget.proportionHeight != null) {
+          proportion = widget.proportionHeight! / widget.proportionWidth!;
+        } else {
+          proportion = .5;
+        }
         var width = constraints.maxWidth;
         return FutureBuilder(
           future: _future,
@@ -71,16 +88,14 @@ class _ReaderImageState extends State<ReaderImage> {
             AsyncSnapshot<RemoteImageData> snapshot,
           ) {
             if (snapshot.hasError) {
-              return buildError(width, width / 2);
+              return buildError(width, width * proportion);
             }
             if (snapshot.connectionState != ConnectionState.done) {
-              return buildLoading(width, width / 2);
+              return buildLoading(width, width * proportion);
             }
+            // true size
             var data = snapshot.data!;
             var height = width * data.height / data.width;
-            // data.width/data.height = width/ ?
-            //  data.width * ? = width * data.height
-            // ? = width * data.height / data.width
             return Image.file(
               File(data.finalPath),
               width: width,
@@ -180,7 +195,8 @@ class _RemoteImageState extends State<RemoteImage> {
 
 // 通用方法
 
-Widget buildSvg(String source, double? width, double? height, {Color? color, double? margin}) {
+Widget buildSvg(String source, double? width, double? height,
+    {Color? color, double? margin}) {
   return Container(
     width: width,
     height: height,
