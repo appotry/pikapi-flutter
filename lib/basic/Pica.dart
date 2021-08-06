@@ -160,6 +160,14 @@ class Pica {
         .toList();
   }
 
+  Future<List<ComicSimple>> leaderboard(String type) async {
+    String data = await _flatInvoke("leaderboard", type);
+    return List.of(jsonDecode(data))
+        .map((e) => Map<String, dynamic>.of(e))
+        .map((e) => ComicSimple.fromJson(e))
+        .toList();
+  }
+
   Future<ComicInfo> comicInfo(String comicId) async {
     String rsp = await _flatInvoke("comicInfo", comicId);
     return ComicInfo.fromJson(json.decode(rsp));
@@ -291,6 +299,10 @@ class Pica {
 
   Future<List<DownloadComic>> allDownloads() async {
     var data = await _flatInvoke("allDownloads", "");
+    data = jsonDecode(data);
+    if (data == null) {
+      return [];
+    }
     List list = json.decode(data);
     return list.map((e) => DownloadComic.fromJson(e)).toList();
   }
@@ -337,4 +349,5 @@ class Pica {
     }
     return [url];
   }
+
 }

@@ -3,6 +3,7 @@ import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/common/Navigatior.dart';
+import 'ComicInfoCategoriesLine.dart';
 import 'Images.dart';
 
 // 漫画卡片
@@ -17,14 +18,14 @@ class ComicInfoCard extends StatefulWidget {
 
 class _ComicInfoCard extends State<ComicInfoCard> {
   bool _favouriteLoading = false;
+  bool _likeLoading = false;
 
   @override
   Widget build(BuildContext context) {
     var info = widget.info;
     var theme = Theme.of(context);
-    var categoriesStyle = makeCategoriesStyle(context);
     var view = info is ComicInfo ? info.viewsCount : 0;
-    // bool? like = info is ComicInfo ? info.isLiked : null;
+    bool? like = info is ComicInfo ? info.isLiked : null;
     bool? favourite = info is ComicInfo ? (info).isFavourite : null;
     return Container(
       padding: EdgeInsets.all(5),
@@ -63,19 +64,22 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                         child: Text(info.author, style: authorStyle),
                       ),
                       Container(height: 5),
-                      Text("分类: " + info.categories.join(" "),
-                          style: categoriesStyle),
+                      ComicInfoCategoriesLine(info.categories),
                       Container(height: 5),
                       Row(
                         children: [
-                          iconFavorite,
-                          iconSpacing,
-                          Text(
-                            '${info.likesCount}',
-                            style: iconLabelStyle,
-                            strutStyle: iconLabelStrutStyle,
-                          ),
-                          iconMargin,
+                          ...info.likesCount > 0
+                              ? [
+                                  iconFavorite,
+                                  iconSpacing,
+                                  Text(
+                                    '${info.likesCount}',
+                                    style: iconLabelStyle,
+                                    strutStyle: iconLabelStrutStyle,
+                                  ),
+                                  iconMargin,
+                                ]
+                              : [],
                           ...(view > 0
                               ? [
                                   iconVisibility,
@@ -84,11 +88,10 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                                     '$view',
                                     style: iconLabelStyle,
                                     strutStyle: iconLabelStrutStyle,
-                                  )
+                                  ),
+                                  iconMargin,
                                 ]
                               : []),
-                          Container(width: 10),
-                          iconMargin,
                           iconPage,
                           iconSpacing,
                           Text(
@@ -96,6 +99,7 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                             style: countLabelStyle,
                             strutStyle: iconLabelStrutStyle,
                           ),
+                          iconMargin,
                           Expanded(child: Container()),
                         ],
                       ),
@@ -103,7 +107,6 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.only(left: 8),
                   height: imageHeight,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -111,26 +114,49 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                     children: [
                       buildFinished(info.finished),
                       Expanded(child: Container()),
+                      ...(like == null
+                          ? []
+                          : [
+                              _likeLoading
+                                  ? IconButton(
+                                      color: Colors.pink[400],
+                                      onPressed: () {},
+                                      icon: Icon(
+                                        Icons.sync,
+                                        size: 26,
+                                      ),
+                                    )
+                                  : IconButton(
+                                      color: Colors.pink[400],
+                                      onPressed: _changeLike,
+                                      icon: Icon(
+                                        like
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        size: 26,
+                                      ),
+                                    ),
+                            ]),
                       ...(favourite == null
                           ? []
                           : [
                               _favouriteLoading
                                   ? IconButton(
-                                      iconSize: 26,
                                       color: Colors.pink[400],
                                       onPressed: () {},
                                       icon: Icon(
                                         Icons.sync,
+                                        size: 26,
                                       ),
                                     )
                                   : IconButton(
-                                      iconSize: 26,
                                       color: Colors.pink[400],
                                       onPressed: _changeFavourite,
                                       icon: Icon(
                                         favourite
                                             ? Icons.bookmark
                                             : Icons.bookmark_border,
+                                        size: 26,
                                       ),
                                     ),
                             ]),
@@ -157,6 +183,22 @@ class _ComicInfoCard extends State<ComicInfoCard> {
     } finally {
       setState(() {
         _favouriteLoading = false;
+      });
+    }
+  }
+
+  Future _changeLike() async {
+    setState(() {
+      _likeLoading = true;
+    });
+    try {
+      var rst = await pica.switchLike(widget.info.id);
+      setState(() {
+        (widget.info as ComicInfo).isLiked = !rst.startsWith("un");
+      });
+    } finally {
+      setState(() {
+        _likeLoading = false;
       });
     }
   }
@@ -224,8 +266,3 @@ final authorStyle = TextStyle(
   fontSize: 13,
   color: Colors.pink.shade300,
 );
-
-TextStyle makeCategoriesStyle(BuildContext context) => TextStyle(
-      fontSize: 13,
-      color: Theme.of(context).textTheme.bodyText1!.color!.withAlpha(0xCC),
-    );

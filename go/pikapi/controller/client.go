@@ -183,6 +183,16 @@ func randomComics() (string, error) {
 	)
 }
 
+func leaderboard(typeName string) (string, error) {
+	return cacheable(
+		fmt.Sprintf("LEADERBOARD$%s", typeName),
+		time.Second*200,
+		func() (interface{}, error) {
+			return client.Leaderboard(typeName)
+		},
+	)
+}
+
 func comicInfo(comicId string) (string, error) {
 	// cache
 	key := fmt.Sprintf("COMIC_INFO$%s", comicId)

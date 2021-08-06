@@ -419,6 +419,8 @@ func FlatInvoke(method string, params string) (string, error) {
 		return searchComics(params)
 	case "randomComics":
 		return randomComics()
+	case "leaderboard":
+		return leaderboard(params)
 	case "comicInfo":
 		return comicInfo(params)
 	case "comicEpPage":

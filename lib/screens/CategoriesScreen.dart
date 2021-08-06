@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/screens/RankingsScreen.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -85,13 +86,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 Wrap(
                   runSpacing: 20,
                   alignment: WrapAlignment.spaceAround,
-                  children: _buildCategories(snapshot.data!),
+                  children: _buildChannels(),
                 ),
                 Divider(),
                 Wrap(
                   runSpacing: 20,
                   alignment: WrapAlignment.spaceAround,
-                  children: _buildChannels(),
+                  children: _buildCategories(snapshot.data!),
                 ),
                 Container(height: 20),
               ],
@@ -141,7 +142,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     };
 
     append(
-      buildMock(imageSize, imageSize),
+      buildSvg('lib/assets/books.svg', imageSize, imageSize, margin: 20),
       "全分类",
       () => _navigateToCategory(null),
     );
@@ -203,25 +204,37 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     };
 
     append(
-      buildSvg('lib/assets/gamepad.svg', imageSize, imageSize,
-          color: Colors.blue.shade500),
-      "游戏专区",
-          () {
+      buildSvg('lib/assets/rankings.svg', imageSize, imageSize, margin: 20,
+          color: Colors.red.shade700),
+      "排行榜",
+      () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => GamesScreen()),
+          MaterialPageRoute(builder: (context) => RankingsScreen()),
         );
       },
     );
 
     append(
-      buildSvg('lib/assets/random.svg', imageSize, imageSize,
+      buildSvg('lib/assets/random.svg', imageSize, imageSize, margin: 20,
           color: Colors.orangeAccent.shade700),
       "随机本子",
-          () {
+      () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => RandomComicsScreen()),
+        );
+      },
+    );
+
+    append(
+      buildSvg('lib/assets/gamepad.svg', imageSize, imageSize, margin: 20,
+          color: Colors.blue.shade500),
+      "游戏专区",
+      () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => GamesScreen()),
         );
       },
     );
