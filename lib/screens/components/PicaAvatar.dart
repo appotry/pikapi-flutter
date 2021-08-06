@@ -3,14 +3,14 @@ import 'package:pikapi/basic/Entities.dart';
 import 'Images.dart';
 
 const double _avatarMargin = 5;
-const double _avatarImageSize = 50;
 const double _avatarBorderSize = 1.5;
 
 // 头像
 class PicaAvatar extends StatelessWidget {
   final PicaImage avatarImage;
+  final double size;
 
-  PicaAvatar(this.avatarImage);
+  const PicaAvatar(this.avatarImage, {this.size = 50});
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +20,15 @@ class PicaAvatar extends StatelessWidget {
       decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: theme.accentColor,
+            color: theme.colorScheme.secondary,
             style: BorderStyle.solid,
             width: _avatarBorderSize,
           )),
       child: ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(_avatarImageSize)),
+        borderRadius: BorderRadius.all(Radius.circular(size)),
         child: RemoteImage(
-          width: _avatarImageSize,
-          height: _avatarImageSize,
+          width: size,
+          height: size,
           fileServer: avatarImage.fileServer,
           path: avatarImage.path,
         ),

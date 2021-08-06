@@ -77,7 +77,7 @@ class _ComicCommentState extends State<ComicComment> {
     var theme = Theme.of(context);
     var nameStyle = TextStyle(fontWeight: FontWeight.bold);
     var levelStyle =
-        TextStyle(fontSize: 12, color: theme.accentColor.withOpacity(.8));
+        TextStyle(fontSize: 12, color: theme.colorScheme.secondary.withOpacity(.8));
     var connectStyle =
         TextStyle(color: theme.textTheme.bodyText1?.color?.withOpacity(.8));
     return Container(

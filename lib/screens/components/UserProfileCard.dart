@@ -42,7 +42,7 @@ class _UserProfileCardState extends State<UserProfileCard> {
     var theme = Theme.of(context);
     var nameStyle = TextStyle(fontWeight: FontWeight.bold);
     var levelStyle =
-        TextStyle(fontSize: 12, color: theme.accentColor.withOpacity(.8));
+        TextStyle(fontSize: 12, color: theme.colorScheme.secondary.withOpacity(.8));
     return ItemBuilder(
       future: _future,
       onRefresh: () async => setState(() => _future = pica.userProfile()),

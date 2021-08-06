@@ -173,13 +173,13 @@ class _DownloadConfirmScreenState extends State<DownloadConfirmScreen> {
         alignment: WrapAlignment.spaceAround,
         children: [
           MaterialButton(
-            color: theme.accentColor,
+            color: theme.colorScheme.secondary,
             textColor: Colors.white,
             onPressed: _selectAll,
             child: Text('全选'),
           ),
           MaterialButton(
-            color: theme.accentColor,
+            color: theme.colorScheme.secondary,
             textColor: Colors.white,
             onPressed: _download,
             child: Text('确定下载'),

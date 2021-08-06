@@ -73,6 +73,7 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                           Text(
                             '${info.likesCount}',
                             style: iconLabelStyle,
+                            strutStyle: iconLabelStrutStyle,
                           ),
                           iconMargin,
                           ...(view > 0
@@ -82,9 +83,19 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                                   Text(
                                     '$view',
                                     style: iconLabelStyle,
+                                    strutStyle: iconLabelStrutStyle,
                                   )
                                 ]
                               : []),
+                          Container(width: 10),
+                          iconMargin,
+                          iconPage,
+                          iconSpacing,
+                          Text(
+                            "${info.epsCount}E / ${info.pagesCount}P",
+                            style: countLabelStyle,
+                            strutStyle: iconLabelStrutStyle,
+                          ),
                           Expanded(child: Container()),
                         ],
                       ),
@@ -191,6 +202,18 @@ final iconVisibility =
 final iconLabelStyle = TextStyle(
   fontSize: 13,
   color: Colors.pink.shade400,
+  height: 1.2,
+);
+final iconLabelStrutStyle = StrutStyle(
+  height: 1.2,
+);
+
+final iconPage =
+    Icon(Icons.ballot_outlined, size: _iconSize, color: Colors.grey);
+final countLabelStyle = TextStyle(
+  fontSize: 13,
+  color: Colors.grey,
+  height: 1.2,
 );
 
 final iconMargin = Container(width: 20);

@@ -36,7 +36,9 @@ class _PinkTheme extends ThemePackage {
   @override
   ThemeData themeData() => ThemeData().copyWith(
         brightness: Brightness.light,
-        accentColor: Colors.pink.shade200,
+        colorScheme: ColorScheme.light(
+          secondary: Colors.pink.shade200,
+        ),
         appBarTheme: AppBarTheme(
           brightness: Brightness.dark,
           color: Colors.pink.shade200,
@@ -62,7 +64,9 @@ class _BlackTheme extends ThemePackage {
   @override
   ThemeData themeData() => ThemeData().copyWith(
         brightness: Brightness.light,
-        accentColor: Colors.pink.shade200,
+        colorScheme: ColorScheme.light(
+          secondary: Colors.pink.shade200,
+        ),
         appBarTheme: AppBarTheme(
           brightness: Brightness.dark,
           color: Colors.grey.shade800,
@@ -88,7 +92,9 @@ class _DarkTheme extends ThemePackage {
 
   @override
   ThemeData themeData() => ThemeData.dark().copyWith(
-        accentColor: Colors.pink.shade200,
+        colorScheme: ColorScheme.light(
+          secondary: Colors.pink.shade200,
+        ),
         appBarTheme: AppBarTheme(
           brightness: Brightness.dark,
           color: Color(0xFF1E1E1E),

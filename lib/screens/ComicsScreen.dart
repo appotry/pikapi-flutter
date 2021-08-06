@@ -7,15 +7,21 @@ import '../basic/Entities.dart';
 import 'SearchScreen.dart';
 import 'components/ComicPager.dart';
 
-// 分类详情 列表
+// 漫画列表
 class ComicsScreen extends StatefulWidget {
-  final String? category;
-  final String? tag;
+  final String? category; // 指定分类
+  final String? tag; // 指定标签
+  final String? creatorId; // 指定上传者
+  final String? creatorName; // 上传者名称 (仅显示)
+  final String? chineseTeam;
 
   const ComicsScreen({
     Key? key,
     this.category,
     this.tag,
+    this.creatorId,
+    this.creatorName,
+    this.chineseTeam,
   }) : super(key: key);
 
   @override
@@ -57,6 +63,8 @@ class _ComicsScreenState extends State<ComicsScreen> {
         _currentPage,
         category: widget.category ?? "",
         tag: widget.tag ?? "",
+        creatorId: widget.creatorId ?? "",
+        chineseTeam: widget.chineseTeam ?? "",
       );
     });
   }
@@ -70,17 +78,27 @@ class _ComicsScreenState extends State<ComicsScreen> {
   @override
   Widget build(BuildContext context) {
     PreferredSizeWidget? appBar;
-    if (widget.category != null && widget.tag == null) {
+    if (widget.tag == null &&
+        widget.creatorId == null &&
+        widget.chineseTeam == null) {
+      // 只有只传分类或不传参数时时才开放搜索
       appBar = _categorySearchBar.build(context);
-    } else if (widget.category == null && widget.tag != null) {
-      appBar = AppBar(
-        title: Text("标签 : ${widget.tag}"),
-      );
     } else {
+      var title = "";
+      if (widget.category != null) {
+        title += "${widget.category} ";
+      }
+      if (widget.tag != null) {
+        title += "${widget.tag} ";
+      }
+      if (widget.creatorName != null) {
+        title += "${widget.creatorName} ";
+      }
+      if (widget.chineseTeam != null) {
+        title += "${widget.chineseTeam} ";
+      }
       appBar = AppBar(
-        title: Text(
-          "${widget.category ?? ""} ${widget.tag ?? ""}",
-        ),
+        title: Text(title),
       );
     }
 

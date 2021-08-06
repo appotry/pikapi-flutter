@@ -123,10 +123,14 @@ class Pica {
     int page, {
     String category = "",
     String tag = "",
+    String creatorId = "",
+    String chineseTeam = "",
   }) async {
     String rsp = await _flatInvoke("comics", {
       "category": category,
       "tag": tag,
+      "creatorId": creatorId,
+      "chineseTeam": chineseTeam,
       "sort": sort,
       "page": page,
     });
@@ -327,11 +331,10 @@ class Pica {
   }
 
   Future<List<String>> downloadGame(String url) async {
-    if (url.startsWith("https://game.eroge.xyz/hhh.php")){
+    if (url.startsWith("https://game.eroge.xyz/hhh.php")) {
       var data = await _flatInvoke("downloadGame", url);
       return List.of(jsonDecode(data)).map((e) => e.toString()).toList();
     }
     return [url];
   }
-
 }

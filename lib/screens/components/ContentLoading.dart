@@ -21,7 +21,7 @@ class ContentLoading extends StatelessWidget {
                 width: min / 2,
                 height: min / 2,
                 child: CircularProgressIndicator(
-                  color: theme.accentColor,
+                  color: theme.colorScheme.secondary,
                   backgroundColor: Colors.grey[100],
                 ),
               ),

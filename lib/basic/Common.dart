@@ -18,3 +18,21 @@ void defaultToast(BuildContext context, String title) {
     reverseCurve: Curves.linear,
   );
 }
+
+
+String add0(int num, int len) {
+  var rsp = "$num";
+  while (rsp.length < len) {
+    rsp = "0$rsp";
+  }
+  return rsp;
+}
+
+String formatTime(String str) {
+  try {
+    var c = DateTime.parse(str);
+    return "${add0(c.year, 4)}-${add0(c.month, 2)}-${add0(c.day, 2)}";
+  } catch (e) {
+    return "-";
+  }
+}

@@ -1,7 +1,12 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/screens/ComicsScreen.dart';
+import 'package:pikapi/screens/common/Navigatior.dart';
 import 'package:pikapi/screens/components/ItemBuilder.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/screens/components/PicaAvatar.dart';
 import 'ComicReaderScreen.dart';
 import 'DownloadConfirmScreen.dart';
 import 'components/ComicComment.dart';
@@ -82,23 +87,6 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
           _buildEpWrap(_epListFuture, _comicInfo),
           ComicComment(_comicInfo.id),
         ];
-
-        add0(int num, int len) {
-          var rsp = "$num";
-          while (rsp.length < len) {
-            rsp = "0$rsp";
-          }
-          return rsp;
-        }
-
-        formatTime(String str) {
-          try {
-            var c = DateTime.parse(str);
-            return "${add0(c.year, 4)}-${add0(c.month, 2)}-${add0(c.day, 2)}";
-          } catch (e) {}
-          return "";
-        }
-
         return DefaultTabController(
           length: _tabs.length,
           child: Scaffold(
@@ -114,7 +102,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                 ComicTagsCard(tags: _comicInfo.tags),
                 ComicDescriptionCard(description: _comicInfo.description),
                 Container(
-                  padding: EdgeInsets.all(5),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
@@ -123,14 +111,63 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                     ),
                   ),
                   child: Wrap(
-                    alignment: WrapAlignment.end,
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "${formatTime(_comicInfo.createdAt)}  ${formatTime(_comicInfo.updatedAt)}",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
+                      Text.rich(TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "${_comicInfo.creator.name}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                if (_comicInfo.creator.id != "") {
+                                  navPushOrReplace(
+                                    context,
+                                    (context) => ComicsScreen(
+                                      creatorId: _comicInfo.creator.id,
+                                      creatorName: _comicInfo.creator.name,
+                                    ),
+                                  );
+                                }
+                              },
+                          ),
+                          TextSpan(
+                            text: "  ",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          TextSpan(
+                            text: "( ${formatTime(_comicInfo.updatedAt)} )",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      )),
+                      Text.rich(
+                        TextSpan(
+                          text: "${_comicInfo.chineseTeam}",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              if (_comicInfo.chineseTeam != "") {
+                                navPushOrReplace(
+                                  context,
+                                  (context) => ComicsScreen(
+                                    chineseTeam: _comicInfo.chineseTeam,
+                                  ),
+                                );
+                              }
+                            },
                         ),
                       ),
                     ],
@@ -139,19 +176,16 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                 Container(height: 5),
                 Container(
                   height: 40,
-                  color: theme.accentColor.withOpacity(.025),
+                  color: theme.colorScheme.secondary.withOpacity(.025),
                   child: TabBar(
                     tabs: _tabs,
-                    indicatorColor: theme.accentColor,
-                    labelColor: theme.accentColor,
+                    indicatorColor: theme.colorScheme.secondary,
+                    labelColor: theme.colorScheme.secondary,
                     onTap: (val) async => setState(() => _tabIndex = val),
                   ),
                 ),
                 Container(height: 15),
-                IndexedStack(
-                  index: _tabIndex,
-                  children: _views,
-                ),
+                _views[_tabIndex],
                 Container(height: 5),
               ],
             ),
@@ -205,10 +239,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
       future: _epListFuture,
       successBuilder: (BuildContext context, AsyncSnapshot<List<Ep>> snapshot) {
         var _epList = snapshot.data!;
-        return Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          alignment: WrapAlignment.spaceAround,
+        return Column(
           children: [
             ContinueReadButton(
               viewFuture: _viewFuture,
@@ -221,22 +252,31 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                     }
                   }
                 } else {
-                  _push(_comicInfo, _epList, _epList.reversed.first.order, null);
+                  _push(
+                      _comicInfo, _epList, _epList.reversed.first.order, null);
                   return;
                 }
               },
             ),
-            ..._epList.map((e) {
-              return Container(
-                child: MaterialButton(
-                  onPressed: () {
-                    _push(_comicInfo, _epList, e.order, null);
-                  },
-                  color: Colors.white,
-                  child: Text(e.title, style: TextStyle(color: Colors.black)),
-                ),
-              );
-            }),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.spaceAround,
+              children: [
+                ..._epList.map((e) {
+                  return Container(
+                    child: MaterialButton(
+                      onPressed: () {
+                        _push(_comicInfo, _epList, e.order, null);
+                      },
+                      color: Colors.white,
+                      child:
+                          Text(e.title, style: TextStyle(color: Colors.black)),
+                    ),
+                  );
+                }),
+              ],
+            ),
           ],
         );
       },

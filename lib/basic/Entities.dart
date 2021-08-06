@@ -1,4 +1,3 @@
-
 class PicaImage {
   late String originalName;
   late String path;
@@ -129,6 +128,7 @@ class ComicInfo extends ComicSimple {
   late bool isFavourite;
   late bool isLiked;
   late int commentsCount;
+  late Creator creator;
 
   ComicInfo.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     this.description = json["description"];
@@ -141,6 +141,19 @@ class ComicInfo extends ComicSimple {
     this.isFavourite = json["isFavourite"];
     this.isLiked = json["isLiked"];
     this.commentsCount = json["commentsCount"];
+    this.creator = Creator.fromJson(Map<String, dynamic>.of(json["_creator"]));
+  }
+}
+
+class Creator extends BasicUser {
+  late String slogan;
+  late String role;
+  late String character;
+
+  Creator.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    this.slogan = json["slogan"];
+    this.role = json["role"];
+    this.character = json["character"];
   }
 }
 

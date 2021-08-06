@@ -196,7 +196,7 @@ class _ImageReaderState extends State<ImageReader> {
                     ),
                     activeTrackBar: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
-                      color: theme.accentColor,
+                      color: theme.colorScheme.secondary,
                     ),
                   ),
                   step: FlutterSliderStep(

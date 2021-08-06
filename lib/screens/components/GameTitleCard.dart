@@ -15,7 +15,7 @@ class GameTitleCard extends StatelessWidget {
     BorderRadius iconRadius = BorderRadius.all(Radius.circular(6));
     TextStyle titleStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
     TextStyle publisherStyle = TextStyle(
-      color: Theme.of(context).accentColor,
+      color: Theme.of(context).colorScheme.secondary,
       fontSize: 12.5,
     );
     TextStyle versionStyle = TextStyle(
