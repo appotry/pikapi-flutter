@@ -117,7 +117,7 @@ class _DownloadConfirmScreenState extends State<DownloadConfirmScreen> {
           }
           return ListView(
             children: [
-              ComicInfoCard(info: widget.comicInfo),
+              ComicInfoCard(widget.comicInfo),
               _buildButtons(),
               Wrap(
                 alignment: WrapAlignment.spaceAround,

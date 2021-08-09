@@ -1,6 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/enum/Address.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/screens/RegisterScreen.dart';
 
 import 'AppScreen.dart';
 import 'DownloadListScreen.dart';
@@ -74,7 +77,7 @@ class _AccountScreenState extends State<AccountScreen> {
             title: Text("哔咔账号"),
             subtitle: Text(_username == "" ? "未设置" : _username),
             onTap: () {
-              _displayTextInputDialog(
+              displayTextInputDialog(
                 context,
                 '哔咔账号',
                 '请输入哔咔账号',
@@ -93,7 +96,7 @@ class _AccountScreenState extends State<AccountScreen> {
             title: Text("哔咔密码"),
             subtitle: Text(_password == "" ? "未设置" : _password),
             onTap: () {
-              _displayTextInputDialog(
+              displayTextInputDialog(
                 context,
                 '哔咔密码',
                 '请输入哔咔密码',
@@ -123,9 +126,10 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           ListTile(
             title: Text("代理服务器"),
-            subtitle: Text(_proxy == "" ? "未设置" : _proxy),
+            subtitle: Text(
+                _proxy == "" ? "未设置 ( 例如 socks5://127.0.0.1:1080/ )" : _proxy),
             onTap: () {
-              _displayTextInputDialog(
+              displayTextInputDialog(
                 context,
                 '代理服务器',
                 '请输入代理服务器',
@@ -139,6 +143,29 @@ class _AccountScreenState extends State<AccountScreen> {
                 },
               );
             },
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  child: Text.rich(TextSpan(
+                    text: '没有账号,我要注册',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    RegisterScreen()),
+                          ).then((value) => _loadProperties()),
+                  )),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -167,46 +194,6 @@ class _AccountScreenState extends State<AccountScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => DownloadListScreen()),
-    );
-  }
-
-  var _controller = TextEditingController.fromValue(TextEditingValue(text: ''));
-
-  Future<void> _displayTextInputDialog(
-    BuildContext context,
-    String title,
-    String hint,
-    String src,
-    String desc,
-    void Function(String) onConfirm,
-  ) async {
-    _controller.text = src;
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(hintText: hint),
-          ),
-          actions: <Widget>[
-            MaterialButton(
-              child: Text('取消'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            MaterialButton(
-              child: Text('确认'),
-              onPressed: () {
-                onConfirm(_controller.text);
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

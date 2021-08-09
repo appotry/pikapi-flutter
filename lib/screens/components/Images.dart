@@ -51,9 +51,12 @@ class RemoteReaderImage extends ReaderImage {
 }
 
 // 平铺到整个页面的图片
+// 这个类是违背widget类@immutable装饰器的
+// 将ReaderImage初始化到字段中, 而不是函数内变量中
+// 从而避免因为listview滚动state重新初始化造成的画面抖动
 abstract class ReaderImage extends StatefulWidget {
-  final double? proportionWidth;
-  final double? proportionHeight;
+  double? proportionWidth;
+  double? proportionHeight;
 
   ReaderImage({Key? key, this.proportionWidth, this.proportionHeight})
       : super(key: key);
@@ -65,7 +68,11 @@ abstract class ReaderImage extends StatefulWidget {
 }
 
 class _ReaderImageState extends State<ReaderImage> {
-  late Future<RemoteImageData> _future = widget.imageData();
+  late Future<RemoteImageData> _future = widget.imageData().then((value) {
+    widget.proportionWidth = value.width.toDouble();
+    widget.proportionHeight = value.height.toDouble();
+    return value;
+  });
 
   // data.width/data.height = width/ ?
   // data.width * ? = width * data.height

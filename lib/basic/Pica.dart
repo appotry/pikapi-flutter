@@ -90,6 +90,37 @@ class Pica {
     return _flatInvoke("login", "");
   }
 
+  Future<dynamic> register(
+      String email,
+      String name,
+      String password,
+      String gender,
+      String birthday,
+      String question1,
+      String answer1,
+      String question2,
+      String answer2,
+      String question3,
+      String answer3) {
+    return _flatInvoke("register", {
+      "email": email,
+      "name": name,
+      "password": password,
+      "gender": gender,
+      "birthday": birthday,
+      "question1": question1,
+      "answer1": answer1,
+      "question2": question2,
+      "answer2": answer2,
+      "question3": question3,
+      "answer3": answer3,
+    });
+  }
+
+  Future<dynamic> clearToken() {
+    return _flatInvoke("clearToken", "");
+  }
+
   Future<UserProfile> userProfile() async {
     String rsp = await _flatInvoke("userProfile", "");
     return UserProfile.fromJson(json.decode(rsp));

@@ -18,6 +18,6 @@ class LinkedComicInfoCard extends StatelessWidget {
             (context) => ComicInfoScreen(comicId: info.id),
           );
         },
-        child: ComicInfoCard(info: info),
+        child: ComicInfoCard(info),
       );
 }

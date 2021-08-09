@@ -6,7 +6,7 @@ import 'package:pikapi/screens/common/Navigatior.dart';
 class ComicTagsCard extends StatelessWidget {
   final List<String> tags;
 
-  const ComicTagsCard({Key? key, required this.tags}) : super(key: key);
+  const ComicTagsCard(this.tags, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

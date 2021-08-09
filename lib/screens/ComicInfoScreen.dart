@@ -98,8 +98,8 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
             ),
             body: ListView(
               children: [
-                ComicInfoCard(info: _comicInfo),
-                ComicTagsCard(tags: _comicInfo.tags),
+                ComicInfoCard(_comicInfo, linkItem: true),
+                ComicTagsCard(_comicInfo.tags),
                 ComicDescriptionCard(description: _comicInfo.description),
                 Container(
                   padding: EdgeInsets.all(10),
@@ -142,7 +142,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                             ),
                           ),
                           TextSpan(
-                            text: "( ${formatTime(_comicInfo.updatedAt)} )",
+                            text: "( ${formatTimeToDate(_comicInfo.updatedAt)} )",
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey,

@@ -14,6 +14,7 @@ import (
 	"pgo/pikapi/database/network_cache"
 	"pgo/pikapi/database/properties"
 	"pgo/pikapi/utils"
+	"pica"
 	"runtime"
 	"strconv"
 )
@@ -127,6 +128,21 @@ func login() error {
 	}
 	properties.SaveToken(client.Token)
 	properties.SaveTokenTime(utils.Timestamp())
+	return nil
+}
+
+func register(params string) error {
+	var dto pica.RegisterDto
+	err := json.Unmarshal([]byte(params), &dto)
+	if err != nil {
+		return err
+	}
+	return client.Register(dto)
+}
+
+func clearToken() error {
+	properties.SaveTokenTime(0)
+	properties.SaveToken("")
 	return nil
 }
 
@@ -407,6 +423,10 @@ func FlatInvoke(method string, params string) (string, error) {
 		return preLogin()
 	case "login":
 		return "", login()
+	case "register":
+		return "", register(params)
+	case "clearToken":
+		return "", clearToken()
 	case "userProfile":
 		return userProfile()
 	case "punchIn":

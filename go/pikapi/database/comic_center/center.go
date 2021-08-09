@@ -282,7 +282,7 @@ func AllDownloads() (*[]ComicDownload, error) {
 
 func LoadFirstNeedDownload() (*ComicDownload, error) {
 	var download ComicDownload
-	err := db.First(&download, "download_failed = 0 AND pause = 0 AND deleting = 0 AND download_finished = 0").Error
+		err := db.First(&download, "download_failed = 0 AND pause = 0 AND deleting = 0 AND download_finished = 0").Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil

@@ -1,16 +1,19 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/common/Navigatior.dart';
-import 'ComicInfoCategoriesLine.dart';
+import '../ComicsScreen.dart';
 import 'Images.dart';
 
 // 漫画卡片
 class ComicInfoCard extends StatefulWidget {
+  final bool linkItem;
   final ComicSimple info;
 
-  const ComicInfoCard({Key? key, required this.info}) : super(key: key);
+  const ComicInfoCard(this.info, {Key? key, this.linkItem = false})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ComicInfoCard();
@@ -57,14 +60,52 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                       Text(info.title, style: titleStyle),
                       Container(height: 5),
                       InkWell(
-                        onTap: () {
-                          navPushOrReplace(context,
-                              (context) => SearchScreen(keyword: info.author));
-                        },
+                        onTap: widget.linkItem
+                            ? () {
+                                navPushOrReplace(
+                                    context,
+                                    (context) =>
+                                        SearchScreen(keyword: info.author));
+                              }
+                            : null,
                         child: Text(info.author, style: authorStyle),
                       ),
                       Container(height: 5),
-                      ComicInfoCategoriesLine(info.categories),
+                      Text.rich(
+                        widget.linkItem
+                            ? TextSpan(
+                                children: [
+                                  TextSpan(text: '分类 :'),
+                                  ...info.categories.map(
+                                    (e) => TextSpan(
+                                      children: [
+                                        TextSpan(text: ' '),
+                                        TextSpan(
+                                          text: e,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () => navPushOrReplace(
+                                                  context,
+                                                  (context) => ComicsScreen(
+                                                    category: e,
+                                                  ),
+                                                ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : TextSpan(
+                                text: "分类 : ${info.categories.join(' ')}"),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyText1!
+                              .color!
+                              .withAlpha(0xCC),
+                        ),
+                      ),
                       Container(height: 5),
                       Row(
                         children: [

@@ -102,7 +102,7 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
           return ListView(
             children: [
               DownloadInfoCard(task: _task),
-              ComicTagsCard(tags: tags),
+              ComicTagsCard(tags),
               ComicDescriptionCard(description: _task.description),
               Container(height: 5),
               Wrap(
