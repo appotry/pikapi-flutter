@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/basic/enum/Address.dart';
+import 'package:pikapi/screens/components/NetworkSetting.dart';
 
 import 'components/ContentLoading.dart';
 
@@ -16,9 +16,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late bool _registering = false;
   late bool _registerOver = false;
 
-  late String _address = "";
-  late String _proxy = "";
-
   late String _email = "";
   late String _name = "";
   late String _password = "";
@@ -30,17 +27,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late String _answer2 = "回答2";
   late String _question3 = "问题3";
   late String _answer3 = "回答3";
-
-  late String _errorMessage = "";
-
-  Future _load() async {
-    var address = await pica.getSwitchAddress();
-    var proxy = await pica.getProxy();
-    setState(() {
-      _address = address;
-      _proxy = proxy;
-    });
-  }
 
   Future _register() async {
     setState(() {
@@ -85,20 +71,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _registerOver = true;
       });
     } catch (e) {
-      setState(() {
-        _errorMessage = "$e";
-      });
+      alertDialog(context, "注册失败", "$e");
     } finally {
       setState(() {
         _registering = false;
       });
     }
-  }
-
-  @override
-  void initState() {
-    _load();
-    super.initState();
   }
 
   @override
@@ -137,40 +115,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ],),
       body: ListView(
         children: [
-          _buildErrorMessage(),
-          ListTile(
-            title: Text("分流"),
-            subtitle: Text(addressName(_address)),
-            onTap: () async {
-              var address = await chooseAddress(context);
-              if (address != null) {
-                await pica.setSwitchAddress(address);
-                setState(() {
-                  _address = address;
-                });
-              }
-            },
-          ),
-          ListTile(
-            title: Text("代理服务器"),
-            subtitle: Text(
-                _proxy == "" ? "未设置 ( 例如 socks5://127.0.0.1:1080/ )" : _proxy),
-            onTap: () {
-              displayTextInputDialog(
-                context,
-                '代理服务器',
-                '请输入代理服务器',
-                _proxy,
-                "",
-                    (value) async {
-                  await pica.setProxy(value);
-                  setState(() {
-                    _proxy = value;
-                  });
-                },
-              );
-            },
-          ),
           Divider(),
           ListTile(
             title: Text("哔咔账号 (不一定是邮箱/登录使用)"),
@@ -391,6 +335,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
           ),
           Divider(),
+          NetworkSetting(),
+          Divider(),
         ],
       ),
     );
@@ -407,20 +353,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       default:
         return "";
     }
-  }
-
-  Widget _buildErrorMessage() {
-    return _errorMessage == "" ? Container() : Container(
-      padding: EdgeInsets.all(10),
-      child: Text(
-        '注册失败 : $_errorMessage',
-        style: TextStyle(
-          color: Colors.red,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
-      ),
-    );
   }
 
 }

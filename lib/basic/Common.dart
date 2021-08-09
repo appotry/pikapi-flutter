@@ -20,44 +20,99 @@ void defaultToast(BuildContext context, String title) {
   );
 }
 
-
-String add0(int num, int len) {
-  var rsp = "$num";
-  while (rsp.length < len) {
-    rsp = "0$rsp";
-  }
-  return rsp;
+Future<bool> confirmDialog(BuildContext context, String title, String content) async {
+  return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: Text(title),
+                content: new SingleChildScrollView(
+                  child: new ListBody(
+                    children: <Widget>[
+                      new Text(content),
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  new MaterialButton(
+                    child: new Text('确定'),
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                  ),
+                  new MaterialButton(
+                    child: new Text('取消'),
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                ],
+              )) ??
+      false;
 }
 
-String formatTimeToDate(String str) {
-  try {
-    var c = DateTime.parse(str);
-    return "${add0(c.year, 4)}-${add0(c.month, 2)}-${add0(c.day, 2)}";
-  } catch (e) {
-    return "-";
-  }
+void alertDialog(BuildContext context, String title, String content) {
+  showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+            title: Text(title),
+            content: new SingleChildScrollView(
+              child: new ListBody(
+                children: <Widget>[
+                  new Text(content),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              new MaterialButton(
+                child: new Text('确定'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ));
 }
-
 
 var _controller = TextEditingController.fromValue(TextEditingValue(text: ''));
 
 Future<void> displayTextInputDialog(
-    BuildContext context,
-    String title,
-    String hint,
-    String src,
-    String desc,
-    void Function(String) onConfirm,
-    ) async {
+  BuildContext context,
+  String title,
+  String hint,
+  String src,
+  String desc,
+  void Function(String) onConfirm,
+) async {
   _controller.text = src;
   return showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
         title: Text(title),
-        content: TextField(
-          controller: _controller,
-          decoration: InputDecoration(hintText: hint),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              TextField(
+                controller: _controller,
+                decoration: InputDecoration(hintText: hint),
+              ),
+              desc.isEmpty
+                  ? Container()
+                  : Container(
+                      padding: EdgeInsets.only(top: 20, bottom: 10),
+                      child: Text(
+                        desc,
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                ?.color
+                                ?.withOpacity(.5)),
+                      ),
+                    ),
+            ],
+          ),
         ),
         actions: <Widget>[
           MaterialButton(
@@ -77,4 +132,21 @@ Future<void> displayTextInputDialog(
       );
     },
   );
+}
+
+String add0(int num, int len) {
+  var rsp = "$num";
+  while (rsp.length < len) {
+    rsp = "0$rsp";
+  }
+  return rsp;
+}
+
+String formatTimeToDate(String str) {
+  try {
+    var c = DateTime.parse(str);
+    return "${add0(c.year, 4)}-${add0(c.month, 2)}-${add0(c.day, 2)}";
+  } catch (e) {
+    return "-";
+  }
 }

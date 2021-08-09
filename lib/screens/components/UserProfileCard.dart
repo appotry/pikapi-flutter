@@ -41,11 +41,13 @@ class _UserProfileCardState extends State<UserProfileCard> {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var nameStyle = TextStyle(fontWeight: FontWeight.bold);
-    var levelStyle =
-        TextStyle(fontSize: 12, color: theme.colorScheme.secondary.withOpacity(.8));
+    var levelStyle = TextStyle(
+        fontSize: 12, color: theme.colorScheme.secondary.withOpacity(.8));
     return ItemBuilder(
       future: _future,
-      onRefresh: () async => setState(() => _future = pica.userProfile()),
+      onRefresh: () async {
+        setState(() => _future = pica.userProfile());
+      },
       height: 150,
       successBuilder:
           (BuildContext context, AsyncSnapshot<UserProfile> snapshot) {

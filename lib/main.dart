@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/screens/InitScreen.dart';
-import 'package:pikapi/screens/common/Navigatior.dart';
+import 'package:pikapi/basic/Navigatior.dart';
 
 import 'basic/Themes.dart';
 

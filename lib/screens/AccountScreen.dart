@@ -4,6 +4,7 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/enum/Address.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/screens/RegisterScreen.dart';
+import 'package:pikapi/screens/components/NetworkSetting.dart';
 
 import 'AppScreen.dart';
 import 'DownloadListScreen.dart';
@@ -19,8 +20,6 @@ class _AccountScreenState extends State<AccountScreen> {
   late bool _logging = false;
   late String _username = "";
   late String _password = "";
-  late String _address = "";
-  late String _proxy = "";
 
   @override
   void initState() {
@@ -31,13 +30,9 @@ class _AccountScreenState extends State<AccountScreen> {
   Future _loadProperties() async {
     var username = await pica.getUsername();
     var password = await pica.getPassword();
-    var address = await pica.getSwitchAddress();
-    var proxy = await pica.getProxy();
     setState(() {
       _username = username;
       _password = password;
-      _address = address;
-      _proxy = proxy;
     });
   }
 
@@ -111,39 +106,7 @@ class _AccountScreenState extends State<AccountScreen> {
               );
             },
           ),
-          ListTile(
-            title: Text("分流"),
-            subtitle: Text(addressName(_address)),
-            onTap: () async {
-              var address = await chooseAddress(context);
-              if (address != null) {
-                await pica.setSwitchAddress(address);
-                setState(() {
-                  _address = address;
-                });
-              }
-            },
-          ),
-          ListTile(
-            title: Text("代理服务器"),
-            subtitle: Text(
-                _proxy == "" ? "未设置 ( 例如 socks5://127.0.0.1:1080/ )" : _proxy),
-            onTap: () {
-              displayTextInputDialog(
-                context,
-                '代理服务器',
-                '请输入代理服务器',
-                _proxy,
-                "",
-                (value) async {
-                  await pica.setProxy(value);
-                  setState(() {
-                    _proxy = value;
-                  });
-                },
-              );
-            },
-          ),
+          NetworkSetting(),
           Row(
             children: [
               Expanded(

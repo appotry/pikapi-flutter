@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/screens/common/Navigatior.dart';
+import 'package:pikapi/basic/Navigatior.dart';
 
 import '../ComicInfoScreen.dart';
 import 'ComicInfoCard.dart';

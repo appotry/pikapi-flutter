@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Themes.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 import 'package:pikapi/screens/AboutScreen.dart';
@@ -6,8 +7,10 @@ import 'package:pikapi/screens/AccountScreen.dart';
 import 'package:pikapi/screens/CleanScreen.dart';
 import 'package:pikapi/screens/DownloadListScreen.dart';
 import 'package:pikapi/screens/FavouritePaperScreen.dart';
+import 'package:pikapi/screens/NetworkSettingScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/screens/components/NetworkSetting.dart';
 
 import 'components/UserProfileCard.dart';
 
@@ -54,13 +57,19 @@ class _SpaceScreenState extends State<SpaceScreen> {
             icon: Icon(Icons.info_outline),
           ),
           IconButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => AccountScreen()),
-              );
+            onPressed: () async {
+              bool result =
+                  await confirmDialog(context, '退出登录', '您确认要退出当前账号吗?');
+              if (result) {
+                await pica.clearToken();
+                await pica.setPassword("");
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AccountScreen()),
+                );
+              }
             },
-            icon: Icon(Icons.manage_accounts),
+            icon: Icon(Icons.exit_to_app),
           ),
         ],
       ),
@@ -85,6 +94,26 @@ class _SpaceScreenState extends State<SpaceScreen> {
           ),
           Divider(),
           ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NetworkSettingScreen()),
+              );
+            },
+            title: Text('网络设置'),
+          ),
+          Divider(),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CleanScreen()),
+              );
+            },
+            title: Text('清除缓存'),
+          ),
+          Divider(),
+          ListTile(
             title: Text("浏览时的图片质量"),
             subtitle: Text(qualityName(_quality)),
             onTap: () async {
@@ -96,16 +125,6 @@ class _SpaceScreenState extends State<SpaceScreen> {
                 });
               }
             },
-          ),
-          Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CleanScreen()),
-              );
-            },
-            title: Text('清除缓存'),
           ),
           Divider(),
           ListTile(
