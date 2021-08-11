@@ -1,5 +1,6 @@
 const ERROR_TYPE_NETWORK = "NETWORK_ERROR";
 
+// 错误的类型, 方便照展示和谐的提示
 String errorType(String error) {
   // EXCEPTION
   // Get "https://picaapi.picacomic.com/categories": net/http: TLS handshake timeout

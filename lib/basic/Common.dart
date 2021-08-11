@@ -20,7 +20,8 @@ void defaultToast(BuildContext context, String title) {
   );
 }
 
-Future<bool> confirmDialog(BuildContext context, String title, String content) async {
+Future<bool> confirmDialog(
+    BuildContext context, String title, String content) async {
   return await showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -50,8 +51,8 @@ Future<bool> confirmDialog(BuildContext context, String title, String content) a
       false;
 }
 
-void alertDialog(BuildContext context, String title, String content) {
-  showDialog(
+Future alertDialog(BuildContext context, String title, String content) {
+  return showDialog(
       context: context,
       builder: (context) => AlertDialog(
             title: Text(title),
@@ -71,6 +72,29 @@ void alertDialog(BuildContext context, String title, String content) {
               ),
             ],
           ));
+}
+
+Future<T?> chooseDialog<T>(
+  BuildContext context,
+  String title,
+  List<T> items,
+) async {
+  return showDialog<T>(
+    context: context,
+    builder: (BuildContext context) {
+      return SimpleDialog(
+        title: Text(title),
+        children: items
+            .map((e) => SimpleDialogOption(
+                  onPressed: () {
+                    Navigator.of(context).pop(e);
+                  },
+                  child: Text('$e'),
+                ))
+            .toList(),
+      );
+    },
+  );
 }
 
 var _controller = TextEditingController.fromValue(TextEditingValue(text: ''));

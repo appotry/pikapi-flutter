@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:io';
+
+import 'package:pikapi/screens/FilePhotoViewScreen.dart';
 
 // 来自下载
 class DownloadReaderImage extends ReaderImage {
@@ -103,22 +107,36 @@ class _ReaderImageState extends State<ReaderImage> {
             // true size
             var data = snapshot.data!;
             var height = width * data.height / data.width;
-            return Image.file(
-              File(data.finalPath),
-              width: width,
-              height: height,
-              errorBuilder: (a, b, c) => Container(
+            return GestureDetector(
+              onLongPress: () async {
+                String? choose = await chooseDialog(context, '请选择', [
+                  '预览图片',
+                ]);
+                switch (choose) {
+                  case '预览图片':
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => FilePhotoViewScreen(data.finalPath),
+                    ));
+                    break;
+                }
+              },
+              child: Image.file(
+                File(data.finalPath),
                 width: width,
                 height: height,
-                child: Center(
-                  child: Icon(
-                    Icons.broken_image,
-                    color: Colors.grey.shade400,
-                    size: width / 2.5,
+                errorBuilder: (a, b, c) => Container(
+                  width: width,
+                  height: height,
+                  child: Center(
+                    child: Icon(
+                      Icons.broken_image,
+                      color: Colors.grey.shade400,
+                      size: width / 2.5,
+                    ),
                   ),
                 ),
+                fit: BoxFit.cover,
               ),
-              fit: BoxFit.cover,
             );
           },
         );
