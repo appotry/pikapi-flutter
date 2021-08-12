@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 
 final pica = Pica._();
@@ -32,6 +33,20 @@ class Pica {
     });
   }
 
+  Future<PagerType> loadPagerType() async {
+    return pagerTypeFromString(await _flatInvoke("loadProperty", {
+      "name": "pagerType",
+      "defaultValue": PagerType.WEB_TOON.toString(),
+    }));
+  }
+
+  Future<dynamic> savePagerType(PagerType pagerType) async {
+    return await _flatInvoke("saveProperty", {
+      "name": "pagerType",
+      "value": pagerType.toString(),
+    });
+  }
+
   Future<String> loadQuality() async {
     return await _flatInvoke("loadProperty", {
       "name": "quality",
@@ -42,10 +57,7 @@ class Pica {
   Future<dynamic> saveQuality(String code) async {
     return await _flatInvoke("saveProperty", {
       "name": "quality",
-      "defaultValue": {
-        "name": "quality",
-        "value": code,
-      },
+      "value": code,
     });
   }
 
@@ -380,5 +392,4 @@ class Pica {
     }
     return [url];
   }
-
 }

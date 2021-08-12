@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/enum/Address.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/basic/enum/ErrorTypes.dart';
 import 'package:pikapi/screens/RegisterScreen.dart';
 import 'package:pikapi/screens/components/NetworkSetting.dart';
 
@@ -145,11 +146,16 @@ class _AccountScreenState extends State<AccountScreen> {
         context,
         MaterialPageRoute(builder: (context) => AppScreen()),
       );
-    } catch (e) {
-      print(e);
+    } catch (e, s) {
+      print("$e\n$s");
       setState(() {
         _logging = false;
       });
+      alertDialog(
+        context,
+        '登录失败',
+        errorType("$e") == ERROR_TYPE_NETWORK ? '网络不通' : '请检查账号密码',
+      );
     }
   }
 

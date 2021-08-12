@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/screens/components/ContentBuilder.dart';
 
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
@@ -31,9 +32,9 @@ class ComicReaderScreen extends StatefulWidget {
 class _ComicReaderScreenState extends State<ComicReaderScreen> {
   late Ep _ep;
   late bool _fullScreen = false;
-  late Future<List<RemoteReaderImage>> _future;
+  late Future<List<PicaImage>> _future;
 
-  Future<List<RemoteReaderImage>> _load() async {
+  Future<List<PicaImage>> _load() async {
     if (widget.initPictureRank == null) {
       await pica.storeViewEp(widget.comicInfo.id, _ep.order, _ep.title, 1);
     }
@@ -50,13 +51,12 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
       );
       list.addAll(page.docs.map((element) => element.media));
     } while (page.pages > page.page);
-    return list.map((e) => RemoteReaderImage(e.fileServer, e.path)).toList();
+    return list;
   }
 
   Future _onPositionChange(int position) async {
     return pica.storeViewEp(
-        widget.comicInfo.id, _ep.order, _ep.title, position);
-    // 暂时删除了+1
+        widget.comicInfo.id, _ep.order, _ep.title, position + 1);
   }
 
   @override
@@ -84,46 +84,48 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
           : AppBar(
               title: Text("${_ep.title} - ${widget.comicInfo.title}"),
             ),
-      body: _buildReader(),
+      body: ContentBuilder(
+        future: _future,
+        onRefresh: () async {
+          setState(() {
+            _future = _load();
+          });
+        },
+        successBuilder:
+            (BuildContext context, AsyncSnapshot<List<PicaImage>> snapshot) {
+          return ImageReader(
+            ImageReaderStruct(
+              images: snapshot.data!
+                  .map((e) => ReaderImageInfo(
+                        e.fileServer,
+                        e.path,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                      ))
+                  .toList(),
+              fullScreen: _fullScreen,
+              onFullScreenChange: _onFullScreenChange,
+              onNextEp: _next,
+              onPositionChange: _onPositionChange,
+              initPosition: widget.initPictureRank == null
+                  ? null
+                  : widget.initPictureRank! - 1,
+            ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildReader() {
-    return FutureBuilder(
-      future: _future,
-      builder: (BuildContext context,
-          AsyncSnapshot<List<RemoteReaderImage>> snapshot) {
-        if (snapshot.hasError) {
-          return ContentError(
-              error: snapshot.error,
-              stackTrace: snapshot.stackTrace,
-              onRefresh: () async {
-                setState(() {
-                  _future = _load();
-                });
-              });
-        }
-        if (snapshot.connectionState != ConnectionState.done) {
-          return ContentLoading(label: '加载中');
-        }
-        return ImageReader(
-          images: snapshot.data!,
-          fullScreen: _fullScreen,
-          onFullScreenChange: (fullScreen) {
-            setState(() {
-              _fullScreen = fullScreen;
-              SystemChrome.setEnabledSystemUIOverlays(
-                  fullScreen ? [] : SystemUiOverlay.values);
-            });
-          },
-          onNextEp: _next,
-          onPositionChange: _onPositionChange,
-          initPosition: widget.initPictureRank == null
-              ? null
-              : widget.initPictureRank! - 1,
-        );
-      },
-    );
+  void _onFullScreenChange(bool fullScreen) {
+    setState(() {
+      _fullScreen = fullScreen;
+      SystemChrome.setEnabledSystemUIOverlays(
+          fullScreen ? [] : SystemUiOverlay.values);
+    });
   }
 
   void _next() {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/screens/components/ContentBuilder.dart';
 import 'components/Images.dart';
 import 'package:pikapi/basic/Pica.dart';
 
@@ -33,7 +34,6 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
   late DownloadEp _ep;
   late bool _fullScreen = false;
   late List<DownloadPicture> pictures = [];
-  late List<Widget> images = [];
   late Future _future = _load();
 
   Future _load() async {
@@ -41,22 +41,16 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
       await pica.storeViewEp(widget.comicInfo.id, _ep.epOrder, _ep.title, 1);
     }
     pictures.clear();
-    images.clear();
     for (var ep in widget.epList) {
       if (ep.epOrder == widget.currentEpOrder) {
         pictures.addAll((await pica.downloadPicturesByEpId(ep.id)));
       }
     }
-    images.addAll(await _buildImages(pictures));
-  }
-
-  Future<List<Widget>> _buildImages(List<DownloadPicture> pictures) async {
-    return pictures.map((e) => DownloadReaderImage(e)).toList();
   }
 
   Future _onPositionChange(int position) async {
-    return pica.storeViewEp(widget.comicInfo.id, _ep.epOrder, _ep.title, position);
-    // 暂时删除了+1
+    return pica.storeViewEp(
+        widget.comicInfo.id, _ep.epOrder, _ep.title, position + 1);
   }
 
   @override
@@ -84,45 +78,41 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
           : AppBar(
               title: Text("${_ep.title} - ${widget.comicInfo.title}"),
             ),
-      body: _buildReader(),
+      body: ContentBuilder(
+        future: _future,
+        onRefresh: () async {
+          setState(() {
+            _future = _load();
+          });
+        },
+        successBuilder:
+            (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          return ImageReader(
+            ImageReaderStruct(
+              images: pictures
+                  .map((e) => ReaderImageInfo(e.fileServer, e.path, e.localPath,
+                      e.width, e.height, e.format, e.fileSize))
+                  .toList(),
+              fullScreen: _fullScreen,
+              onFullScreenChange: _onFullScreenChange,
+              onNextEp: _next,
+              onPositionChange: _onPositionChange,
+              initPosition: widget.initPictureRank == null
+                  ? null
+                  : widget.initPictureRank! - 1,
+            ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildReader() {
-    return FutureBuilder(
-      future: _future,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasError) {
-          return ContentError(
-              error: snapshot.error,
-              stackTrace: snapshot.stackTrace,
-              onRefresh: () async {
-                setState(() {
-                  _future = _load();
-                });
-              });
-        }
-        if (snapshot.connectionState != ConnectionState.done) {
-          return ContentLoading(label: '加载中');
-        }
-        return ImageReader(
-          images: images,
-          fullScreen: _fullScreen,
-          onFullScreenChange: (fullScreen) {
-            setState(() {
-              _fullScreen = fullScreen;
-              SystemChrome.setEnabledSystemUIOverlays(
-                  fullScreen ? [] : SystemUiOverlay.values);
-            });
-          },
-          onNextEp: _next,
-          onPositionChange: _onPositionChange,
-          initPosition: widget.initPictureRank == null
-              ? null
-              : widget.initPictureRank! - 1,
-        );
-      },
-    );
+  void _onFullScreenChange(bool fullScreen) {
+    setState(() {
+      _fullScreen = fullScreen;
+      SystemChrome.setEnabledSystemUIOverlays(
+          fullScreen ? [] : SystemUiOverlay.values);
+    });
   }
 
   void _next() {

@@ -7,7 +7,8 @@ import 'package:pikapi/screens/AccountScreen.dart';
 import 'package:pikapi/screens/CleanScreen.dart';
 import 'package:pikapi/screens/DownloadListScreen.dart';
 import 'package:pikapi/screens/FavouritePaperScreen.dart';
-import 'package:pikapi/screens/NetworkSettingScreen.dart';
+import 'package:pikapi/screens/NetworkSettingsScreen.dart';
+import 'package:pikapi/screens/ReaderSettingsScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/screens/components/NetworkSetting.dart';
@@ -24,20 +25,17 @@ class SpaceScreen extends StatefulWidget {
 
 class _SpaceScreenState extends State<SpaceScreen> {
   String _theme = "";
-  String _quality = "";
 
-  Future<dynamic> init() async {
+  Future<dynamic> _init() async {
     var theme = await pica.loadTheme();
-    var quality = await pica.loadQuality();
     setState(() {
       _theme = theme;
-      _quality = quality;
     });
   }
 
   @override
   void initState() {
-    init();
+    _init();
     super.initState();
   }
 
@@ -97,7 +95,8 @@ class _SpaceScreenState extends State<SpaceScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => NetworkSettingScreen()),
+                MaterialPageRoute(
+                    builder: (context) => NetworkSettingsScreen()),
               );
             },
             title: Text('网络设置'),
@@ -114,17 +113,13 @@ class _SpaceScreenState extends State<SpaceScreen> {
           ),
           Divider(),
           ListTile(
-            title: Text("浏览时的图片质量"),
-            subtitle: Text(qualityName(_quality)),
-            onTap: () async {
-              String? quality = await chooseQuality(context, "请选择浏览时的图片质量");
-              if (quality != null) {
-                pica.saveQuality(quality);
-                setState(() {
-                  _quality = quality;
-                });
-              }
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ReaderSettingsScreen()),
+              );
             },
+            title: Text('阅读器设置'),
           ),
           Divider(),
           ListTile(
