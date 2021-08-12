@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 
 enum PagerType {
   WEB_TOON,
-  PAGE_WEB_TOON,
+  WEB_TOON_ZOOM,
+  WEB_TOON_PAGE,
 }
+
+var types = {
+  'WebToon (默认)': PagerType.WEB_TOON,
+  'WebToon + 双击放大 (试验性)': PagerType.WEB_TOON_ZOOM,
+  'WebToon + 分页 (还没做完)': PagerType.WEB_TOON_PAGE,
+};
 
 PagerType pagerTypeFromString(String pagerType) {
   for (var value in PagerType.values) {
@@ -16,12 +23,12 @@ PagerType pagerTypeFromString(String pagerType) {
 }
 
 String pagerTypeName(PagerType pagerType) {
-  switch (pagerType) {
-    case PagerType.WEB_TOON:
-      return 'WebToon';
-    case PagerType.PAGE_WEB_TOON:
-      return 'WebToon (分页/缩放) (试验性双击放大)';
+  for (var e in types.entries) {
+    if (e.value == pagerType) {
+      return e.key;
+    }
   }
+  return '';
 }
 
 Future<PagerType?> choosePagerType(BuildContext buildContext) async {
@@ -30,20 +37,14 @@ Future<PagerType?> choosePagerType(BuildContext buildContext) async {
     builder: (BuildContext context) {
       return SimpleDialog(
         title: Text("选择阅读模式"),
-        children: [
-          SimpleDialogOption(
-            child: Text("WebToon"),
-            onPressed: () {
-              Navigator.of(context).pop(PagerType.WEB_TOON);
-            },
-          ),
-          SimpleDialogOption(
-            child: Text("WebToon (分页/缩放)"),
-            onPressed: () {
-              Navigator.of(context).pop(PagerType.PAGE_WEB_TOON);
-            },
-          ),
-        ],
+        children: types.entries
+            .map((e) => SimpleDialogOption(
+                  child: Text(e.key),
+                  onPressed: () {
+                    Navigator.of(context).pop(e.value);
+                  },
+                ))
+            .toList(),
       );
     },
   );
