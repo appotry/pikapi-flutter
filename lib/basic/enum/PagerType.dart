@@ -9,8 +9,8 @@ enum PagerType {
 
 var types = {
   'WebToon (默认)': PagerType.WEB_TOON,
-  'WebToon + 双击放大 (试验性)': PagerType.WEB_TOON_ZOOM,
-  'WebToon + 分页 (还没做完)': PagerType.WEB_TOON_PAGE,
+  'WebToon + 双指放大 (试验性)': PagerType.WEB_TOON_ZOOM,
+  'WebToon + 分页 + 双击放大 (试验性)': PagerType.WEB_TOON_PAGE,
 };
 
 PagerType pagerTypeFromString(String pagerType) {

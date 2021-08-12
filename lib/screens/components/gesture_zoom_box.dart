@@ -1,42 +1,17 @@
-//
-
-/*
- * Copyright (c) 2015-2019 StoneHui
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-library gesture_zoom_box;
-
+import 'package:flutter/material.dart';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-
-/// 可缩放/平移的盒子小部件
 class GestureZoomBox extends StatefulWidget {
   final double maxScale;
   final double doubleTapScale;
   final Widget child;
-  final VoidCallback? onPressed;
   final Duration duration;
 
-  /// 通过最大缩放比例 [maxScale]、双击缩放比例 [doubleTapScale]、子部件 [child]、点击事件 [onPressed] 创建小部件
   const GestureZoomBox({
     Key? key,
-    this.maxScale = 5.0,
+    this.maxScale = 2.0,
     this.doubleTapScale = 2.0,
     required this.child,
-    this.onPressed,
     this.duration = const Duration(milliseconds: 200),
   })  : assert(maxScale >= 1.0),
         assert(doubleTapScale >= 1.0 && doubleTapScale <= maxScale),
@@ -50,29 +25,18 @@ class GestureZoomBox extends StatefulWidget {
 
 class _GestureZoomBoxState extends State<GestureZoomBox>
     with TickerProviderStateMixin {
-  // 缩放动画控制器
-  AnimationController? _scaleAnimController;
+  AnimationController? _scaleAnimController; // 缩放动画控制器
+  AnimationController? _offsetAnimController; // 偏移动画控制器
+  ScaleUpdateDetails? _latestScaleUpdateDetails; // 上次缩放变化数据
 
-  // 偏移动画控制器
-  AnimationController? _offsetAnimController;
-
-  // 上次缩放变化数据
-  ScaleUpdateDetails? _latestScaleUpdateDetails;
-
-  // 当前缩放值
-  double _scale = 1.0;
-
-  // 当前偏移值
-  Offset _offset = Offset.zero;
-
-  // 双击缩放的点击位置
-  Offset? _doubleTapPosition;
+  double _scale = 1.0; // 当前缩放值
+  Offset _offset = Offset.zero; // 当前偏移值
+  Offset? _doubleTapPosition; // 双击缩放的点击位置
 
   bool _isScaling = false;
   bool _isDragging = false;
 
-  // 拖动超出边界的最大值
-  double _maxDragOver = 100;
+  double _maxDragOver = 100; // 拖动超出边界的最大值
 
   @override
   void initState() {
@@ -89,7 +53,6 @@ class _GestureZoomBoxState extends State<GestureZoomBox>
       child: Listener(
         onPointerUp: _onPointerUp,
         child: GestureDetector(
-          onTap: widget.onPressed,
           onDoubleTap: _onDoubleTap,
           onScaleStart: _onScaleStart,
           onScaleUpdate: _onScaleUpdate,
@@ -197,10 +160,10 @@ class _GestureZoomBoxState extends State<GestureZoomBox>
 
     // 计算本次拖动增量
     double offsetXIncrement = (details.localFocalPoint.dx -
-        latestScaleUpdateDetails.localFocalPoint.dx) *
+            latestScaleUpdateDetails.localFocalPoint.dx) *
         _scale;
     double offsetYIncrement = (details.localFocalPoint.dy -
-        latestScaleUpdateDetails.localFocalPoint.dy) *
+            latestScaleUpdateDetails.localFocalPoint.dy) *
         _scale;
     // 处理 X 轴边界
     double scaleOffsetX = size.width * (_scale - 1.0) / 2;
@@ -234,11 +197,9 @@ class _GestureZoomBoxState extends State<GestureZoomBox>
   /// 缩放/拖动结束
   _onScaleEnd(ScaleEndDetails details) {
     final size = context.size;
-
     if (size == null) {
       return;
     }
-
     if (_scale < 1.0) {
       // 缩放值过小，恢复到 1.0
       _animationScale(1.0);
@@ -278,7 +239,7 @@ class _GestureZoomBoxState extends State<GestureZoomBox>
       } else {
         // 处理 X 轴边界
         double duration =
-        (widget.duration.inSeconds + widget.duration.inMilliseconds / 1000);
+            (widget.duration.inSeconds + widget.duration.inMilliseconds / 1000);
         Offset targetOffset =
             _offset + details.velocity.pixelsPerSecond * duration;
         targetOffsetX = targetOffset.dx;
