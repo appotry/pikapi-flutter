@@ -2,6 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
+double coverWidth = 210;
+double coverHeight = 315;
+
 String categoryTitle(String? categoryTitle) {
   return categoryTitle ?? "全分类";
 }
@@ -74,7 +77,7 @@ Future alertDialog(BuildContext context, String title, String content) {
           ));
 }
 
-Future<T?> chooseDialog<T>(
+Future<T?> chooseListDialog<T>(
   BuildContext context,
   String title,
   List<T> items,
@@ -91,6 +94,27 @@ Future<T?> chooseDialog<T>(
                   },
                   child: Text('$e'),
                 ))
+            .toList(),
+      );
+    },
+  );
+}
+
+
+Future<T?> chooseMapDialog<T>(
+    BuildContext buildContext, Map<String, T> values, String title) async {
+  return await showDialog<T>(
+    context: buildContext,
+    builder: (BuildContext context) {
+      return SimpleDialog(
+        title: Text(title),
+        children: values.entries
+            .map((e) => SimpleDialogOption(
+          child: Text(e.key),
+          onPressed: () {
+            Navigator.of(context).pop(e.value);
+          },
+        ))
             .toList(),
       );
     },

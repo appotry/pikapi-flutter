@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Common.dart';
+import 'package:pikapi/basic/enum/ListLayout.dart';
 import 'package:pikapi/basic/enum/Sort.dart';
 import 'package:pikapi/basic/Pica.dart';
 import '../basic/Entities.dart';
@@ -44,7 +45,10 @@ class _SearchScreenState extends State<SearchScreen> {
     buildDefaultAppBar: (BuildContext context) {
       return AppBar(
         title: Text("${categoryTitle(widget.category)} ${widget.keyword}"),
-        actions: [_searchBar.getSearchAction(context)],
+        actions: [
+          chooseLayoutAction(context),
+          _searchBar.getSearchAction(context),
+        ],
       );
     },
   );

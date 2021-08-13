@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'ComicInfoCardLinked.dart';
+import 'package:pikapi/screens/components/ComicInfoCard.dart';
+import 'LinkToComicInfo.dart';
 import 'ContentBuilder.dart';
 
 class ComicListBuilder extends StatelessWidget {
@@ -20,7 +21,10 @@ class ComicListBuilder extends StatelessWidget {
           onRefresh: reload,
           child: ListView(
             children: [
-              ...snapshot.data!.map((e) => LinkedComicInfoCard(e)),
+              ...snapshot.data!.map((e) => LinkToComicInfo(
+                    comicId: e.id,
+                    child: ComicInfoCard(e),
+                  )),
               MaterialButton(
                 onPressed: reload,
                 child: Container(

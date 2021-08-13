@@ -13,9 +13,9 @@ var types = {
   'WebToon + 分页 + 双击放大 (试验性)': PagerType.WEB_TOON_PAGE,
 };
 
-PagerType pagerTypeFromString(String pagerType) {
+PagerType pagerTypeFromString(String pagerTypeString) {
   for (var value in PagerType.values) {
-    if (pagerType == value.toString()) {
+    if (pagerTypeString == value.toString()) {
       return value;
     }
   }

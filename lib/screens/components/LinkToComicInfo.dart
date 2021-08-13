@@ -5,19 +5,23 @@ import 'package:pikapi/basic/Navigatior.dart';
 import '../ComicInfoScreen.dart';
 import 'ComicInfoCard.dart';
 
-class LinkedComicInfoCard extends StatelessWidget {
-  final ComicSimple info;
+class LinkToComicInfo extends StatelessWidget {
+  final String comicId;
+  final Widget child;
 
-  const LinkedComicInfoCard(this.info);
+  const LinkToComicInfo({
+    required this.comicId,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) => InkWell(
         onTap: () {
           navPushOrReplace(
             context,
-            (context) => ComicInfoScreen(comicId: info.id),
+            (context) => ComicInfoScreen(comicId: comicId),
           );
         },
-        child: ComicInfoCard(info),
+        child: child,
       );
 }

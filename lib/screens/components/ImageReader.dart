@@ -454,7 +454,7 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
 
             return GestureDetector(
               onLongPress: () async {
-                String? choose = await chooseDialog(context, '请选择', [
+                String? choose = await chooseListDialog(context, '请选择', [
                   '预览图片',
                 ]);
                 switch (choose) {
@@ -651,10 +651,8 @@ class _WebToonPageReaderState extends State<_WebToonPageReader> {
 
                           return GestureDetector(
                             onLongPress: () async {
-                              String? choose =
-                                  await chooseDialog(context, '请选择', [
-                                '预览图片',
-                              ]);
+                              String? choose = await chooseListDialog(
+                                  context, '请选择', ['预览图片']);
                               switch (choose) {
                                 case '预览图片':
                                   Navigator.of(context).push(MaterialPageRoute(

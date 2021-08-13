@@ -5,6 +5,8 @@ import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 
+import 'enum/ListLayout.dart';
+
 final pica = Pica._();
 
 class Pica {
@@ -44,6 +46,20 @@ class Pica {
     return await _flatInvoke("saveProperty", {
       "name": "pagerType",
       "value": pagerType.toString(),
+    });
+  }
+
+  Future<ListLayout> loadListLayout() async {
+    return listLayoutFromString(await _flatInvoke("loadProperty", {
+      "name": "listLayout",
+      "defaultValue": ListLayout.INFO_CARD.toString(),
+    }));
+  }
+
+  Future<dynamic> saveListLayout(ListLayout layout) async {
+    return await _flatInvoke("saveProperty", {
+      "name": "listLayout",
+      "value": layout.toString(),
     });
   }
 

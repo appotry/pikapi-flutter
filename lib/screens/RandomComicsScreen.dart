@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/screens/components/ComicInfoCardLinked.dart';
-import 'package:pikapi/screens/components/ContentBuilder.dart';
 
 import 'components/ComicsListBuilder.dart';
 
