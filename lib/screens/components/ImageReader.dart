@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:another_xlider/another_xlider.dart';
 import 'package:flutter/material.dart';
@@ -19,14 +18,14 @@ import 'Images.dart';
 class ReaderImageInfo {
   final String fileServer;
   final String path;
-  final String? localPath;
+  final String? downloadLocalPath;
   final int? width;
   final int? height;
   final String? format;
   final int? fileSize;
 
-  ReaderImageInfo(this.fileServer, this.path, this.localPath, this.width,
-      this.height, this.format, this.fileSize);
+  ReaderImageInfo(this.fileServer, this.path, this.downloadLocalPath,
+      this.width, this.height, this.format, this.fileSize);
 }
 
 class ImageReaderStruct {
@@ -47,41 +46,24 @@ class ImageReaderStruct {
   });
 }
 
-class ImageReader extends StatefulWidget {
+class ImageReader extends StatelessWidget {
   final ImageReaderStruct struct;
+  final PagerType pagerType;
 
-  const ImageReader(this.struct);
-
-  @override
-  State<StatefulWidget> createState() => _ImageReaderState();
-}
-
-class _ImageReaderState extends State<ImageReader> {
-  Future<PagerType> _future = pica.loadPagerType();
+  const ImageReader(this.struct, this.pagerType);
 
   @override
   Widget build(BuildContext context) {
-    return ContentBuilder(
-      future: _future,
-      onRefresh: () async {
-        setState(() {
-          _future = pica.loadPagerType();
-        });
-      },
-      successBuilder:
-          (BuildContext context, AsyncSnapshot<PagerType> snapshot) {
-        switch (snapshot.data!) {
-          case PagerType.WEB_TOON:
-            return _WebToonReader(widget.struct);
-          case PagerType.WEB_TOON_PAGE:
-            return _WebToonPageReader(widget.struct);
-          case PagerType.GALLERY:
-            return _GalleryReader(widget.struct);
-          default:
-            return Container();
-        }
-      },
-    );
+    switch (pagerType) {
+      case PagerType.WEB_TOON:
+        return _WebToonReader(struct);
+      case PagerType.WEB_TOON_PAGE:
+        return _WebToonPageReader(struct);
+      case PagerType.GALLERY:
+        return _GalleryReader(struct);
+      default:
+        return Container();
+    }
   }
 }
 
@@ -123,12 +105,12 @@ class _WebToonReaderState extends State<_WebToonReader> {
   void initState() {
     var index = 0;
     widget.struct.images.forEach((e) {
-      if (e.localPath != null) {
+      if (e.downloadLocalPath != null) {
         _sizes.add(_WebToonImageProportionSize(e.width!, e.height!));
         _images.add(_WebToonDownloadImage(
           fileServer: e.fileServer,
           path: e.path,
-          localPath: e.localPath!,
+          localPath: e.downloadLocalPath!,
           fileSize: e.fileSize!,
           width: e.width!,
           height: e.height!,
@@ -168,7 +150,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
       child: Stack(
         children: [
           _buildList(),
-          ..._buildControllers(),
+          SafeArea(child: Stack(children: _buildControllers())),
         ],
       ),
     );
@@ -199,129 +181,31 @@ class _WebToonReaderState extends State<_WebToonReader> {
   List<Widget> _buildControllers() {
     if (widget.struct.fullScreen) {
       return [
-        _buildFullScreenController(),
+        _buildFullScreenController(
+          widget.struct.fullScreen,
+          widget.struct.onFullScreenChange,
+        ),
       ];
     }
     return [
-      _buildFullScreenController(),
-      _buildScrollController(),
+      _buildFullScreenController(
+        widget.struct.fullScreen,
+        widget.struct.onFullScreenChange,
+      ),
+      _buildImageCount(_current, widget.struct.images.length),
+      _buildScrollController(
+        context,
+        _current,
+        _slider,
+        widget.struct.images.length,
+        (value) => _slider = value,
+        () {
+          if (_slider != _current && _slider > 0) {
+            _itemScrollController.jumpTo(index: _slider - 1);
+          }
+        },
+      ),
     ];
-  }
-
-  Widget _buildFullScreenController() {
-    return Container(
-      child: Column(
-        children: [
-          Expanded(child: Container()),
-          Row(
-            children: [
-              Material(
-                color: Color(0x0),
-                child: Container(
-                  padding:
-                      EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    color: Color(0x88000000),
-                  ),
-                  margin: EdgeInsets.only(bottom: 5),
-                  child: GestureDetector(
-                    onTap: () {
-                      widget.struct
-                          .onFullScreenChange(!widget.struct.fullScreen);
-                    },
-                    child: Icon(
-                      widget.struct.fullScreen
-                          ? Icons.fullscreen_exit
-                          : Icons.fullscreen_outlined,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScrollController() {
-    if (widget.struct.images.length == 0) {
-      return Container();
-    }
-    var theme = Theme.of(context);
-    return Container(
-      child: Row(
-        children: [
-          Expanded(child: Container()),
-          Material(
-            color: Color(0x0),
-            child: Container(
-              width: 40,
-              height: 300,
-              decoration: BoxDecoration(
-                color: Color(0x66000000),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                ),
-              ),
-              padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 8),
-              child: Center(
-                child: FlutterSlider(
-                  axis: Axis.vertical,
-                  values: [
-                    (_slider > widget.struct.images.length
-                            ? widget.struct.images.length
-                            : _slider)
-                        .toDouble()
-                  ],
-                  max: widget.struct.images.length.toDouble(),
-                  min: 1,
-                  onDragging: (handlerIndex, lowerValue, upperValue) {
-                    double a = lowerValue;
-                    _slider = a.toInt();
-                  },
-                  onDragCompleted: (handlerIndex, lowerValue, upperValue) {
-                    if (_slider != _current && _slider > 0) {
-                      _itemScrollController.jumpTo(index: _slider - 1);
-                    }
-                  },
-                  trackBar: FlutterSliderTrackBar(
-                    inactiveTrackBar: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.grey.shade300,
-                    ),
-                    activeTrackBar: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: theme.colorScheme.secondary,
-                    ),
-                  ),
-                  step: FlutterSliderStep(
-                    step: 1,
-                    isPercentRange: false,
-                  ),
-                  tooltip: FlutterSliderTooltip(custom: (value) {
-                    double a = value;
-                    return Container(
-                      padding: EdgeInsets.all(5),
-                      color: Colors.white,
-                      child: Text('${a.toInt()}',
-                          style: TextStyle(color: Colors.black)),
-                    );
-                  }),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildNextEp() {
@@ -506,176 +390,88 @@ class _GalleryReaderState extends State<_GalleryReader> {
     return Stack(
       children: [
         _buildViewer(),
-        ..._buildControllers(),
+        SafeArea(child: Stack(children: _buildControllers())),
       ],
     );
   }
 
   Widget _buildViewer() {
     return PhotoViewGallery.builder(
+      backgroundDecoration: BoxDecoration(color: Colors.black),
+      loadingBuilder: (context, event) => LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return buildLoading(constraints.maxWidth, constraints.maxHeight);
+        },
+      ),
+      pageController: _pageController,
       onPageChanged: (value) {
-        print("VALUE : $value");
         setState(() {
           _current = value + 1;
+          _slider = value + 1;
           widget.struct.onPositionChange(value);
         });
       },
-      pageController: _pageController,
       itemCount: widget.struct.images.length,
       builder: (BuildContext context, int index) {
         var item = widget.struct.images[index];
-        if (item.localPath != null) {
+        if (item.downloadLocalPath != null) {
           return PhotoViewGalleryPageOptions(
-            imageProvider: PicaFileImageProvider(item.localPath!),
+            imageProvider:
+                PicaDownloadFileImageProvider(item.downloadLocalPath!),
+            errorBuilder: (b, e, s) {
+              print("$e,$s");
+              return LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return buildError(
+                      constraints.maxWidth, constraints.maxHeight);
+                },
+              );
+            },
           );
         }
         return PhotoViewGalleryPageOptions(
           imageProvider: PicaRemoteImageProvider(item.fileServer, item.path),
+          errorBuilder: (b, e, s) {
+            print("$e,$s");
+            return LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return buildError(constraints.maxWidth, constraints.maxHeight);
+              },
+            );
+          },
         );
       },
     );
   }
 
   List<Widget> _buildControllers() {
-    if (widget.struct.fullScreen) {
-      return [
-        _buildFullScreenController(),
-      ];
-    }
-    return [
-      _buildFullScreenController(),
-      _buildScrollController(),
+    var controllers = [
+      _buildFullScreenController(
+        widget.struct.fullScreen,
+        widget.struct.onFullScreenChange,
+      ),
     ];
-  }
-
-  Widget _buildFullScreenController() {
-    return Container(
-      child: Column(
-        children: [
-          Expanded(child: Container()),
-          Row(
-            children: [
-              Material(
-                color: Color(0x0),
-                child: Container(
-                  padding:
-                      EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    color: Color(0x88000000),
-                  ),
-                  margin: EdgeInsets.only(bottom: 5),
-                  child: GestureDetector(
-                    onTap: () {
-                      widget.struct
-                          .onFullScreenChange(!widget.struct.fullScreen);
-                    },
-                    child: Icon(
-                      widget.struct.fullScreen
-                          ? Icons.fullscreen_exit
-                          : Icons.fullscreen_outlined,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScrollController() {
-    if (widget.struct.images.length == 0) {
-      return Container();
-    }
-    var theme = Theme.of(context);
-    return Container(
-      child: Row(
-        children: [
-          Expanded(child: Container()),
-          Material(
-            color: Color(0x0),
-            child: Container(
-              width: 40,
-              height: 300,
-              decoration: BoxDecoration(
-                color: Color(0x66000000),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                ),
-              ),
-              padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 8),
-              child: Center(
-                child: FlutterSlider(
-                  axis: Axis.vertical,
-                  values: [
-                    (_slider > widget.struct.images.length
-                            ? widget.struct.images.length
-                            : _slider)
-                        .toDouble()
-                  ],
-                  max: widget.struct.images.length.toDouble(),
-                  min: 1,
-                  onDragging: (handlerIndex, lowerValue, upperValue) {
-                    double a = lowerValue;
-                    _slider = a.toInt();
-                  },
-                  onDragCompleted: (handlerIndex, lowerValue, upperValue) {
-                    if (_slider != _current && _slider > 0) {
-                      _pageController.jumpToPage(_slider - 1);
-                    }
-                  },
-                  trackBar: FlutterSliderTrackBar(
-                    inactiveTrackBar: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.grey.shade300,
-                    ),
-                    activeTrackBar: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: theme.colorScheme.secondary,
-                    ),
-                  ),
-                  step: FlutterSliderStep(
-                    step: 1,
-                    isPercentRange: false,
-                  ),
-                  tooltip: FlutterSliderTooltip(custom: (value) {
-                    double a = value;
-                    return Container(
-                      padding: EdgeInsets.all(5),
-                      color: Colors.white,
-                      child: Text('${a.toInt()}',
-                          style: TextStyle(color: Colors.black)),
-                    );
-                  }),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNextEp() {
-    return Container(
-      padding: EdgeInsets.all(20),
-      child: MaterialButton(
-        onPressed: widget.struct.onNextEp,
-        textColor: Colors.white,
-        child: Container(
-          padding: EdgeInsets.only(top: 40, bottom: 40),
-          child: Text("下一章"),
+    if (!widget.struct.fullScreen) {
+      controllers.addAll([
+        _buildImageCount(_current, widget.struct.images.length),
+        _buildScrollController(
+          context,
+          _current,
+          _slider,
+          widget.struct.images.length,
+          (value) => _slider = value,
+          () {
+            if (_slider != _current && _slider > 0) {
+              _pageController.jumpToPage(_slider - 1);
+            }
+          },
         ),
-      ),
-    );
+      ]);
+    }
+    if (_current == widget.struct.images.length) {
+      controllers.add(_buildNextEpController(widget.struct.onNextEp));
+    }
+    return controllers;
   }
 }
 
@@ -691,8 +487,10 @@ class _WebToonPageReader extends StatefulWidget {
 }
 
 class _WebToonPageReaderState extends State<_WebToonPageReader> {
-  int _page = 0;
-  int _pageSize = 10;
+  final int _pageSize = 10;
+  late int _page = widget.struct.initPosition != null
+      ? widget.struct.initPosition! ~/ _pageSize
+      : 0;
   late Future<List<_PageWebToonImageStatus>> _pageStatus = _initPage();
 
   void _prePage() {
@@ -723,12 +521,12 @@ class _WebToonPageReaderState extends State<_WebToonPageReader> {
         index < len && index < (_page + 1) * _pageSize;
         index++) {
       var item = widget.struct.images[index];
-      if (item.localPath != null && item.localPath != "") {
+      if (item.downloadLocalPath != null && item.downloadLocalPath != "") {
         var status = _PageWebToonImageStatus();
         status.status = _ImageStatusSuccess;
         status.width = item.width!;
         status.height = item.height!;
-        status.path = await pica.downloadImagePath(item.localPath!);
+        status.path = await pica.downloadImagePath(item.downloadLocalPath!);
         list.add(status);
       } else {
         var status = _PageWebToonImageStatus();
@@ -779,7 +577,7 @@ class _WebToonPageReaderState extends State<_WebToonPageReader> {
             GestureZoomBox(
               child: _buildViewer(snapshot.data!),
             ),
-            ..._buildControllers(),
+            SafeArea(child: Stack(children: _buildControllers())),
           ],
         );
       },
@@ -854,55 +652,22 @@ class _WebToonPageReaderState extends State<_WebToonPageReader> {
   List<Widget> _buildControllers() {
     if (widget.struct.fullScreen) {
       return [
-        _buildFullScreenController(),
+        _buildFullScreenController(
+          widget.struct.fullScreen,
+          widget.struct.onFullScreenChange,
+        ),
+        _buildImageCount(
+            _page + 1, (widget.struct.images.length / _pageSize).ceil()),
       ];
     }
     return [
-      _buildFullScreenController(),
+      _buildFullScreenController(
+        widget.struct.fullScreen,
+        widget.struct.onFullScreenChange,
+      ),
+      _buildImageCount(_page, (widget.struct.images.length / _pageSize).ceil()),
       _buildScrollController(),
     ];
-  }
-
-  Widget _buildFullScreenController() {
-    return Container(
-      child: Column(
-        children: [
-          Expanded(child: Container()),
-          Row(
-            children: [
-              Material(
-                color: Color(0x0),
-                child: Container(
-                  padding:
-                      EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    color: Color(0x88000000),
-                  ),
-                  margin: EdgeInsets.only(bottom: 5),
-                  child: GestureDetector(
-                    onTap: () {
-                      widget.struct
-                          .onFullScreenChange(!widget.struct.fullScreen);
-                    },
-                    child: Icon(
-                      widget.struct.fullScreen
-                          ? Icons.fullscreen_exit
-                          : Icons.fullscreen_outlined,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildScrollController() {
@@ -952,6 +717,8 @@ class _WebToonPageReaderState extends State<_WebToonPageReader> {
   }
 }
 
+//
+
 const _ImageStatusInit = 0;
 const _ImageStatusSuccess = 1;
 const _ImageStatusError = 2;
@@ -961,4 +728,161 @@ class _PageWebToonImageStatus {
   int width = 2;
   int height = 1;
   late String path;
+}
+
+/////////////////////////////
+
+Widget _buildFullScreenController(
+  bool fullScreen,
+  FutureOr<dynamic> Function(bool fullScreen) onFullScreenChange,
+) {
+  return Align(
+    alignment: Alignment.bottomLeft,
+    child: Material(
+      color: Color(0x0),
+      child: Container(
+        padding: EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+        margin: EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(10),
+            bottomRight: Radius.circular(10),
+          ),
+          color: Color(0x88000000),
+        ),
+        child: GestureDetector(
+          onTap: () {
+            onFullScreenChange(!fullScreen);
+          },
+          child: Icon(
+            fullScreen ? Icons.fullscreen_exit : Icons.fullscreen_outlined,
+            size: 30,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildImageCount(int current, int total) {
+  return Align(
+    alignment: Alignment.topRight,
+    child: Material(
+      color: Color(0x0),
+      child: Container(
+        margin: EdgeInsets.only(top: 10),
+        padding: EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            bottomLeft: Radius.circular(10),
+          ),
+          color: Color(0x88000000),
+        ),
+        child: GestureDetector(
+          onTap: () {
+            // TODO 输入跳转页数
+          },
+          child: Text("$current/$total", style: TextStyle(color: Colors.white)),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildScrollController(
+  BuildContext context,
+  int current,
+  int slider,
+  int total,
+  Function(int) onSliderChange,
+  Function() onSliderDown,
+) {
+  if (total == 0) {
+    return Container();
+  }
+  var theme = Theme.of(context);
+  return Align(
+    alignment: Alignment.centerRight,
+    child: Material(
+      color: Color(0x0),
+      child: Container(
+        width: 40,
+        height: 300,
+        decoration: BoxDecoration(
+          color: Color(0x66000000),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            bottomLeft: Radius.circular(10),
+          ),
+        ),
+        padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 8),
+        child: Center(
+          child: FlutterSlider(
+            axis: Axis.vertical,
+            values: [(slider > total ? total : slider).toDouble()],
+            max: total.toDouble(),
+            min: 1,
+            onDragging: (handlerIndex, lowerValue, upperValue) {
+              onSliderChange(lowerValue.toInt());
+            },
+            onDragCompleted: (handlerIndex, lowerValue, upperValue) {
+              onSliderChange(lowerValue.toInt());
+              onSliderDown();
+            },
+            trackBar: FlutterSliderTrackBar(
+              inactiveTrackBar: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.grey.shade300,
+              ),
+              activeTrackBar: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: theme.colorScheme.secondary,
+              ),
+            ),
+            step: FlutterSliderStep(
+              step: 1,
+              isPercentRange: false,
+            ),
+            tooltip: FlutterSliderTooltip(custom: (value) {
+              double a = value;
+              return Container(
+                padding: EdgeInsets.all(5),
+                color: Colors.white,
+                child:
+                    Text('${a.toInt()}', style: TextStyle(color: Colors.black)),
+              );
+            }),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildNextEpController(Function() next) {
+  return Align(
+    alignment: Alignment.bottomRight,
+    child: Material(
+      color: Color(0x0),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            bottomLeft: Radius.circular(10),
+          ),
+          color: Color(0x88000000),
+        ),
+        child: GestureDetector(
+          onTap: () {
+            next();
+          },
+          child: Text("下一章", style: TextStyle(color: Colors.white)),
+        ),
+      ),
+    ),
+  );
 }

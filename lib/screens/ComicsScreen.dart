@@ -62,7 +62,7 @@ class _ComicsScreenState extends State<ComicsScreen> {
         onPressed: () async {
           String? category = await chooseListDialog(context, '请选择分类', [
             categoryTitle(null),
-            ...storageCategories,
+            ...storedCategories,
           ]);
           if (category != null) {
             if (category == categoryTitle(null)) {

@@ -93,25 +93,6 @@ class Pica {
     return await _flatInvoke("setProxy", proxy);
   }
 
-  Future<bool> getConvert2png() async {
-    return (await _flatInvoke("loadProperty", {
-          "name": "convert2png",
-          "defaultValue": "true",
-        })) ==
-        "true";
-  }
-
-  Future<dynamic> setConvert2png(bool value) {
-    return _flatInvoke("saveProperty", {
-      "name": "convert2png",
-      "value": "$value",
-    });
-  }
-
-  Future<String> loadPngBase64(String path) async {
-    return await _flatInvoke("loadPngBase64", path);
-  }
-
   Future<String> getUsername() async {
     return await _flatInvoke("getUsername", "");
   }

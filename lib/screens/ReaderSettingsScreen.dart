@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
@@ -12,14 +11,11 @@ class ReaderSettingsScreen extends StatefulWidget {
 
 class _ReaderSettingsScreenState extends State<ReaderSettingsScreen> {
   String _quality = "";
-  PagerType? _pagerType;
 
   Future<dynamic> _init() async {
     var quality = await pica.loadQuality();
-    var pt = await pica.loadPagerType();
     setState(() {
       _quality = quality;
-      _pagerType = pt;
     });
   }
 
@@ -51,32 +47,13 @@ class _ReaderSettingsScreenState extends State<ReaderSettingsScreen> {
             Divider(),
             ListTile(
               title: Text("阅读器模式"),
-              subtitle:
-                  Text(_pagerType == null ? "" : pagerTypeName(_pagerType!)),
+              subtitle: Text(pagerTypeName(storedPagerType)),
               onTap: () async {
                 PagerType? t = await choosePagerType(context);
                 if (t != null) {
-                  pica.savePagerType(t);
+                  await pica.savePagerType(t);
                   setState(() {
-                    _pagerType = t;
-                  });
-                }
-              },
-            ),
-            Divider(),
-            ListTile(
-              title: Text("阅读时转换PNG (解决JPEG引起的程序崩溃)"),
-              subtitle: Text(convert2png ? "是" : "否"),
-              onTap: () async {
-                String? choose = await chooseListDialog(
-                  context,
-                  "阅读时转换PNG",
-                  ["是", "否"],
-                );
-                if (choose != null) {
-                  await pica.setConvert2png("是" == choose);
-                  setState(() {
-                    convert2png = "是" == choose;
+                    storedPagerType = t;
                   });
                 }
               },

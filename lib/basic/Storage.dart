@@ -1,4 +1,4 @@
 
-var convert2png = true;
+var storedCategories = <String>[];
 
-var storageCategories = <String>[];
+late var storedPagerType;

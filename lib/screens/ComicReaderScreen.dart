@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/basic/Storage.dart';
+import 'package:pikapi/basic/enum/PagerType.dart';
+import 'package:pikapi/screens/DownloadReaderScreen.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
 
 import 'components/ContentError.dart';
@@ -16,8 +19,9 @@ class ComicReaderScreen extends StatefulWidget {
   final List<Ep> epList;
   final currentEpOrder;
   final int? initPictureRank;
+  final PagerType pagerType = storedPagerType;
 
-  const ComicReaderScreen({
+  ComicReaderScreen({
     Key? key,
     required this.comicInfo,
     required this.epList,
@@ -33,6 +37,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
   late Ep _ep;
   late bool _fullScreen = false;
   late Future<List<PicaImage>> _future;
+  int? _lastChangeRank;
 
   Future<List<PicaImage>> _load() async {
     if (widget.initPictureRank == null) {
@@ -55,6 +60,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
   }
 
   Future _onPositionChange(int position) async {
+    _lastChangeRank = position + 1;
     return pica.storeViewEp(
         widget.comicInfo.id, _ep.order, _ep.title, position + 1);
   }
@@ -83,6 +89,34 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
           ? null
           : AppBar(
               title: Text("${_ep.title} - ${widget.comicInfo.title}"),
+              actions: [
+                IconButton(
+                  onPressed: () async {
+                    PagerType? t = await choosePagerType(context);
+                    if (t != null) {
+                      if (widget.pagerType != t) {
+                        pica.savePagerType(t);
+                        storedPagerType = t;
+                        // 重新加载本页
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return ComicReaderScreen(
+                                comicInfo: widget.comicInfo,
+                                epList: widget.epList,
+                                currentEpOrder: widget.currentEpOrder,
+                                initPictureRank: _lastChangeRank ??
+                                    widget.initPictureRank, // maybe null
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: Icon(Icons.view_day_outlined),
+                ),
+              ],
             ),
       body: ContentBuilder(
         future: _future,
@@ -114,6 +148,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
                   ? null
                   : widget.initPictureRank! - 1,
             ),
+            widget.pagerType,
           );
         },
       ),

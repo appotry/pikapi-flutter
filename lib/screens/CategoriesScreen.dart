@@ -47,10 +47,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   Future<List<Category>> _fetch() async {
     List<Category> categories = await pica.categories();
-    storageCategories = [];
+    storedCategories = [];
     categories.forEach((element) {
       if (!element.isWeb) {
-        storageCategories.add(element.title);
+        storedCategories.add(element.title);
       }
     });
     return categories;

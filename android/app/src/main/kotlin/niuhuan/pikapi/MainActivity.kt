@@ -16,6 +16,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.sync.Mutex
 import mobile.Mobile
 import java.io.File
@@ -23,7 +24,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 class MainActivity : FlutterActivity() {
 
-    private val scope = CoroutineScope(EmptyCoroutineContext)
+    private val scope = CoroutineScope(newFixedThreadPoolContext(5, "worker-scope"))
     private val uiThreadHandler = Handler(Looper.getMainLooper())
 
     private val notImplementedToken = Any()
@@ -172,5 +173,5 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
-    
+
 }

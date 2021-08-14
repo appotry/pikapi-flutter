@@ -1,13 +1,10 @@
 package controller
 
 import (
-	"bytes"
 	"crypto/md5"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image/png"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -216,22 +213,6 @@ func downloadImagePath(path string) (string, error) {
 	return downloadPath(path), nil
 }
 
-func loadPngBase64(path string) (string, error) {
-	b, i, f, e := decodeFromFile(path)
-	if e != nil {
-		return "", e
-	}
-	if f != "png" {
-		buffer := bytes.Buffer{}
-		e = png.Encode(&buffer, i)
-		if e != nil {
-			return "", e
-		}
-		b = buffer.Bytes()
-	}
-	return base64.StdEncoding.EncodeToString(b), e
-}
-
 func createDownload(params string) error {
 	var paramsStruct struct {
 		Comic  comic_center.ComicDownload     `json:"comic"`
@@ -430,8 +411,6 @@ func FlatInvoke(method string, params string) (string, error) {
 		return "", setProxy(params)
 	case "getProxy":
 		return getProxy()
-	case "loadPngBase64":
-		return loadPngBase64(params)
 	case "setUsername":
 		return "", setUsername(params)
 	case "setPassword":

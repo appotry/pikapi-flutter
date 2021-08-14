@@ -8,8 +8,6 @@ import 'package:flutter_svg/svg.dart';
 import 'dart:io';
 import 'dart:ui' as ui show Codec;
 
-import 'package:pikapi/basic/Storage.dart';
-
 // 从本地加载图片
 class PicaFileImageProvider extends ImageProvider<PicaFileImageProvider> {
   final String path;
@@ -32,15 +30,60 @@ class PicaFileImageProvider extends ImageProvider<PicaFileImageProvider> {
 
   Future<ui.Codec> _loadAsync(PicaFileImageProvider key) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(convert2png
-        ? base64Decode(await pica.loadPngBase64(path))
-        : await File(path).readAsBytes());
+    return PaintingBinding.instance!
+        .instantiateImageCodec(await File(path).readAsBytes());
   }
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final PicaFileImageProvider typedOther = other;
+    return path == typedOther.path && scale == typedOther.scale;
+  }
+
+  @override
+  int get hashCode => hashValues(path, scale);
+
+  @override
+  String toString() => '$runtimeType('
+      'path: ${describeIdentity(path)},'
+      ' scale: $scale'
+      ')';
+}
+
+// 从本地加载图片
+class PicaDownloadFileImageProvider
+    extends ImageProvider<PicaDownloadFileImageProvider> {
+  final String path;
+  final double scale;
+
+  PicaDownloadFileImageProvider(this.path, {this.scale = 1.0});
+
+  @override
+  ImageStreamCompleter load(
+      PicaDownloadFileImageProvider key, DecoderCallback decode) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
+    );
+  }
+
+  @override
+  Future<PicaDownloadFileImageProvider> obtainKey(
+      ImageConfiguration configuration) {
+    return SynchronousFuture<PicaDownloadFileImageProvider>(this);
+  }
+
+  Future<ui.Codec> _loadAsync(PicaDownloadFileImageProvider key) async {
+    assert(key == this);
+    return PaintingBinding.instance!.instantiateImageCodec(
+        await File(await pica.downloadImagePath(path)).readAsBytes());
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) return false;
+    final PicaDownloadFileImageProvider typedOther = other;
     return path == typedOther.path && scale == typedOther.scale;
   }
 
@@ -79,9 +122,8 @@ class PicaRemoteImageProvider extends ImageProvider<PicaRemoteImageProvider> {
   Future<ui.Codec> _loadAsync(PicaRemoteImageProvider key) async {
     assert(key == this);
     var downloadTo = await pica.remoteImageData(fileServer, path);
-    return PaintingBinding.instance!.instantiateImageCodec(convert2png
-        ? base64Decode(await pica.loadPngBase64(downloadTo.finalPath))
-        : await File(downloadTo.finalPath).readAsBytes());
+    return PaintingBinding.instance!
+        .instantiateImageCodec(await File(downloadTo.finalPath).readAsBytes());
   }
 
   @override
