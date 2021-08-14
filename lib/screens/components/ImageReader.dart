@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:another_xlider/another_xlider.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:pikapi/basic/Common.dart';
+import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
@@ -71,10 +73,10 @@ class _ImageReaderState extends State<ImageReader> {
         switch (snapshot.data!) {
           case PagerType.WEB_TOON:
             return _WebToonReader(widget.struct);
-          case PagerType.WEB_TOON_ZOOM:
-            return _WebToonZoomReader(widget.struct);
           case PagerType.WEB_TOON_PAGE:
             return _WebToonPageReader(widget.struct);
+          case PagerType.GALLERY:
+            return _GalleryReader(widget.struct);
           default:
             return Container();
         }
@@ -454,34 +456,20 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
 
             return GestureDetector(
               onLongPress: () async {
-                String? choose = await chooseListDialog(context, '请选择', [
-                  '预览图片',
-                ]);
+                String? choose =
+                    await chooseListDialog(context, '请选择', ['预览图片', '保存图片']);
                 switch (choose) {
                   case '预览图片':
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => FilePhotoViewScreen(data.finalPath),
                     ));
                     break;
+                  case '保存图片':
+                    saveImage(data.finalPath, context);
+                    break;
                 }
               },
-              child: Image.file(
-                File(data.finalPath),
-                width: width,
-                height: height,
-                errorBuilder: (a, b, c) => Container(
-                  width: width,
-                  height: height,
-                  child: Center(
-                    child: Icon(
-                      Icons.broken_image,
-                      color: Colors.grey.shade400,
-                      size: width / 2.5,
-                    ),
-                  ),
-                ),
-                fit: BoxFit.cover,
-              ),
+              child: buildFile(data.finalPath, width, height),
             );
           },
         );
@@ -492,17 +480,202 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class _WebToonZoomReader extends _WebToonReader {
-  _WebToonZoomReader(ImageReaderStruct struct) : super(struct);
+class _GalleryReader extends StatefulWidget {
+  final ImageReaderStruct struct;
+
+  _GalleryReader(this.struct);
 
   @override
-  State<StatefulWidget> createState() => _WebToonZoomReaderState();
+  State<StatefulWidget> createState() => _GalleryReaderState();
 }
 
-class _WebToonZoomReaderState extends _WebToonReaderState {
+class _GalleryReaderState extends State<_GalleryReader> {
+  late int _current = (widget.struct.initPosition ?? 0) + 1;
+  late int _slider = (widget.struct.initPosition ?? 0) + 1;
+  late PageController _pageController =
+      PageController(initialPage: widget.struct.initPosition ?? 0);
+
   @override
-  Widget _buildList() {
-    return InteractiveViewer(child: super._buildList());
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        _buildViewer(),
+        ..._buildControllers(),
+      ],
+    );
+  }
+
+  Widget _buildViewer() {
+    return PhotoViewGallery.builder(
+      onPageChanged: (value) {
+        print("VALUE : $value");
+        setState(() {
+          _current = value + 1;
+          widget.struct.onPositionChange(value);
+        });
+      },
+      pageController: _pageController,
+      itemCount: widget.struct.images.length,
+      builder: (BuildContext context, int index) {
+        var item = widget.struct.images[index];
+        if (item.localPath != null) {
+          return PhotoViewGalleryPageOptions(
+            imageProvider: PicaFileImageProvider(item.localPath!),
+          );
+        }
+        return PhotoViewGalleryPageOptions(
+          imageProvider: PicaRemoteImageProvider(item.fileServer, item.path),
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildControllers() {
+    if (widget.struct.fullScreen) {
+      return [
+        _buildFullScreenController(),
+      ];
+    }
+    return [
+      _buildFullScreenController(),
+      _buildScrollController(),
+    ];
+  }
+
+  Widget _buildFullScreenController() {
+    return Container(
+      child: Column(
+        children: [
+          Expanded(child: Container()),
+          Row(
+            children: [
+              Material(
+                color: Color(0x0),
+                child: Container(
+                  padding:
+                      EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                    color: Color(0x88000000),
+                  ),
+                  margin: EdgeInsets.only(bottom: 5),
+                  child: GestureDetector(
+                    onTap: () {
+                      widget.struct
+                          .onFullScreenChange(!widget.struct.fullScreen);
+                    },
+                    child: Icon(
+                      widget.struct.fullScreen
+                          ? Icons.fullscreen_exit
+                          : Icons.fullscreen_outlined,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScrollController() {
+    if (widget.struct.images.length == 0) {
+      return Container();
+    }
+    var theme = Theme.of(context);
+    return Container(
+      child: Row(
+        children: [
+          Expanded(child: Container()),
+          Material(
+            color: Color(0x0),
+            child: Container(
+              width: 40,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Color(0x66000000),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
+                ),
+              ),
+              padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 8),
+              child: Center(
+                child: FlutterSlider(
+                  axis: Axis.vertical,
+                  values: [
+                    (_slider > widget.struct.images.length
+                            ? widget.struct.images.length
+                            : _slider)
+                        .toDouble()
+                  ],
+                  max: widget.struct.images.length.toDouble(),
+                  min: 1,
+                  onDragging: (handlerIndex, lowerValue, upperValue) {
+                    double a = lowerValue;
+                    _slider = a.toInt();
+                  },
+                  onDragCompleted: (handlerIndex, lowerValue, upperValue) {
+                    if (_slider != _current && _slider > 0) {
+                      _pageController.jumpToPage(_slider - 1);
+                    }
+                  },
+                  trackBar: FlutterSliderTrackBar(
+                    inactiveTrackBar: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.grey.shade300,
+                    ),
+                    activeTrackBar: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                  step: FlutterSliderStep(
+                    step: 1,
+                    isPercentRange: false,
+                  ),
+                  tooltip: FlutterSliderTooltip(custom: (value) {
+                    double a = value;
+                    return Container(
+                      padding: EdgeInsets.all(5),
+                      color: Colors.white,
+                      child: Text('${a.toInt()}',
+                          style: TextStyle(color: Colors.black)),
+                    );
+                  }),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNextEp() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      child: MaterialButton(
+        onPressed: widget.struct.onNextEp,
+        textColor: Colors.white,
+        child: Container(
+          padding: EdgeInsets.only(top: 40, bottom: 40),
+          child: Text("下一章"),
+        ),
+      ),
+    );
   }
 }
 

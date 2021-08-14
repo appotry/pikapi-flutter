@@ -250,26 +250,6 @@ func downloadThePicture(picturePoint *comic_center.ComicDownloadPicture) error {
 	defer lock.Unlock()
 	picturePath := fmt.Sprintf("%s/%d/%d", picturePoint.ComicId, picturePoint.EpOrder, picturePoint.RankInEp)
 	realPath := downloadPath(picturePath)
-	// 文件存在, 入库
-	if stat, err := os.Stat(realPath); err == nil {
-		img, format, err := decodeInfoFromFile(realPath)
-		if err == nil {
-			err = comic_center.PictureSuccess(
-				picturePoint.ComicId,
-				picturePoint.EpId,
-				picturePoint.ID,
-				stat.Size(),
-				format,
-				int32(img.Bounds().Dx()),
-				int32(img.Bounds().Dy()),
-				picturePath,
-			)
-		} else {
-			os.Remove(realPath)
-			// 删除文件
-		}
-	}
-	// 文件不存在, 或文件无效, 下载
 	// 从缓存
 	buff, img, format, err := decodeFromCache(picturePoint.FileServer, picturePoint.Path)
 	if err != nil {

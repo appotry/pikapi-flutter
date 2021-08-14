@@ -1,6 +1,8 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 
+import 'Pica.dart';
+
 class ThemeEventArgs extends EventArgs {
   ThemeData? themeData;
 
@@ -122,6 +124,7 @@ var themeEvent = Event<ThemeEventArgs>();
 changeThemeByCode(String themeCode) {
   for (var package in themePackages) {
     if (themeCode == package.code()) {
+      _themeCode = themeCode;
       themeEvent.broadcast(ThemeEventArgs(package.themeData()));
       return;
     }
@@ -129,17 +132,19 @@ changeThemeByCode(String themeCode) {
   themeEvent.broadcast(ThemeEventArgs(ThemeData()));
 }
 
-String themeName(String themeCode) {
+String? _themeCode;
+
+String currentThemeName() {
   for (var package in themePackages) {
-    if (themeCode == package.code()) {
+    if (_themeCode == package.code()) {
       return package.name();
     }
   }
   return "";
 }
 
-Future<String?> chooseTheme(BuildContext buildContext) async {
-  return await showDialog<String>(
+Future<dynamic> chooseTheme(BuildContext buildContext) async {
+  String? theme = await showDialog<String>(
     context: buildContext,
     builder: (BuildContext context) {
       return SimpleDialog(
@@ -155,4 +160,8 @@ Future<String?> chooseTheme(BuildContext buildContext) async {
       );
     },
   );
+  if (theme != null) {
+    pica.saveTheme(theme);
+    changeThemeByCode(theme);
+  }
 }

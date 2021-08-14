@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Common.dart';
+import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/ListLayout.dart';
 import 'package:pikapi/basic/enum/Sort.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -47,11 +48,36 @@ class _SearchScreenState extends State<SearchScreen> {
         title: Text("${categoryTitle(widget.category)} ${widget.keyword}"),
         actions: [
           chooseLayoutAction(context),
+          _chooseCategoryAction(),
           _searchBar.getSearchAction(context),
         ],
       );
     },
   );
+
+  Widget _chooseCategoryAction() => IconButton(
+    onPressed: () async {
+      String? category = await chooseListDialog(context, '请选择分类', [
+        categoryTitle(null),
+        ...storageCategories,
+      ]);
+      if (category != null) {
+        if (category == categoryTitle(null)) {
+          category = null;
+        }
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) {
+            return SearchScreen(
+              category: category,
+              keyword: widget.keyword,
+            );
+          },
+        ));
+      }
+    },
+    icon: Icon(Icons.category),
+  );
+
   late Future<ComicsPage> _future;
   String _currentSort = SORT_DEFAULT;
   int _currentPage = 1;

@@ -38,15 +38,15 @@ Future<bool> confirmDialog(
                 ),
                 actions: <Widget>[
                   new MaterialButton(
-                    child: new Text('确定'),
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                    },
-                  ),
-                  new MaterialButton(
                     child: new Text('取消'),
                     onPressed: () {
                       Navigator.of(context).pop(false);
+                    },
+                  ),
+                  new MaterialButton(
+                    child: new Text('确定'),
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
                     },
                   ),
                 ],
@@ -100,7 +100,6 @@ Future<T?> chooseListDialog<T>(
   );
 }
 
-
 Future<T?> chooseMapDialog<T>(
     BuildContext buildContext, Map<String, T> values, String title) async {
   return await showDialog<T>(
@@ -110,11 +109,11 @@ Future<T?> chooseMapDialog<T>(
         title: Text(title),
         children: values.entries
             .map((e) => SimpleDialogOption(
-          child: Text(e.key),
-          onPressed: () {
-            Navigator.of(context).pop(e.value);
-          },
-        ))
+                  child: Text(e.key),
+                  onPressed: () {
+                    Navigator.of(context).pop(e.value);
+                  },
+                ))
             .toList(),
       );
     },

@@ -1,7 +1,13 @@
 package niuhuan.pikapi
 
+import android.content.ContentValues
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import androidx.annotation.NonNull
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
@@ -12,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import mobile.Mobile
+import java.io.File
 import kotlin.coroutines.EmptyCoroutineContext
 
 class MainActivity : FlutterActivity() {
@@ -19,16 +26,17 @@ class MainActivity : FlutterActivity() {
     private val scope = CoroutineScope(EmptyCoroutineContext)
     private val uiThreadHandler = Handler(Looper.getMainLooper())
 
+    private val notImplementedToken = Any()
     private fun MethodChannel.Result.withCoroutine(exec: () -> Any?) {
         scope.launch {
             try {
                 val data = exec()
                 uiThreadHandler.post {
                     when (data) {
-                        null -> {
+                        notImplementedToken -> {
                             notImplemented()
                         }
-                        is Unit -> {
+                        is Unit, null -> {
                             success(null)
                         }
                         else -> {
@@ -58,8 +66,11 @@ class MainActivity : FlutterActivity() {
                                 call.argument("params")!!
                         )
                     }
+                    "androidSaveFileToImage" -> {
+                        saveImage(call.argument("path")!!)
+                    }
                     else -> {
-                        null
+                        notImplementedToken
                     }
                 }
             }
@@ -139,4 +150,27 @@ class MainActivity : FlutterActivity() {
 
     }
 
+    private fun saveImage(path: String) {
+        BitmapFactory.decodeFile(path)?.let { bitmap ->
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, System.currentTimeMillis().toString())
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { //this one
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
+                }
+            }
+            contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
+                contentResolver.openOutputStream(uri)?.use { fos ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { //this one
+                    contentValues.clear()
+                    contentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
+                    contentResolver.update(uri, contentValues, null, null)
+                }
+            }
+        }
+    }
+    
 }

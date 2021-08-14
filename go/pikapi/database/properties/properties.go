@@ -49,6 +49,18 @@ func SaveProperty(name string, value string) error {
 	}).Error
 }
 
+func LoadBoolProperty(name string, defaultValue bool) (bool, error) {
+	stringValue, err := LoadProperty(name, strconv.FormatBool(defaultValue))
+	if err != nil {
+		return false, err
+	}
+	return strconv.ParseBool(stringValue)
+}
+
+func SaveBoolProperty(name string, value bool) error {
+	return SaveProperty(name, strconv.FormatBool(value))
+}
+
 func SaveSwitchAddress(value string) error {
 	return SaveProperty("switch_address", value)
 }
@@ -57,7 +69,7 @@ func LoadSwitchAddress() (string, error) {
 	return LoadProperty("switch_address", "")
 }
 
-func SaveProxy(value string) error{
+func SaveProxy(value string) error {
 	return SaveProperty("proxy", value)
 }
 

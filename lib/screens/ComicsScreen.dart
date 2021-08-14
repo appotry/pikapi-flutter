@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Common.dart';
+import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/ListLayout.dart';
 import 'package:pikapi/basic/enum/Sort.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -50,11 +51,38 @@ class _ComicsScreenState extends State<ComicsScreen> {
         title: new Text(categoryTitle(widget.category)),
         actions: [
           chooseLayoutAction(context),
+          _chooseCategoryAction(),
           _categorySearchBar.getSearchAction(context),
         ],
       );
     },
   );
+
+  Widget _chooseCategoryAction() => IconButton(
+        onPressed: () async {
+          String? category = await chooseListDialog(context, '请选择分类', [
+            categoryTitle(null),
+            ...storageCategories,
+          ]);
+          if (category != null) {
+            if (category == categoryTitle(null)) {
+              category = null;
+            }
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) {
+                return ComicsScreen(
+                  category: category,
+                  tag: widget.tag,
+                  creatorId: widget.creatorId,
+                  creatorName: widget.creatorName,
+                  chineseTeam: widget.chineseTeam,
+                );
+              },
+            ));
+          }
+        },
+        icon: Icon(Icons.category),
+      );
 
   late String _currentSort = SORT_DEFAULT;
   late int _currentPage = 1;
@@ -103,7 +131,10 @@ class _ComicsScreenState extends State<ComicsScreen> {
       }
       appBar = AppBar(
         title: Text(title),
-        actions: [chooseLayoutAction(context)],
+        actions: [
+          chooseLayoutAction(context),
+          _chooseCategoryAction(),
+        ],
       );
     }
 

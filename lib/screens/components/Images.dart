@@ -1,7 +1,108 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:io';
+import 'dart:ui' as ui show Codec;
+
+import 'package:pikapi/basic/Storage.dart';
+
+// 从本地加载图片
+class PicaFileImageProvider extends ImageProvider<PicaFileImageProvider> {
+  final String path;
+  final double scale;
+
+  PicaFileImageProvider(this.path, {this.scale = 1.0});
+
+  @override
+  ImageStreamCompleter load(PicaFileImageProvider key, DecoderCallback decode) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
+    );
+  }
+
+  @override
+  Future<PicaFileImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<PicaFileImageProvider>(this);
+  }
+
+  Future<ui.Codec> _loadAsync(PicaFileImageProvider key) async {
+    assert(key == this);
+    return PaintingBinding.instance!.instantiateImageCodec(convert2png
+        ? base64Decode(await pica.loadPngBase64(path))
+        : await File(path).readAsBytes());
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) return false;
+    final PicaFileImageProvider typedOther = other;
+    return path == typedOther.path && scale == typedOther.scale;
+  }
+
+  @override
+  int get hashCode => hashValues(path, scale);
+
+  @override
+  String toString() => '$runtimeType('
+      'path: ${describeIdentity(path)},'
+      ' scale: $scale'
+      ')';
+}
+
+// 从远端加载图片 暂时未使用 (现在都是先获取路径然后再通过file显示)
+class PicaRemoteImageProvider extends ImageProvider<PicaRemoteImageProvider> {
+  final String fileServer;
+  final String path;
+  final double scale;
+
+  PicaRemoteImageProvider(this.fileServer, this.path, {this.scale = 1.0});
+
+  @override
+  ImageStreamCompleter load(
+      PicaRemoteImageProvider key, DecoderCallback decode) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
+    );
+  }
+
+  @override
+  Future<PicaRemoteImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<PicaRemoteImageProvider>(this);
+  }
+
+  Future<ui.Codec> _loadAsync(PicaRemoteImageProvider key) async {
+    assert(key == this);
+    var downloadTo = await pica.remoteImageData(fileServer, path);
+    return PaintingBinding.instance!.instantiateImageCodec(convert2png
+        ? base64Decode(await pica.loadPngBase64(downloadTo.finalPath))
+        : await File(downloadTo.finalPath).readAsBytes());
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) return false;
+    final PicaRemoteImageProvider typedOther = other;
+    return fileServer == typedOther.fileServer &&
+        path == typedOther.path &&
+        scale == typedOther.scale;
+  }
+
+  @override
+  int get hashCode => hashValues(fileServer, path, scale);
+
+  @override
+  String toString() => '$runtimeType('
+      'fileServer: ${describeIdentity(fileServer)},'
+      ' path: ${describeIdentity(path)},'
+      ' scale: $scale'
+      ')';
+}
 
 // 下载的图片
 class DownloadImage extends StatefulWidget {
@@ -135,8 +236,8 @@ Widget buildLoading(double? width, double? height) {
 
 Widget buildFile(String file, double? width, double? height,
     {BoxFit fit = BoxFit.cover}) {
-  return Image.file(
-    File(file),
+  return Image(
+    image: PicaFileImageProvider(file),
     width: width,
     height: height,
     errorBuilder: (a, b, c) {

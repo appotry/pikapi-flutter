@@ -92,7 +92,7 @@ func cacheable(key string, expire time.Duration, reload func() (interface{}, err
 
 func categories() (string, error) {
 	key := "CATEGORIES"
-	expire := time.Hour * 24 * 5
+	expire := time.Hour * 3
 	cache := network_cache.LoadCache(key, expire)
 	if cache != "" {
 		return cache, nil

@@ -3,6 +3,7 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/enum/Address.dart';
 
+// 这里用GlobalKey是为了让注册和登录页面保持一致
 final _networkSettingGK = GlobalKey<_NetworkSettingState>();
 
 class NetworkSetting extends StatefulWidget {

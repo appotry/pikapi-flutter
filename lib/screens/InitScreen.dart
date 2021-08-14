@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/Themes.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/enum/ListLayout.dart';
@@ -21,9 +22,9 @@ class _InitScreenState extends State<InitScreen> {
 
   Future<dynamic> _init() async {
     // 初始化
-    currentLayout = await pica.loadListLayout();
-    // 从数据库读取并切换主题
-    changeThemeByCode(await pica.loadTheme());
+    changeThemeByCode(await pica.loadTheme()); // 从数据库读取并切换主题
+    currentLayout = await pica.loadListLayout(); // 页面布局
+    convert2png = await pica.getConvert2png();
     // 登录, 如果token失效重新登录, 网络不好的时候可能需要1分钟
     if (await pica.preLogin()) {
       // 如果token或username+password有效则直接进入登录好的界面

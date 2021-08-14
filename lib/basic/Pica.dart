@@ -24,7 +24,7 @@ class Pica {
   Future<String> loadTheme() async {
     return await _flatInvoke("loadProperty", {
       "name": "theme",
-      "defaultValue": "dark",
+      "defaultValue": "pink",
     });
   }
 
@@ -91,6 +91,25 @@ class Pica {
 
   Future<dynamic> setProxy(String proxy) async {
     return await _flatInvoke("setProxy", proxy);
+  }
+
+  Future<bool> getConvert2png() async {
+    return (await _flatInvoke("loadProperty", {
+          "name": "convert2png",
+          "defaultValue": "true",
+        })) ==
+        "true";
+  }
+
+  Future<dynamic> setConvert2png(bool value) {
+    return _flatInvoke("saveProperty", {
+      "name": "convert2png",
+      "value": "$value",
+    });
+  }
+
+  Future<String> loadPngBase64(String path) async {
+    return await _flatInvoke("loadPngBase64", path);
   }
 
   Future<String> getUsername() async {
@@ -407,5 +426,17 @@ class Pica {
       return List.of(jsonDecode(data)).map((e) => e.toString()).toList();
     }
     return [url];
+  }
+
+  Future<dynamic> iosSaveFileToImage(String path) async {
+    return _channel.invokeMethod("iosSaveFileToImage", {
+      "path": path,
+    });
+  }
+
+  Future androidSaveFileToImage(String path) async {
+    return _channel.invokeMethod("androidSaveFileToImage", {
+      "path": path,
+    });
   }
 }

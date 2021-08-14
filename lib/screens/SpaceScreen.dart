@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Themes.dart';
-import 'package:pikapi/basic/enum/Quality.dart';
 import 'package:pikapi/screens/AboutScreen.dart';
 import 'package:pikapi/screens/AccountScreen.dart';
 import 'package:pikapi/screens/CleanScreen.dart';
@@ -11,7 +10,6 @@ import 'package:pikapi/screens/NetworkSettingsScreen.dart';
 import 'package:pikapi/screens/ReaderSettingsScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/screens/components/NetworkSetting.dart';
 
 import 'components/UserProfileCard.dart';
 
@@ -24,18 +22,9 @@ class SpaceScreen extends StatefulWidget {
 }
 
 class _SpaceScreenState extends State<SpaceScreen> {
-  String _theme = "";
-
-  Future<dynamic> _init() async {
-    var theme = await pica.loadTheme();
-    setState(() {
-      _theme = theme;
-    });
-  }
 
   @override
   void initState() {
-    _init();
     super.initState();
   }
 
@@ -78,17 +67,13 @@ class _SpaceScreenState extends State<SpaceScreen> {
           Divider(),
           ListTile(
             onTap: () async {
-              String? theme = await chooseTheme(context);
-              if (theme != null) {
-                pica.saveTheme(theme);
-                changeThemeByCode(theme);
-                setState(() {
-                  _theme = theme;
-                });
-              }
+              await chooseTheme(context);
+              setState(() {
+
+              });
             },
             title: Text('主题'),
-            subtitle: Text(themeName(_theme)),
+            subtitle: Text(currentThemeName()),
           ),
           Divider(),
           ListTile(

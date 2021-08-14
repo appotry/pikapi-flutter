@@ -14,19 +14,6 @@ import (
 	"sync"
 )
 
-func decodeInfoFromBuff(buff []byte) (image.Image, string, error) {
-	buffer := bytes.NewBuffer(buff)
-	return image.Decode(buffer)
-}
-
-func decodeInfoFromFile(path string) (image.Image, string, error) {
-	buff, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, "", err
-	}
-	return decodeInfoFromBuff(buff)
-}
-
 var mutexCounter = -1
 var busMutex *sync.Mutex
 var subMutexes []*sync.Mutex
@@ -45,6 +32,24 @@ func takeMutex() *sync.Mutex {
 	return subMutexes[mutexCounter]
 }
 
+func decodeInfoFromBuff(buff []byte) (image.Image, string, error) {
+	buffer := bytes.NewBuffer(buff)
+	return image.Decode(buffer)
+}
+
+func decodeFromFile(path string) ([]byte, image.Image, string, error) {
+	b, e := ioutil.ReadFile(path)
+	if e != nil {
+		return nil, nil, "", e
+	}
+	i, f, e := decodeInfoFromBuff(b)
+	if e != nil {
+		return nil, nil, "", e
+	}
+	return b, i, f, e
+}
+
+// 下载图片并decode
 func decodeFromUrl(fileServer string, path string) ([]byte, image.Image, string, error) {
 	m := takeMutex()
 	m.Lock()
@@ -88,4 +93,3 @@ func decodeFromCache(fileServer string, path string) ([]byte, image.Image, strin
 	}
 	return nil, nil, "", errors.New("not found")
 }
-

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 
@@ -57,6 +59,24 @@ class _ReaderSettingsScreenState extends State<ReaderSettingsScreen> {
                   pica.savePagerType(t);
                   setState(() {
                     _pagerType = t;
+                  });
+                }
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Text("阅读时转换PNG (解决JPEG引起的程序崩溃)"),
+              subtitle: Text(convert2png ? "是" : "否"),
+              onTap: () async {
+                String? choose = await chooseListDialog(
+                  context,
+                  "阅读时转换PNG",
+                  ["是", "否"],
+                );
+                if (choose != null) {
+                  await pica.setConvert2png("是" == choose);
+                  setState(() {
+                    convert2png = "是" == choose;
                   });
                 }
               },

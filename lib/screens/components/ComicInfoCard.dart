@@ -107,7 +107,9 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                         ),
                       ),
                       Container(height: 5),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        runSpacing: 5,
                         children: [
                           ...info.likesCount > 0
                               ? [
@@ -141,7 +143,6 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                             strutStyle: iconLabelStrutStyle,
                           ),
                           iconMargin,
-                          Expanded(child: Container()),
                         ],
                       ),
                     ],

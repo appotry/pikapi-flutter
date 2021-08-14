@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/screens/RankingsScreen.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
@@ -42,11 +43,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     },
   );
 
-  late Future<List<Category>> _categoriesFuture = pica.categories();
+  late Future<List<Category>> _categoriesFuture = _fetch();
+
+  Future<List<Category>> _fetch() async {
+    List<Category> categories = await pica.categories();
+    storageCategories = [];
+    categories.forEach((element) {
+      if (!element.isWeb) {
+        storageCategories.add(element.title);
+      }
+    });
+    return categories;
+  }
 
   void _reloadCategories() {
     setState(() {
-      this._categoriesFuture = pica.categories();
+      this._categoriesFuture = _fetch();
     });
   }
 
@@ -204,8 +216,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     };
 
     append(
-      buildSvg('lib/assets/rankings.svg', imageSize, imageSize, margin: 20,
-          color: Colors.red.shade700),
+      buildSvg('lib/assets/rankings.svg', imageSize, imageSize,
+          margin: 20, color: Colors.red.shade700),
       "排行榜",
       () {
         Navigator.push(
@@ -216,8 +228,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
 
     append(
-      buildSvg('lib/assets/random.svg', imageSize, imageSize, margin: 20,
-          color: Colors.orangeAccent.shade700),
+      buildSvg('lib/assets/random.svg', imageSize, imageSize,
+          margin: 20, color: Colors.orangeAccent.shade700),
       "随机本子",
       () {
         Navigator.push(
@@ -228,8 +240,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
 
     append(
-      buildSvg('lib/assets/gamepad.svg', imageSize, imageSize, margin: 20,
-          color: Colors.blue.shade500),
+      buildSvg('lib/assets/gamepad.svg', imageSize, imageSize,
+          margin: 20, color: Colors.blue.shade500),
       "游戏专区",
       () {
         Navigator.push(
