@@ -7,6 +7,7 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/basic/enum/PagerDirection.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -14,6 +15,10 @@ import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
 
 import 'Images.dart';
+
+///////////////////////////////////////////////////////////////////////////////
+
+// 对Reader的传参以及封装
 
 class ReaderImageInfo {
   final String fileServer;
@@ -29,38 +34,40 @@ class ReaderImageInfo {
 }
 
 class ImageReaderStruct {
-  final List<ReaderImageInfo> images;
   final bool fullScreen;
   final FutureOr<dynamic> Function(bool fullScreen) onFullScreenChange;
   final FutureOr<dynamic> Function() onNextEp;
   final FutureOr<dynamic> Function(int) onPositionChange;
   final int? initPosition;
+  final PagerType pagerType;
+  final PagerDirection pagerDirection;
 
   const ImageReaderStruct({
-    required this.images,
     required this.fullScreen,
     required this.onFullScreenChange,
     required this.onNextEp,
     required this.onPositionChange,
     this.initPosition,
+    required this.pagerType,
+    required this.pagerDirection,
   });
 }
 
 class ImageReader extends StatelessWidget {
+  final List<ReaderImageInfo> images;
   final ImageReaderStruct struct;
-  final PagerType pagerType;
 
-  const ImageReader(this.struct, this.pagerType);
+  const ImageReader(this.images, this.struct);
 
   @override
   Widget build(BuildContext context) {
-    switch (pagerType) {
+    switch (struct.pagerType) {
       case PagerType.WEB_TOON:
-        return _WebToonReader(struct);
-      case PagerType.WEB_TOON_PAGE:
-        return _WebToonPageReader(struct);
+        return _WebToonReader(images, struct);
+      case PagerType.WEB_TOON_ZOOM:
+        return _WebToonZoomReader(images, struct);
       case PagerType.GALLERY:
-        return _GalleryReader(struct);
+        return _GalleryReader(images, struct);
       default:
         return Container();
     }
@@ -70,17 +77,17 @@ class ImageReader extends StatelessWidget {
 ///////////////////////////////////////////////////////////////////////////////
 
 class _WebToonReader extends StatefulWidget {
+  final List<ReaderImageInfo> images;
   final ImageReaderStruct struct;
 
-  const _WebToonReader(this.struct);
+  const _WebToonReader(this.images, this.struct);
 
   @override
   State<StatefulWidget> createState() => _WebToonReaderState();
 }
 
 class _WebToonReaderState extends State<_WebToonReader> {
-  late final List<_WebToonImageProportionSize> _sizes = [];
-  late final List<Widget> _images = [];
+  late final List<Size?> _trueSizes = [];
   late final ItemScrollController _itemScrollController;
   late final ItemPositionsListener _itemPositionsListener;
   late final int _initialPosition;
@@ -94,7 +101,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
       setState(() {
         _current = to;
         _slider = to;
-        if (to - 1 < widget.struct.images.length) {
+        if (to - 1 < widget.images.length) {
           widget.struct.onPositionChange(to - 1);
         }
       });
@@ -103,31 +110,18 @@ class _WebToonReaderState extends State<_WebToonReader> {
 
   @override
   void initState() {
-    var index = 0;
-    widget.struct.images.forEach((e) {
+    widget.images.forEach((e) {
       if (e.downloadLocalPath != null) {
-        _sizes.add(_WebToonImageProportionSize(e.width!, e.height!));
-        _images.add(_WebToonDownloadImage(
-          fileServer: e.fileServer,
-          path: e.path,
-          localPath: e.downloadLocalPath!,
-          fileSize: e.fileSize!,
-          width: e.width!,
-          height: e.height!,
-          format: e.format!,
-          sizeList: _sizes,
-          indexOfSizeList: index++,
-        ));
+        _trueSizes.add(Size(e.width!.toDouble(), e.height!.toDouble()));
       } else {
-        _sizes.add(_WebToonImageProportionSize(2, 1));
-        _images.add(_WebToonRemoteImage(e.fileServer, e.path, _sizes, index++));
+        _trueSizes.add(null);
       }
     });
     _itemScrollController = ItemScrollController();
     _itemPositionsListener = ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onCurrentChange);
     if (widget.struct.initPosition != null &&
-        widget.struct.images.length > widget.struct.initPosition!) {
+        widget.images.length > widget.struct.initPosition!) {
       _initialPosition = widget.struct.initPosition!;
     } else {
       _initialPosition = 0;
@@ -158,22 +152,86 @@ class _WebToonReaderState extends State<_WebToonReader> {
 
   Widget _buildList() {
     var scaffold = Scaffold.of(context);
-    return ScrollablePositionedList.builder(
-      initialScrollIndex: _initialPosition,
-      padding: widget.struct.fullScreen
-          ? EdgeInsets.only(
-              top: scaffold.appBarMaxHeight ?? 0,
-              bottom: scaffold.appBarMaxHeight ?? 0,
-            )
-          : null,
-      itemScrollController: _itemScrollController,
-      itemPositionsListener: _itemPositionsListener,
-      itemCount: widget.struct.images.length + 1,
-      itemBuilder: (BuildContext context, int index) {
-        if (widget.struct.images.length == index) {
-          return _buildNextEp();
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        // reload _images size
+        List<Widget> _images = [];
+        for (var index = 0; index < widget.images.length; index++) {
+          late Size renderSize;
+          if (_trueSizes[index] != null) {
+            if (widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM) {
+              renderSize = Size(
+                constraints.maxWidth,
+                constraints.maxWidth *
+                    _trueSizes[index]!.height /
+                    _trueSizes[index]!.width,
+              );
+            } else {
+              renderSize = Size(
+                constraints.maxHeight *
+                    _trueSizes[index]!.width /
+                    _trueSizes[index]!.height,
+                constraints.maxHeight,
+              );
+            }
+          } else {
+            if (widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM) {
+              renderSize = Size(constraints.maxWidth, constraints.maxWidth / 2);
+            } else {
+              renderSize =
+                  Size(constraints.maxWidth / 2, constraints.maxHeight);
+            }
+          }
+          var currentIndex = index;
+          var onTrueSize = (Size size) {
+            setState(() {
+              _trueSizes[currentIndex] = size;
+            });
+          };
+          var e = widget.images[index];
+          if (e.downloadLocalPath != null) {
+            _images.add(_WebToonDownloadImage(
+              fileServer: e.fileServer,
+              path: e.path,
+              localPath: e.downloadLocalPath!,
+              fileSize: e.fileSize!,
+              width: e.width!,
+              height: e.height!,
+              format: e.format!,
+              size: renderSize,
+              onTrueSize: onTrueSize,
+            ));
+          } else {
+            _images.add(_WebToonRemoteImage(
+              e.fileServer,
+              e.path,
+              renderSize,
+              onTrueSize,
+            ));
+          }
         }
-        return _images[index];
+        return ScrollablePositionedList.builder(
+          initialScrollIndex: _initialPosition,
+          scrollDirection:
+              widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM
+                  ? Axis.vertical
+                  : Axis.horizontal,
+          padding: widget.struct.fullScreen
+              ? EdgeInsets.only(
+                  top: scaffold.appBarMaxHeight ?? 0,
+                  bottom: scaffold.appBarMaxHeight ?? 0,
+                )
+              : null,
+          itemScrollController: _itemScrollController,
+          itemPositionsListener: _itemPositionsListener,
+          itemCount: widget.images.length + 1,
+          itemBuilder: (BuildContext context, int index) {
+            if (widget.images.length == index) {
+              return _buildNextEp();
+            }
+            return _images[index];
+          },
+        );
       },
     );
   }
@@ -192,12 +250,12 @@ class _WebToonReaderState extends State<_WebToonReader> {
         widget.struct.fullScreen,
         widget.struct.onFullScreenChange,
       ),
-      _buildImageCount(_current, widget.struct.images.length),
+      _buildImageCount(_current, widget.images.length),
       _buildScrollController(
         context,
         _current,
         _slider,
-        widget.struct.images.length,
+        widget.images.length,
         (value) => _slider = value,
         () {
           if (_slider != _current && _slider > 0) {
@@ -241,9 +299,9 @@ class _WebToonDownloadImage extends _WebToonReaderImage {
     required this.width,
     required this.height,
     required this.format,
-    required List<_WebToonImageProportionSize> sizeList,
-    required int indexOfSizeList,
-  }) : super(sizeList, indexOfSizeList);
+    required Size size,
+    Function(Size)? onTrueSize,
+  }) : super(size, onTrueSize);
 
   @override
   Future<RemoteImageData> imageData() async {
@@ -261,26 +319,17 @@ class _WebToonDownloadImage extends _WebToonReaderImage {
   }
 }
 
-class _WebToonImageProportionSize {
-  final int width;
-  final int height;
-
-  _WebToonImageProportionSize(this.width, this.height);
-
-  @override
-  String toString() {
-    return " { $width , $height } ";
-  }
-}
-
 // 来自远端
 class _WebToonRemoteImage extends _WebToonReaderImage {
   final String fileServer;
   final String path;
 
-  _WebToonRemoteImage(this.fileServer, this.path,
-      List<_WebToonImageProportionSize> sizeList, int indexOfSizeList)
-      : super(sizeList, indexOfSizeList);
+  _WebToonRemoteImage(
+    this.fileServer,
+    this.path,
+    Size size,
+    Function(Size)? onTrueSize,
+  ) : super(size, onTrueSize);
 
   @override
   Future<RemoteImageData> imageData() async {
@@ -288,15 +337,12 @@ class _WebToonRemoteImage extends _WebToonReaderImage {
   }
 }
 
-// 平铺到整个页面的图片
-// 这个类是违背widget类@immutable装饰器的
-// 将ReaderImage初始化到字段中, 而不是函数内变量中
-// 从而避免因为listview滚动state重新初始化造成的画面抖动
+// 通用
 abstract class _WebToonReaderImage extends StatefulWidget {
-  final List<_WebToonImageProportionSize> sizeList;
-  final int indexOfSizeList;
+  final Size size;
+  final Function(Size)? onTrueSize;
 
-  _WebToonReaderImage(this.sizeList, this.indexOfSizeList);
+  _WebToonReaderImage(this.size, this.onTrueSize);
 
   @override
   State<StatefulWidget> createState() => _WebToonReaderImageState();
@@ -306,22 +352,16 @@ abstract class _WebToonReaderImage extends StatefulWidget {
 
 class _WebToonReaderImageState extends State<_WebToonReaderImage> {
   late Future<RemoteImageData> _future = widget.imageData().then((value) {
-    widget.sizeList[widget.indexOfSizeList] =
-        _WebToonImageProportionSize(value.width, value.height);
+    widget.onTrueSize?.call(
+      Size(value.width.toDouble(), value.height.toDouble()),
+    );
     return value;
   });
 
-  // data.width/data.height = width/ ?
-  // data.width * ? = width * data.height
-  // ? = width * data.height / data.width
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        late double proportion =
-            widget.sizeList[widget.indexOfSizeList].height /
-                widget.sizeList[widget.indexOfSizeList].width;
-        var width = constraints.maxWidth;
         return FutureBuilder(
           future: _future,
           builder: (
@@ -329,15 +369,12 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
             AsyncSnapshot<RemoteImageData> snapshot,
           ) {
             if (snapshot.hasError) {
-              return buildError(width, width * proportion);
+              return buildError(widget.size.width, widget.size.height);
             }
             if (snapshot.connectionState != ConnectionState.done) {
-              return buildLoading(width, width * proportion);
+              return buildLoading(widget.size.width, widget.size.height);
             }
-            // true size
             var data = snapshot.data!;
-            var height = width * data.height / data.width;
-
             return GestureDetector(
               onLongPress: () async {
                 String? choose =
@@ -353,7 +390,11 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
                     break;
                 }
               },
-              child: buildFile(data.finalPath, width, height),
+              child: buildFile(
+                data.finalPath,
+                widget.size.width,
+                widget.size.height,
+              ),
             );
           },
         );
@@ -364,10 +405,29 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class _WebToonZoomReader extends _WebToonReader {
+  const _WebToonZoomReader(
+    List<ReaderImageInfo> images,
+    ImageReaderStruct struct,
+  ) : super(images, struct);
+  @override
+  State<StatefulWidget> createState() => _WebToonZoomReaderState();
+}
+
+class _WebToonZoomReaderState extends _WebToonReaderState{
+  @override
+  Widget _buildList() {
+    return GestureZoomBox(child: super._buildList());
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 class _GalleryReader extends StatefulWidget {
+  final List<ReaderImageInfo> images;
   final ImageReaderStruct struct;
 
-  _GalleryReader(this.struct);
+  _GalleryReader(this.images, this.struct);
 
   @override
   State<StatefulWidget> createState() => _GalleryReaderState();
@@ -397,6 +457,10 @@ class _GalleryReaderState extends State<_GalleryReader> {
 
   Widget _buildViewer() {
     return PhotoViewGallery.builder(
+      scrollDirection:
+          widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM
+              ? Axis.vertical
+              : Axis.horizontal,
       backgroundDecoration: BoxDecoration(color: Colors.black),
       loadingBuilder: (context, event) => LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -411,9 +475,9 @@ class _GalleryReaderState extends State<_GalleryReader> {
           widget.struct.onPositionChange(value);
         });
       },
-      itemCount: widget.struct.images.length,
+      itemCount: widget.images.length,
       builder: (BuildContext context, int index) {
-        var item = widget.struct.images[index];
+        var item = widget.images[index];
         if (item.downloadLocalPath != null) {
           return PhotoViewGalleryPageOptions(
             imageProvider:
@@ -453,12 +517,12 @@ class _GalleryReaderState extends State<_GalleryReader> {
     ];
     if (!widget.struct.fullScreen) {
       controllers.addAll([
-        _buildImageCount(_current, widget.struct.images.length),
+        _buildImageCount(_current, widget.images.length),
         _buildScrollController(
           context,
           _current,
           _slider,
-          widget.struct.images.length,
+          widget.images.length,
           (value) => _slider = value,
           () {
             if (_slider != _current && _slider > 0) {
@@ -468,7 +532,7 @@ class _GalleryReaderState extends State<_GalleryReader> {
         ),
       ]);
     }
-    if (_current == widget.struct.images.length) {
+    if (_current == widget.images.length) {
       controllers.add(_buildNextEpController(widget.struct.onNextEp));
     }
     return controllers;
@@ -476,261 +540,6 @@ class _GalleryReaderState extends State<_GalleryReader> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-class _WebToonPageReader extends StatefulWidget {
-  final ImageReaderStruct struct;
-
-  const _WebToonPageReader(this.struct);
-
-  @override
-  State<StatefulWidget> createState() => _WebToonPageReaderState();
-}
-
-class _WebToonPageReaderState extends State<_WebToonPageReader> {
-  final int _pageSize = 10;
-  late int _page = widget.struct.initPosition != null
-      ? widget.struct.initPosition! ~/ _pageSize
-      : 0;
-  late Future<List<_PageWebToonImageStatus>> _pageStatus = _initPage();
-
-  void _prePage() {
-    if (_page == 0) {
-      return;
-    }
-    setState(() {
-      _page--;
-      _pageStatus = _initPage();
-    });
-  }
-
-  void _nextPage() {
-    if ((_page + 1) * _pageSize >= widget.struct.images.length) {
-      return;
-    }
-    setState(() {
-      _page++;
-      _pageStatus = _initPage();
-    });
-  }
-
-  Future<List<_PageWebToonImageStatus>> _initPage() async {
-    await widget.struct.onPositionChange(_page * _pageSize);
-    List<_PageWebToonImageStatus> list = [];
-    var len = widget.struct.images.length;
-    for (var index = _page * _pageSize;
-        index < len && index < (_page + 1) * _pageSize;
-        index++) {
-      var item = widget.struct.images[index];
-      if (item.downloadLocalPath != null && item.downloadLocalPath != "") {
-        var status = _PageWebToonImageStatus();
-        status.status = _ImageStatusSuccess;
-        status.width = item.width!;
-        status.height = item.height!;
-        status.path = await pica.downloadImagePath(item.downloadLocalPath!);
-        list.add(status);
-      } else {
-        var status = _PageWebToonImageStatus();
-        list.add(status);
-        _downloadImage(
-            list, index - (_page * _pageSize), item.fileServer, item.path);
-      }
-    }
-    return list;
-  }
-
-  Future _downloadImage(List<_PageWebToonImageStatus> list, int index,
-      String fileServer, String path) async {
-    try {
-      var data = await pica.remoteImageData(fileServer, path);
-      setState(() {
-        list[index].width = data.width;
-        list[index].height = data.height;
-        list[index].path = data.finalPath;
-        list[index].status = _ImageStatusSuccess;
-      });
-    } catch (e) {
-      setState(() {
-        list[index].status = _ImageStatusError;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ContentBuilder(
-      future: _pageStatus,
-      onRefresh: _initPage,
-      successBuilder: (BuildContext context,
-          AsyncSnapshot<List<_PageWebToonImageStatus>> snapshot) {
-        return Stack(
-          children: [
-            GestureZoomBox(
-              child: _buildViewer(snapshot.data!),
-            ),
-            SafeArea(child: Stack(children: _buildControllers())),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildViewer(List<_PageWebToonImageStatus> data) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        var width = constraints.maxWidth;
-        var height =
-            data.map((e) => width * e.height / e.width).reduce((a, b) => a + b);
-        return ListView(
-          children: [
-            Container(
-              height: height,
-              child: Column(
-                children: data.map((e) {
-                  switch (e.status) {
-                    case _ImageStatusInit:
-                      return LayoutBuilder(
-                        builder:
-                            (BuildContext context, BoxConstraints constraints) {
-                          var width = constraints.maxWidth;
-                          return buildLoading(
-                              width, width * e.height / e.width);
-                        },
-                      );
-                    case _ImageStatusError:
-                      return LayoutBuilder(
-                        builder:
-                            (BuildContext context, BoxConstraints constraints) {
-                          var width = constraints.maxWidth;
-                          return buildError(width, width * e.height / e.width);
-                        },
-                      );
-                    case _ImageStatusSuccess:
-                      return LayoutBuilder(
-                        builder:
-                            (BuildContext context, BoxConstraints constraints) {
-                          var width = constraints.maxWidth;
-
-                          return GestureDetector(
-                            onLongPress: () async {
-                              String? choose = await chooseListDialog(
-                                  context, '请选择', ['预览图片']);
-                              switch (choose) {
-                                case '预览图片':
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) =>
-                                        FilePhotoViewScreen(e.path),
-                                  ));
-                                  break;
-                              }
-                            },
-                            child: buildFile(
-                                e.path, width, width * e.height / e.width),
-                          );
-                        },
-                      );
-                  }
-                  return Container();
-                }).toList(),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  List<Widget> _buildControllers() {
-    if (widget.struct.fullScreen) {
-      return [
-        _buildFullScreenController(
-          widget.struct.fullScreen,
-          widget.struct.onFullScreenChange,
-        ),
-        _buildImageCount(
-            _page + 1, (widget.struct.images.length / _pageSize).ceil()),
-      ];
-    }
-    return [
-      _buildFullScreenController(
-        widget.struct.fullScreen,
-        widget.struct.onFullScreenChange,
-      ),
-      _buildImageCount(_page, (widget.struct.images.length / _pageSize).ceil()),
-      _buildScrollController(),
-    ];
-  }
-
-  Widget _buildScrollController() {
-    if (widget.struct.images.length == 0) {
-      return Container();
-    }
-    return Container(
-      child: Row(
-        children: [
-          Expanded(child: Container()),
-          Column(
-            children: [
-              Expanded(child: Container()),
-              Material(
-                color: Color(0x0),
-                child: InkWell(
-                  onTap: _prePage,
-                  child: Container(
-                    color: Colors.black.withOpacity(.3),
-                    padding:
-                        EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 8),
-                    child:
-                        Text('上\n一\n页', style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-              ),
-              Container(height: 10),
-              Material(
-                color: Color(0x0),
-                child: InkWell(
-                  onTap: _nextPage,
-                  child: Container(
-                    color: Colors.black.withOpacity(.3),
-                    padding:
-                        EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 8),
-                    child:
-                        Text('下\n一\n页', style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-              ),
-              Expanded(child: Container()),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-//
-
-const _ImageStatusInit = 0;
-const _ImageStatusSuccess = 1;
-const _ImageStatusError = 2;
-
-class _PageWebToonImageStatus {
-  int status = _ImageStatusInit;
-  int width = 2;
-  int height = 1;
-  late String path;
-}
-
-/////////////////////////////
 
 Widget _buildFullScreenController(
   bool fullScreen,

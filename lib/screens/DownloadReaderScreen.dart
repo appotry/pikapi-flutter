@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Storage.dart';
+import 'package:pikapi/basic/enum/PagerDirection.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -16,6 +17,7 @@ class DownloadReaderScreen extends StatefulWidget {
   final int currentEpOrder;
   final int? initPictureRank;
   final PagerType pagerType = storedPagerType;
+  final PagerDirection pagerDirection = storedPagerDirection;
 
   DownloadReaderScreen({
     Key? key,
@@ -81,6 +83,32 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
               actions: [
                 IconButton(
                   onPressed: () async {
+                    PagerDirection? t = await choosePagerDirection(context);
+                    if (t != null) {
+                      if (widget.pagerDirection != t) {
+                        pica.savePagerDirection(t);
+                        storedPagerDirection = t;
+                        // 重新加载本页
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return DownloadReaderScreen(
+                                comicInfo: widget.comicInfo,
+                                epList: widget.epList,
+                                currentEpOrder: widget.currentEpOrder,
+                                initPictureRank: _lastChangeRank ??
+                                    widget.initPictureRank, // maybe null
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: Icon(Icons.grid_goldenratio),
+                ),
+                IconButton(
+                  onPressed: () async {
                     PagerType? t = await choosePagerType(context);
                     if (t != null) {
                       if (widget.pagerType != t) {
@@ -117,11 +145,11 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
         successBuilder:
             (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           return ImageReader(
+            pictures
+                .map((e) => ReaderImageInfo(e.fileServer, e.path, e.localPath,
+                    e.width, e.height, e.format, e.fileSize))
+                .toList(),
             ImageReaderStruct(
-              images: pictures
-                  .map((e) => ReaderImageInfo(e.fileServer, e.path, e.localPath,
-                      e.width, e.height, e.format, e.fileSize))
-                  .toList(),
               fullScreen: _fullScreen,
               onFullScreenChange: _onFullScreenChange,
               onNextEp: _next,
@@ -129,8 +157,9 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
               initPosition: widget.initPictureRank == null
                   ? null
                   : widget.initPictureRank! - 1,
+              pagerType: widget.pagerType,
+              pagerDirection: widget.pagerDirection,
             ),
-            widget.pagerType,
           );
         },
       ),

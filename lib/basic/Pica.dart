@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/basic/enum/PagerDirection.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 
@@ -48,6 +49,21 @@ class Pica {
       "value": pagerType.toString(),
     });
   }
+
+  Future<PagerDirection> loadPagerDirection() async {
+    return pagerDirectionFromString(await _flatInvoke("loadProperty", {
+      "name": "pagerDirection",
+      "defaultValue": PagerDirection.TOP_TO_BOTTOM.toString(),
+    }));
+  }
+
+  Future<dynamic> savePagerDirection(PagerDirection pagerDirection) async {
+    return await _flatInvoke("saveProperty", {
+      "name": "pagerDirection",
+      "value": pagerDirection.toString(),
+    });
+  }
+  
 
   Future<ListLayout> loadListLayout() async {
     return listLayoutFromString(await _flatInvoke("loadProperty", {
@@ -420,4 +436,5 @@ class Pica {
       "path": path,
     });
   }
+
 }

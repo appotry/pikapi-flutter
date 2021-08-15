@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 
 enum PagerType {
   WEB_TOON,
-  WEB_TOON_PAGE,
+  WEB_TOON_ZOOM,
   GALLERY,
 }
 
 var types = {
   'WebToon (默认)': PagerType.WEB_TOON,
-  'WebToon + 分页 + 双击放大 (试验性)': PagerType.WEB_TOON_PAGE,
-  '相册 (试验性)': PagerType.GALLERY,
+  'WebToon + 双击放大': PagerType.WEB_TOON_ZOOM,
+  '相册': PagerType.GALLERY,
 };
 
 PagerType pagerTypeFromString(String pagerTypeString) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/Storage.dart';
+import 'package:pikapi/basic/enum/PagerDirection.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 
@@ -54,6 +55,20 @@ class _ReaderSettingsScreenState extends State<ReaderSettingsScreen> {
                   await pica.savePagerType(t);
                   setState(() {
                     storedPagerType = t;
+                  });
+                }
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Text("阅读器方向"),
+              subtitle: Text(pagerDirectionName(storedPagerDirection)),
+              onTap: () async {
+                PagerDirection? t = await choosePagerDirection(context);
+                if (t != null) {
+                  await pica.savePagerDirection(t);
+                  setState(() {
+                    storedPagerDirection = t;
                   });
                 }
               },
