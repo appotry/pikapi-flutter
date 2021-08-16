@@ -1,10 +1,10 @@
 PIKAPI - 哔咔客户端
 ========
-一个全平台的, 无广告的, 哔咔漫画客户端, 能运行在 Windows/MacOS/Linux/Android/IOS中。
+- 美观易用且无广告的哔咔漫画客户端, 能运行在Windows/MacOS/Linux/Android/IOS中。
 
 ## 界面 / 功能
 
-![阅读器](images/reader2.png)
+![阅读器](images/reader.png)
 
 ### 登录/分流
 
@@ -14,7 +14,7 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 
 ### 漫画分类/搜索
 
-![分类](images/category_screen.png) ![列表](images/pager_screen.png)
+![分类](images/categories_screen.png) ![列表](images/comic_list.png)
 
 
 ### 漫画阅读/下载/导入/导出
@@ -95,4 +95,3 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 ## 参考
 
 - [picacomic](https://github.com/AnkiKong/picacomic)
-- [picacg-windows](https://github.com/tonquer/picacg-windows)
