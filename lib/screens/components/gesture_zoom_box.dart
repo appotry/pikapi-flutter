@@ -57,7 +57,10 @@ class _GestureZoomBoxState extends State<GestureZoomBox>
           onScaleStart: _onScaleStart,
           onScaleUpdate: _onScaleUpdate,
           onScaleEnd: _onScaleEnd,
-          child: widget.child,
+          child: AbsorbPointer(
+            absorbing: _scale != 1,
+            child: widget.child,
+          ),
         ),
       ),
     );
