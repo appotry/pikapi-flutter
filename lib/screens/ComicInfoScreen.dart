@@ -142,7 +142,8 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                             ),
                           ),
                           TextSpan(
-                            text: "( ${formatTimeToDate(_comicInfo.updatedAt)} )",
+                            text:
+                                "( ${formatTimeToDate(_comicInfo.updatedAt)} )",
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey,
@@ -285,17 +286,13 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
   }
 
   void _push(ComicInfo comicInfo, List<Ep> epList, int order, int? rank) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ComicReaderScreen(
-          comicInfo: comicInfo,
-          epList: epList,
-          currentEpOrder: order,
-          initPictureRank: rank,
-        ),
-      ),
-    ).whenComplete(() {
+    var screen = ComicReaderScreen(
+      comicInfo: comicInfo,
+      epList: epList,
+      currentEpOrder: order,
+      initPictureRank: rank,
+    );
+    circularPush(context, screen).whenComplete(() {
       setState(() {
         _viewFuture = _loadViewLog();
       });

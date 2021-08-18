@@ -7,9 +7,10 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/basic/Storage.dart';
+import 'package:pikapi/basic/enum/FullScreenAction.dart';
 import 'package:pikapi/basic/enum/PagerDirection.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
-import 'package:pikapi/screens/components/ContentBuilder.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
@@ -61,16 +62,73 @@ class ImageReader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    late Widget reader;
     switch (struct.pagerType) {
       case PagerType.WEB_TOON:
-        return _WebToonReader(images, struct);
+        reader = _WebToonReader(images, struct);
+        break;
       case PagerType.WEB_TOON_ZOOM:
-        return _WebToonZoomReader(images, struct);
+        reader = _WebToonZoomReader(images, struct);
+        break;
       case PagerType.GALLERY:
-        return _GalleryReader(images, struct);
+        reader = _GalleryReader(images, struct);
+        break;
       default:
-        return Container();
+        reader = Container();
+        break;
     }
+    switch (storedFullScreenAction) {
+      case FullScreenAction.CONTROLLER:
+        return Stack(
+          children: [
+            reader,
+            _buildFullScreenController(
+              struct.fullScreen,
+              struct.onFullScreenChange,
+            ),
+          ],
+        );
+      case FullScreenAction.TOUCH_ONCE:
+        return GestureDetector(
+          onTap: () => struct.onFullScreenChange(!struct.fullScreen),
+          child: reader,
+        );
+      default:
+        return reader;
+    }
+  }
+
+  Widget _buildFullScreenController(
+    bool fullScreen,
+    FutureOr<dynamic> Function(bool fullScreen) onFullScreenChange,
+  ) {
+    return Align(
+      alignment: Alignment.bottomLeft,
+      child: Material(
+        color: Color(0x0),
+        child: Container(
+          padding: EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
+          margin: EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(10),
+              bottomRight: Radius.circular(10),
+            ),
+            color: Color(0x88000000),
+          ),
+          child: GestureDetector(
+            onTap: () {
+              onFullScreenChange(!fullScreen);
+            },
+            child: Icon(
+              fullScreen ? Icons.fullscreen_exit : Icons.fullscreen_outlined,
+              size: 30,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -238,18 +296,9 @@ class _WebToonReaderState extends State<_WebToonReader> {
 
   List<Widget> _buildControllers() {
     if (widget.struct.fullScreen) {
-      return [
-        _buildFullScreenController(
-          widget.struct.fullScreen,
-          widget.struct.onFullScreenChange,
-        ),
-      ];
+      return [];
     }
     return [
-      _buildFullScreenController(
-        widget.struct.fullScreen,
-        widget.struct.onFullScreenChange,
-      ),
       _buildImageCount(_current, widget.images.length),
       _buildScrollController(
         context,
@@ -410,11 +459,12 @@ class _WebToonZoomReader extends _WebToonReader {
     List<ReaderImageInfo> images,
     ImageReaderStruct struct,
   ) : super(images, struct);
+
   @override
   State<StatefulWidget> createState() => _WebToonZoomReaderState();
 }
 
-class _WebToonZoomReaderState extends _WebToonReaderState{
+class _WebToonZoomReaderState extends _WebToonReaderState {
   @override
   Widget _buildList() {
     return GestureZoomBox(child: super._buildList());
@@ -509,12 +559,7 @@ class _GalleryReaderState extends State<_GalleryReader> {
   }
 
   List<Widget> _buildControllers() {
-    var controllers = [
-      _buildFullScreenController(
-        widget.struct.fullScreen,
-        widget.struct.onFullScreenChange,
-      ),
-    ];
+    var controllers = <Widget>[];
     if (!widget.struct.fullScreen) {
       controllers.addAll([
         _buildImageCount(_current, widget.images.length),
@@ -540,39 +585,6 @@ class _GalleryReaderState extends State<_GalleryReader> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-Widget _buildFullScreenController(
-  bool fullScreen,
-  FutureOr<dynamic> Function(bool fullScreen) onFullScreenChange,
-) {
-  return Align(
-    alignment: Alignment.bottomLeft,
-    child: Material(
-      color: Color(0x0),
-      child: Container(
-        padding: EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
-        margin: EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(10),
-            bottomRight: Radius.circular(10),
-          ),
-          color: Color(0x88000000),
-        ),
-        child: GestureDetector(
-          onTap: () {
-            onFullScreenChange(!fullScreen);
-          },
-          child: Icon(
-            fullScreen ? Icons.fullscreen_exit : Icons.fullscreen_outlined,
-            size: 30,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    ),
-  );
-}
 
 Widget _buildImageCount(int current, int total) {
   return Align(

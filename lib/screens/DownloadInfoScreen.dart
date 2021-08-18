@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/basic/Navigatior.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'ComicInfoScreen.dart';
 import 'DownloadExportScreen.dart';
@@ -146,22 +147,22 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
     );
   }
 
-  void _push(DownloadComic task, List<DownloadEp> epList, int epOrder, int? rank) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DownloadReaderScreen(
-          comicInfo: _task,
-          epList: _epList,
-          currentEpOrder: epOrder,
-          initPictureRank: rank,
-        ),
-      ),
-    ).whenComplete(() {
+  void _push(
+    DownloadComic task,
+    List<DownloadEp> epList,
+    int epOrder,
+    int? rank,
+  ) {
+    var readerScreen = DownloadReaderScreen(
+      comicInfo: _task,
+      epList: _epList,
+      currentEpOrder: epOrder,
+      initPictureRank: rank,
+    );
+    circularPush(context, readerScreen).whenComplete(() {
       setState(() {
         _viewFuture = pica.loadView(widget.comicId);
       });
     });
   }
 }
-

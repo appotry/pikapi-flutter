@@ -205,11 +205,9 @@ func comicInfo(comicId string) (string, error) {
 		}
 		return cache, nil
 	}
-	print(1)
 	// get
 	comic, err := client.ComicInfo(comicId)
 	if err != nil {
-		print(2)
 		return "", err
 	}
 	// 标记历史记录
@@ -241,16 +239,13 @@ func comicInfo(comicId string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	print(3)
 	// return
 	buff, err := json.Marshal(comic)
 	if err != nil {
 		return "", err
 	}
-	print(4)
 	cache = string(buff)
 	network_cache.SaveCache(key, cache)
-	print(5)
 	return cache, nil
 }
 

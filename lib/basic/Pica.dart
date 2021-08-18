@@ -6,6 +6,7 @@ import 'package:pikapi/basic/enum/PagerDirection.dart';
 import 'package:pikapi/basic/enum/PagerType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 
+import 'enum/FullScreenAction.dart';
 import 'enum/ListLayout.dart';
 
 final pica = Pica._();
@@ -61,6 +62,20 @@ class Pica {
     return await _flatInvoke("saveProperty", {
       "name": "pagerDirection",
       "value": pagerDirection.toString(),
+    });
+  }
+
+  Future<FullScreenAction> loadFullScreenAction() async {
+    return fullScreenActionFromString(await _flatInvoke("loadProperty", {
+      "name": "fullScreenAction",
+      "defaultValue": FullScreenAction.CONTROLLER.toString(),
+    }));
+  }
+
+  Future<dynamic> saveFullScreenAction(FullScreenAction fullScreenAction) async {
+    return await _flatInvoke("saveProperty", {
+      "name": "fullScreenAction",
+      "value": fullScreenAction.toString(),
     });
   }
 
@@ -456,6 +471,21 @@ class Pica {
   Future androidSaveFileToImage(String path) async {
     return _channel.invokeMethod("androidSaveFileToImage", {
       "path": path,
+    });
+  }
+
+  Future<bool> getAutoFullScreen() async {
+    var value = await _flatInvoke("loadProperty", {
+      "name": "autoFullScreen",
+      "defaultValue": "false",
+    });
+    return value == "true";
+  }
+
+  Future<dynamic> setAutoFullScreen(bool value) async {
+    return await _flatInvoke("saveProperty", {
+      "name": "autoFullScreen",
+      "value": "$value",
     });
   }
 }

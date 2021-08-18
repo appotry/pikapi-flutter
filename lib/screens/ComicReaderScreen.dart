@@ -22,6 +22,7 @@ class ComicReaderScreen extends StatefulWidget {
   final int? initPictureRank;
   final PagerType pagerType = storedPagerType;
   final PagerDirection pagerDirection = storedPagerDirection;
+  late final bool autoFullScreen;
 
   ComicReaderScreen({
     Key? key,
@@ -29,7 +30,10 @@ class ComicReaderScreen extends StatefulWidget {
     required this.epList,
     required this.currentEpOrder,
     this.initPictureRank,
-  }) : super(key: key);
+    bool? autoFullScreen,
+  }) : super(key: key) {
+    this.autoFullScreen = autoFullScreen ?? storedAutoFullScreen;
+  }
 
   @override
   State<StatefulWidget> createState() => _ComicReaderScreenState();
@@ -37,7 +41,7 @@ class ComicReaderScreen extends StatefulWidget {
 
 class _ComicReaderScreenState extends State<ComicReaderScreen> {
   late Ep _ep;
-  late bool _fullScreen = false;
+  late bool _fullScreen = widget.autoFullScreen;
   late Future<List<PicaImage>> _future;
   int? _lastChangeRank;
 
@@ -69,6 +73,9 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
 
   @override
   void initState() {
+    if (widget.autoFullScreen) {
+      SystemChrome.setEnabledSystemUIOverlays([]);
+    }
     widget.epList.forEach((element) {
       if (element.order == widget.currentEpOrder) {
         _ep = element;
@@ -100,19 +107,15 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
                         pica.savePagerDirection(t);
                         storedPagerDirection = t;
                         // 重新加载本页
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return ComicReaderScreen(
-                                comicInfo: widget.comicInfo,
-                                epList: widget.epList,
-                                currentEpOrder: widget.currentEpOrder,
-                                initPictureRank: _lastChangeRank ??
-                                    widget.initPictureRank, // maybe null
-                              );
-                            },
-                          ),
-                        );
+                        Navigator.of(context).pop(ComicReaderScreen(
+                          comicInfo: widget.comicInfo,
+                          epList: widget.epList,
+                          currentEpOrder: widget.currentEpOrder,
+                          initPictureRank:
+                              _lastChangeRank ?? widget.initPictureRank,
+                          // maybe null
+                          autoFullScreen: _fullScreen,
+                        ));
                       }
                     }
                   },
@@ -126,19 +129,15 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
                         pica.savePagerType(t);
                         storedPagerType = t;
                         // 重新加载本页
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return ComicReaderScreen(
-                                comicInfo: widget.comicInfo,
-                                epList: widget.epList,
-                                currentEpOrder: widget.currentEpOrder,
-                                initPictureRank: _lastChangeRank ??
-                                    widget.initPictureRank, // maybe null
-                              );
-                            },
-                          ),
-                        );
+                        Navigator.of(context).pop(ComicReaderScreen(
+                          comicInfo: widget.comicInfo,
+                          epList: widget.epList,
+                          currentEpOrder: widget.currentEpOrder,
+                          initPictureRank:
+                              _lastChangeRank ?? widget.initPictureRank,
+                          // maybe null
+                          autoFullScreen: _fullScreen,
+                        ));
                       }
                     }
                   },
@@ -184,30 +183,26 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     );
   }
 
-  void _onFullScreenChange(bool fullScreen) {
+  Future _onFullScreenChange(bool fullScreen) async {
     setState(() {
       _fullScreen = fullScreen;
-      SystemChrome.setEnabledSystemUIOverlays(
-          fullScreen ? [] : SystemUiOverlay.values);
     });
+    SystemChrome.setEnabledSystemUIOverlays(
+        fullScreen ? [] : SystemUiOverlay.values);
   }
 
-  void _next() {
+  Future _next() async {
     var orderMap = Map<int, Ep>();
     widget.epList.forEach((element) {
       orderMap[element.order] = element;
     });
     if (orderMap.containsKey(widget.currentEpOrder + 1)) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ComicReaderScreen(
-            comicInfo: widget.comicInfo,
-            epList: widget.epList,
-            currentEpOrder: widget.currentEpOrder + 1,
-          ),
-        ),
-      );
+      Navigator.of(context).pop(ComicReaderScreen(
+        comicInfo: widget.comicInfo,
+        epList: widget.epList,
+        currentEpOrder: widget.currentEpOrder + 1,
+        autoFullScreen: _fullScreen,
+      ));
     } else {
       defaultToast(context, "找不到下一章啦");
     }
