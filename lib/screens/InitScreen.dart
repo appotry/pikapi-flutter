@@ -26,6 +26,9 @@ class _InitScreenState extends State<InitScreen> {
     currentLayout = await pica.loadListLayout(); // 页面布局
     storedPagerType = await pica.loadPagerType();
     storedPagerDirection = await pica.loadPagerDirection();
+    storedAddress = await pica.getSwitchAddress();
+    storedProxy = await pica.getProxy();
+    storedQuality = await pica.loadQuality();
     // 登录, 如果token失效重新登录, 网络不好的时候可能需要1分钟
     if (await pica.preLogin()) {
       // 如果token或username+password有效则直接进入登录好的界面

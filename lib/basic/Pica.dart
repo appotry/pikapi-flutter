@@ -63,7 +63,6 @@ class Pica {
       "value": pagerDirection.toString(),
     });
   }
-  
 
   Future<ListLayout> loadListLayout() async {
     return listLayoutFromString(await _flatInvoke("loadProperty", {
@@ -289,12 +288,35 @@ class Pica {
     return list.map((e) => ComicSimple.fromJson(e)).toList();
   }
 
+  Future<dynamic> postComment(String comicId, String content) {
+    return _flatInvoke("postComment", {
+      "comicId": comicId,
+      "content": content,
+    });
+  }
+
   Future<CommentPage> comments(String comicId, int page) async {
     var rsp = await _flatInvoke("comments", {
       "comicId": comicId,
       "page": page,
     });
     return CommentPage.fromJson(json.decode(rsp));
+  }
+
+  Future<CommentChildrenPage> commentChildren(
+      String commentId, int page) async {
+    var rsp = await _flatInvoke("commentChildren", {
+      "commentId": commentId,
+      "page": page,
+    });
+    return CommentChildrenPage.fromJson(json.decode(rsp));
+  }
+
+  Future<MyCommentsPage> myComments(int page) async {
+    String response = await _flatInvoke("myComments", "$page");
+    print("RESPONSE");
+    print(response);
+    return MyCommentsPage.fromJson(jsonDecode(response));
   }
 
   Future<List<ViewLog>> viewLogPage(int page, int pageSize) async {
@@ -436,5 +458,4 @@ class Pica {
       "path": path,
     });
   }
-
 }

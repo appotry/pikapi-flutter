@@ -3,14 +3,13 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Themes.dart';
 import 'package:pikapi/screens/AboutScreen.dart';
 import 'package:pikapi/screens/AccountScreen.dart';
-import 'package:pikapi/screens/CleanScreen.dart';
 import 'package:pikapi/screens/DownloadListScreen.dart';
 import 'package:pikapi/screens/FavouritePaperScreen.dart';
-import 'package:pikapi/screens/NetworkSettingsScreen.dart';
-import 'package:pikapi/screens/ReaderSettingsScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
 import 'package:pikapi/basic/Pica.dart';
 
+import 'MyCommentsScreen.dart';
+import 'SettingsScreen.dart';
 import 'components/UserProfileCard.dart';
 
 // 个人空间页面
@@ -22,7 +21,6 @@ class SpaceScreen extends StatefulWidget {
 }
 
 class _SpaceScreenState extends State<SpaceScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -34,15 +32,6 @@ class _SpaceScreenState extends State<SpaceScreen> {
       appBar: AppBar(
         title: Text('我的'),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AboutScreen()),
-              );
-            },
-            icon: Icon(Icons.info_outline),
-          ),
           IconButton(
             onPressed: () async {
               bool result =
@@ -58,6 +47,24 @@ class _SpaceScreenState extends State<SpaceScreen> {
             },
             icon: Icon(Icons.exit_to_app),
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AboutScreen()),
+              );
+            },
+            icon: Icon(Icons.info_outline),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              );
+            },
+            icon: Icon(Icons.settings),
+          ),
         ],
       ),
       body: ListView(
@@ -68,53 +75,10 @@ class _SpaceScreenState extends State<SpaceScreen> {
           ListTile(
             onTap: () async {
               await chooseTheme(context);
-              setState(() {
-
-              });
+              setState(() {});
             },
             title: Text('主题'),
             subtitle: Text(currentThemeName()),
-          ),
-          Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NetworkSettingsScreen()),
-              );
-            },
-            title: Text('网络设置'),
-          ),
-          Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CleanScreen()),
-              );
-            },
-            title: Text('清除缓存'),
-          ),
-          Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ReaderSettingsScreen()),
-              );
-            },
-            title: Text('阅读器设置'),
-          ),
-          Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ViewLogsScreen()),
-              );
-            },
-            title: Text('浏览记录'),
           ),
           Divider(),
           ListTile(
@@ -125,6 +89,26 @@ class _SpaceScreenState extends State<SpaceScreen> {
               );
             },
             title: Text('我的收藏'),
+          ),
+          Divider(),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyCommentsScreen()),
+              );
+            },
+            title: Text('我的评论'),
+          ),
+          Divider(),
+          ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ViewLogsScreen()),
+              );
+            },
+            title: Text('浏览记录'),
           ),
           Divider(),
           ListTile(

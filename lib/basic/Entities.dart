@@ -518,3 +518,62 @@ class GameInfo extends GameSimple {
     this.createdAt = json["created_at"];
   }
 }
+
+class MyCommentsPage extends Page {
+  late List<MyComment> docs;
+
+  MyCommentsPage.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    this.docs =
+        List.of(json["docs"]).map((e) => MyComment.fromJson(e)).toList();
+  }
+}
+
+class MyComment {
+  late String id;
+  late String content;
+  late bool hide;
+  late String createdAt;
+  late int likesCount;
+  late int commentsCount;
+  late bool isLiked;
+  late MyCommentComic comic;
+
+  MyComment.fromJson(Map<String, dynamic> json) {
+    this.id = json["_id"];
+    this.content = json["content"];
+    this.hide = json["hide"];
+    this.createdAt = json["created_at"];
+    this.likesCount = json["likesCount"];
+    this.commentsCount = json["commentsCount"];
+    this.isLiked = json["isLiked"];
+    this.comic = MyCommentComic.fromJson(json["_comic"]);
+  }
+}
+
+class MyCommentComic {
+  late String id;
+  late String title;
+
+  MyCommentComic.fromJson(Map<String, dynamic> json) {
+    this.id = json["_id"];
+    this.title = json["title"];
+  }
+}
+
+class CommentChildrenPage extends Page {
+  late List<CommentChild> docs;
+
+  CommentChildrenPage.fromJson(Map<String, dynamic> json)
+      : super.fromJson(json) {
+    this.docs =
+        List.of(json["docs"]).map((e) => CommentChild.fromJson(e)).toList();
+  }
+}
+
+class CommentChild extends Comment {
+  late String parent;
+
+  CommentChild.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
+    this.parent = json["_parent"];
+  }
+}

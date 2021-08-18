@@ -57,6 +57,14 @@ func RemoveCache(key string) error {
 	return err
 }
 
+func RemoveCaches(like string) error {
+	err := db.Unscoped().Delete(&NetworkCache{}, "k LIKE ?", like).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	}
+	return err
+}
+
 func RemoveAll() error {
 	err := db.Unscoped().Delete(&NetworkCache{}, "1 = 1").Error
 	if err != nil {

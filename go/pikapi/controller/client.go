@@ -361,12 +361,57 @@ func comments(params string) (string, error) {
 	json.Unmarshal([]byte(params), &paramsStruct)
 	comicId := paramsStruct.ComicId
 	page := paramsStruct.Page
-	//
 	return cacheable(
 		fmt.Sprintf("COMMENTS$%s$%d", comicId, page),
 		time.Hour*2,
 		func() (interface{}, error) {
 			return client.ComicCommentsPage(comicId, page)
+		},
+	)
+}
+
+func commentChildren(params string) (string, error) {
+	var paramsStruct struct {
+		CommentId string `json:"comicId"`
+		Page      int    `json:"page"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	commentId := paramsStruct.CommentId
+	page := paramsStruct.Page
+	return cacheable(
+		fmt.Sprintf("COMMENT_CHILDREN%s$%d", commentId, page),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.CommentChildren(commentId, page)
+		},
+	)
+}
+
+func postComment(params string) (string, error) {
+	var paramsStruct struct {
+		ComicId string `json:"comicId"`
+		Content string `json:"content"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	err := client.PostComment(paramsStruct.ComicId, paramsStruct.Content)
+	if err != nil {
+		return "", err
+	}
+	network_cache.RemoveCaches("MY_COMMENTS$%")
+	network_cache.RemoveCaches(fmt.Sprintf("COMMENTS$%s$%%", paramsStruct.ComicId))
+	return "", nil
+}
+
+func myComments(pageStr string) (string, error) {
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		return "", err
+	}
+	return cacheable(
+		fmt.Sprintf("MY_COMMENTS$%d", page),
+		time.Hour*2,
+		func() (interface{}, error) {
+			return client.MyComments(page)
 		},
 	)
 }
