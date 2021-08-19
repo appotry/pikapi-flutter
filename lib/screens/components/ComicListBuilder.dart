@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/screens/components/ComicInfoCard.dart';
-import 'LinkToComicInfo.dart';
+import 'package:pikapi/screens/components/ComicList.dart';
+import 'package:pikapi/screens/components/FitButton.dart';
 import 'ContentBuilder.dart';
 
 class ComicListBuilder extends StatelessWidget {
@@ -19,20 +19,12 @@ class ComicListBuilder extends StatelessWidget {
           (BuildContext context, AsyncSnapshot<List<ComicSimple>> snapshot) {
         return RefreshIndicator(
           onRefresh: reload,
-          child: ListView(
-            children: [
-              ...snapshot.data!.map((e) => LinkToComicInfo(
-                    comicId: e.id,
-                    child: ComicInfoCard(e),
-                  )),
-              MaterialButton(
-                onPressed: reload,
-                child: Container(
-                  padding: EdgeInsets.all(30),
-                  child: Text('刷新'),
-                ),
-              ),
-            ],
+          child: ComicList(
+            snapshot.data!,
+            appendWidget: FitButton(
+              onPressed: reload,
+              text: '刷新',
+            ),
           ),
         );
       },

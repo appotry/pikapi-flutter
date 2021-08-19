@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/basic/enum/ListLayout.dart';
 
-import 'components/ComicsListBuilder.dart';
+import 'components/ComicListBuilder.dart';
 
 class RankingsScreen extends StatelessWidget {
   @override
@@ -11,6 +12,9 @@ class RankingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('排行榜'),
+        actions: [
+          chooseLayoutAction(context),
+        ],
       ),
       body: DefaultTabController(
         length: 3,

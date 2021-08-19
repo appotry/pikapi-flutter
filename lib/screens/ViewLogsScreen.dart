@@ -14,7 +14,7 @@ class ViewLogsScreen extends StatefulWidget {
 
 class _ViewLogsScreenState extends State<ViewLogsScreen> {
   static const _pageSize = 24;
-  static const _scrollPhysics = AlwaysScrollableScrollPhysics();
+  static const _scrollPhysics = AlwaysScrollableScrollPhysics(); // 即使不足一页仍可滚动
 
   final _scrollController = ScrollController();
   final _comicList = <ComicWrapEntity>[];
