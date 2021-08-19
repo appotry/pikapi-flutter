@@ -84,27 +84,15 @@ class _ComicsScreenState extends State<ComicsScreen> {
         icon: Icon(Icons.category),
       );
 
-  late String _currentSort = SORT_DEFAULT;
-  late int _currentPage = 1;
-  late Future<ComicsPage> _future;
-
-  void _load() {
-    setState(() {
-      _future = pica.comics(
-        _currentSort,
-        _currentPage,
-        category: widget.category ?? "",
-        tag: widget.tag ?? "",
-        creatorId: widget.creatorId ?? "",
-        chineseTeam: widget.chineseTeam ?? "",
-      );
-    });
-  }
-
-  @override
-  void initState() {
-    _load();
-    super.initState();
+  Future<ComicsPage> _load(String _currentSort,int _currentPage) {
+    return pica.comics(
+      _currentSort,
+      _currentPage,
+      category: widget.category ?? "",
+      tag: widget.tag ?? "",
+      creatorId: widget.creatorId ?? "",
+      chineseTeam: widget.chineseTeam ?? "",
+    );
   }
 
   @override
@@ -141,21 +129,7 @@ class _ComicsScreenState extends State<ComicsScreen> {
     return Scaffold(
       appBar: appBar,
       body: ComicPager(
-        future: _future,
-        onPageChange: (toPage) {
-          _currentPage = toPage;
-          _load();
-        },
-        onSortChange: (toSort) {
-          if (toSort != null) {
-            _currentSort = toSort;
-            _load();
-          }
-        },
-        onRefresh: () async {
-          _load();
-        },
-        currentSort: _currentSort,
+        fetchPage: _load,
       ),
     );
   }

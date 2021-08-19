@@ -1,26 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum PagerDirection {
+enum ReaderDirection {
   TOP_TO_BOTTOM,
   LEFT_TO_RIGHT,
 }
 
 var types = {
-  '从上到下': PagerDirection.TOP_TO_BOTTOM,
-  '从左到右': PagerDirection.LEFT_TO_RIGHT,
+  '从上到下': ReaderDirection.TOP_TO_BOTTOM,
+  '从左到右': ReaderDirection.LEFT_TO_RIGHT,
 };
 
-PagerDirection pagerDirectionFromString(String pagerDirectionString) {
-  for (var value in PagerDirection.values) {
+ReaderDirection pagerDirectionFromString(String pagerDirectionString) {
+  for (var value in ReaderDirection.values) {
     if (pagerDirectionString == value.toString()) {
       return value;
     }
   }
-  return PagerDirection.TOP_TO_BOTTOM;
+  return ReaderDirection.TOP_TO_BOTTOM;
 }
 
-String pagerDirectionName(PagerDirection pagerDirection) {
+String readerDirectionName(ReaderDirection pagerDirection) {
   for (var e in types.entries) {
     if (e.value == pagerDirection) {
       return e.key;
@@ -29,8 +29,8 @@ String pagerDirectionName(PagerDirection pagerDirection) {
   return '';
 }
 
-Future<PagerDirection?> choosePagerDirection(BuildContext buildContext) async {
-  return await showDialog<PagerDirection>(
+Future<ReaderDirection?> choosePagerDirection(BuildContext buildContext) async {
+  return await showDialog<ReaderDirection>(
     context: buildContext,
     builder: (BuildContext context) {
       return SimpleDialog(

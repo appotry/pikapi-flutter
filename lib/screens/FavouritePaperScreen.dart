@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pikapi/basic/enum/Sort.dart';
 import 'package:pikapi/basic/Pica.dart';
 import '../basic/Entities.dart';
 import 'components/ComicPager.dart';
@@ -11,20 +10,8 @@ class FavouritePaperScreen extends StatefulWidget {
 }
 
 class _FavouritePaperScreen extends State<FavouritePaperScreen> {
-  late Future<ComicsPage> _future;
-  late String _currentSort = SORT_DEFAULT;
-  late int _currentPage = 1;
-
-  void _load() {
-    setState(() {
-      _future = pica.favouriteComics(_currentSort, _currentPage);
-    });
-  }
-
-  @override
-  void initState() {
-    _load();
-    super.initState();
+  Future<ComicsPage> _fetch(String _currentSort, int _currentPage) {
+    return pica.favouriteComics(_currentSort, _currentPage);
   }
 
   @override
@@ -34,21 +21,7 @@ class _FavouritePaperScreen extends State<FavouritePaperScreen> {
         title: Text('收藏'),
       ),
       body: ComicPager(
-        future: _future,
-        onPageChange: (toPage) {
-          _currentPage = toPage;
-          _load();
-        },
-        onSortChange: (toSort) {
-          if (toSort != null) {
-            _currentSort = toSort;
-            _load();
-          }
-        },
-        onRefresh: () async {
-          _load();
-        },
-        currentSort: _currentSort,
+        fetchPage: _fetch,
       ),
     );
   }

@@ -1,28 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum PagerType {
+enum ReaderType {
   WEB_TOON,
   WEB_TOON_ZOOM,
   GALLERY,
 }
 
 var types = {
-  'WebToon (默认)': PagerType.WEB_TOON,
-  'WebToon + 双击放大': PagerType.WEB_TOON_ZOOM,
-  '相册': PagerType.GALLERY,
+  'WebToon (默认)': ReaderType.WEB_TOON,
+  'WebToon + 双击放大': ReaderType.WEB_TOON_ZOOM,
+  '相册': ReaderType.GALLERY,
 };
 
-PagerType pagerTypeFromString(String pagerTypeString) {
-  for (var value in PagerType.values) {
+ReaderType pagerTypeFromString(String pagerTypeString) {
+  for (var value in ReaderType.values) {
     if (pagerTypeString == value.toString()) {
       return value;
     }
   }
-  return PagerType.WEB_TOON;
+  return ReaderType.WEB_TOON;
 }
 
-String pagerTypeName(PagerType pagerType) {
+String readerTypeName(ReaderType pagerType) {
   for (var e in types.entries) {
     if (e.value == pagerType) {
       return e.key;
@@ -31,8 +31,8 @@ String pagerTypeName(PagerType pagerType) {
   return '';
 }
 
-Future<PagerType?> choosePagerType(BuildContext buildContext) async {
-  return await showDialog<PagerType>(
+Future<ReaderType?> choosePagerType(BuildContext buildContext) async {
+  return await showDialog<ReaderType>(
     context: buildContext,
     builder: (BuildContext context) {
       return SimpleDialog(

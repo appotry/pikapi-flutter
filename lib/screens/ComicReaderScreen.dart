@@ -4,8 +4,8 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/enum/PagerDirection.dart';
-import 'package:pikapi/basic/enum/PagerType.dart';
+import 'package:pikapi/basic/enum/ReaderDirection.dart';
+import 'package:pikapi/basic/enum/ReaderType.dart';
 import 'package:pikapi/screens/DownloadReaderScreen.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
 
@@ -20,8 +20,8 @@ class ComicReaderScreen extends StatefulWidget {
   final List<Ep> epList;
   final currentEpOrder;
   final int? initPictureRank;
-  final PagerType pagerType = storedPagerType;
-  final PagerDirection pagerDirection = storedPagerDirection;
+  final ReaderType pagerType = storedReaderType;
+  final ReaderDirection pagerDirection = storedReaderDirection;
   late final bool autoFullScreen;
 
   ComicReaderScreen({
@@ -101,11 +101,11 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
               actions: [
                 IconButton(
                   onPressed: () async {
-                    PagerDirection? t = await choosePagerDirection(context);
+                    ReaderDirection? t = await choosePagerDirection(context);
                     if (t != null) {
                       if (widget.pagerDirection != t) {
-                        pica.savePagerDirection(t);
-                        storedPagerDirection = t;
+                        pica.saveReaderDirection(t);
+                        storedReaderDirection = t;
                         // 重新加载本页
                         Navigator.of(context).pop(ComicReaderScreen(
                           comicInfo: widget.comicInfo,
@@ -123,11 +123,11 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
                 ),
                 IconButton(
                   onPressed: () async {
-                    PagerType? t = await choosePagerType(context);
+                    ReaderType? t = await choosePagerType(context);
                     if (t != null) {
                       if (widget.pagerType != t) {
-                        pica.savePagerType(t);
-                        storedPagerType = t;
+                        pica.saveReaderType(t);
+                        storedReaderType = t;
                         // 重新加载本页
                         Navigator.of(context).pop(ComicReaderScreen(
                           comicInfo: widget.comicInfo,

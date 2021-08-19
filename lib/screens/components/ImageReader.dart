@@ -9,8 +9,8 @@ import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/FullScreenAction.dart';
-import 'package:pikapi/basic/enum/PagerDirection.dart';
-import 'package:pikapi/basic/enum/PagerType.dart';
+import 'package:pikapi/basic/enum/ReaderDirection.dart';
+import 'package:pikapi/basic/enum/ReaderType.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
@@ -40,8 +40,8 @@ class ImageReaderStruct {
   final FutureOr<dynamic> Function() onNextEp;
   final FutureOr<dynamic> Function(int) onPositionChange;
   final int? initPosition;
-  final PagerType pagerType;
-  final PagerDirection pagerDirection;
+  final ReaderType pagerType;
+  final ReaderDirection pagerDirection;
 
   const ImageReaderStruct({
     required this.fullScreen,
@@ -64,13 +64,13 @@ class ImageReader extends StatelessWidget {
   Widget build(BuildContext context) {
     late Widget reader;
     switch (struct.pagerType) {
-      case PagerType.WEB_TOON:
+      case ReaderType.WEB_TOON:
         reader = _WebToonReader(images, struct);
         break;
-      case PagerType.WEB_TOON_ZOOM:
+      case ReaderType.WEB_TOON_ZOOM:
         reader = _WebToonZoomReader(images, struct);
         break;
-      case PagerType.GALLERY:
+      case ReaderType.GALLERY:
         reader = _GalleryReader(images, struct);
         break;
       default:
@@ -217,7 +217,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
         for (var index = 0; index < widget.images.length; index++) {
           late Size renderSize;
           if (_trueSizes[index] != null) {
-            if (widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM) {
+            if (widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM) {
               renderSize = Size(
                 constraints.maxWidth,
                 constraints.maxWidth *
@@ -233,7 +233,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
               );
             }
           } else {
-            if (widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM) {
+            if (widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM) {
               renderSize = Size(constraints.maxWidth, constraints.maxWidth / 2);
             } else {
               renderSize =
@@ -271,7 +271,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
         return ScrollablePositionedList.builder(
           initialScrollIndex: _initialPosition,
           scrollDirection:
-              widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM
+              widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM
                   ? Axis.vertical
                   : Axis.horizontal,
           padding: widget.struct.fullScreen
@@ -508,7 +508,7 @@ class _GalleryReaderState extends State<_GalleryReader> {
   Widget _buildViewer() {
     return PhotoViewGallery.builder(
       scrollDirection:
-          widget.struct.pagerDirection == PagerDirection.TOP_TO_BOTTOM
+          widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM
               ? Axis.vertical
               : Axis.horizontal,
       backgroundDecoration: BoxDecoration(color: Colors.black),

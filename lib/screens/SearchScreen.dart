@@ -56,51 +56,39 @@ class _SearchScreenState extends State<SearchScreen> {
   );
 
   Widget _chooseCategoryAction() => IconButton(
-    onPressed: () async {
-      String? category = await chooseListDialog(context, '请选择分类', [
-        categoryTitle(null),
-        ...storedCategories,
-      ]);
-      if (category != null) {
-        if (category == categoryTitle(null)) {
-          category = null;
-        }
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) {
-            return SearchScreen(
-              category: category,
-              keyword: widget.keyword,
-            );
-          },
-        ));
-      }
-    },
-    icon: Icon(Icons.category),
-  );
+        onPressed: () async {
+          String? category = await chooseListDialog(context, '请选择分类', [
+            categoryTitle(null),
+            ...storedCategories,
+          ]);
+          if (category != null) {
+            if (category == categoryTitle(null)) {
+              category = null;
+            }
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) {
+                return SearchScreen(
+                  category: category,
+                  keyword: widget.keyword,
+                );
+              },
+            ));
+          }
+        },
+        icon: Icon(Icons.category),
+      );
 
-  late Future<ComicsPage> _future;
-  String _currentSort = SORT_DEFAULT;
-  int _currentPage = 1;
-
-  void _load() {
-    setState(() {
-      if (widget.category == null) {
-        _future = pica.searchComics(widget.keyword, _currentSort, _currentPage);
-      } else {
-        _future = pica.searchComicsInCategories(
-          widget.keyword,
-          _currentSort,
-          _currentPage,
-          [widget.category!],
-        );
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    _load();
-    super.initState();
+  Future<ComicsPage> _fetch(String _currentSort, int _currentPage) {
+    if (widget.category == null) {
+      return pica.searchComics(widget.keyword, _currentSort, _currentPage);
+    } else {
+      return pica.searchComicsInCategories(
+        widget.keyword,
+        _currentSort,
+        _currentPage,
+        [widget.category!],
+      );
+    }
   }
 
   @override
@@ -108,21 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       appBar: _searchBar.build(context),
       body: ComicPager(
-        future: _future,
-        onPageChange: (toPage) {
-          _currentPage = toPage;
-          _load();
-        },
-        onSortChange: (toSort) {
-          if (toSort != null) {
-            _currentSort = toSort;
-            _load();
-          }
-        },
-        onRefresh: () async {
-          _load();
-        },
-        currentSort: _currentSort,
+        fetchPage: _fetch,
       ),
     );
   }

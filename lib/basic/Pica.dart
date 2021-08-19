@@ -2,12 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/basic/enum/PagerDirection.dart';
-import 'package:pikapi/basic/enum/PagerType.dart';
+import 'package:pikapi/basic/enum/ReaderDirection.dart';
+import 'package:pikapi/basic/enum/ReaderType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 
 import 'enum/FullScreenAction.dart';
 import 'enum/ListLayout.dart';
+import 'enum/PagerAction.dart';
 
 final pica = Pica._();
 
@@ -37,30 +38,30 @@ class Pica {
     });
   }
 
-  Future<PagerType> loadPagerType() async {
+  Future<ReaderType> loadReaderType() async {
     return pagerTypeFromString(await _flatInvoke("loadProperty", {
-      "name": "pagerType",
-      "defaultValue": PagerType.WEB_TOON.toString(),
+      "name": "readerType",
+      "defaultValue": ReaderType.WEB_TOON.toString(),
     }));
   }
 
-  Future<dynamic> savePagerType(PagerType pagerType) async {
+  Future<dynamic> saveReaderType(ReaderType pagerType) async {
     return await _flatInvoke("saveProperty", {
-      "name": "pagerType",
+      "name": "readerType",
       "value": pagerType.toString(),
     });
   }
 
-  Future<PagerDirection> loadPagerDirection() async {
+  Future<ReaderDirection> loadReaderDirection() async {
     return pagerDirectionFromString(await _flatInvoke("loadProperty", {
-      "name": "pagerDirection",
-      "defaultValue": PagerDirection.TOP_TO_BOTTOM.toString(),
+      "name": "readerDirection",
+      "defaultValue": ReaderDirection.TOP_TO_BOTTOM.toString(),
     }));
   }
 
-  Future<dynamic> savePagerDirection(PagerDirection pagerDirection) async {
+  Future<dynamic> saveReaderDirection(ReaderDirection pagerDirection) async {
     return await _flatInvoke("saveProperty", {
-      "name": "pagerDirection",
+      "name": "readerDirection",
       "value": pagerDirection.toString(),
     });
   }
@@ -76,6 +77,20 @@ class Pica {
     return await _flatInvoke("saveProperty", {
       "name": "fullScreenAction",
       "value": fullScreenAction.toString(),
+    });
+  }
+
+  Future<PagerAction> loadPagerAction() async {
+    return pagerActionFromString(await _flatInvoke("loadProperty", {
+      "name": "pagerAction",
+      "defaultValue": PagerAction.CONTROLLER.toString(),
+    }));
+  }
+
+  Future<dynamic> savePagerAction(PagerAction pagerAction) async {
+    return await _flatInvoke("saveProperty", {
+      "name": "pagerAction",
+      "value": pagerAction.toString(),
     });
   }
 

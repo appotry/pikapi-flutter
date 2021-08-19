@@ -10,8 +10,9 @@ import 'LinkToComicInfo.dart';
 class ComicList extends StatefulWidget {
   final Widget? appendWidget;
   final List<ComicSimple> comicList;
+  final ScrollController? controller;
 
-  const ComicList(this.comicList, {this.appendWidget});
+  const ComicList(this.comicList, {this.appendWidget, this.controller});
 
   @override
   State<StatefulWidget> createState() => _ComicListState();
@@ -105,6 +106,8 @@ class _ComicListState extends State<ComicList> {
     }
     // 返回
     return ListView(
+      controller: widget.controller,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(top: gap, bottom: gap),
       children: wraps,
     );
@@ -112,6 +115,8 @@ class _ComicListState extends State<ComicList> {
 
   Widget _buildInfoCardList() {
     return ListView(
+      controller: widget.controller,
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         ...widget.comicList
             .map((e) => LinkToComicInfo(

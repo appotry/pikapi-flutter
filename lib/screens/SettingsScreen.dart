@@ -3,8 +3,10 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/FullScreenAction.dart';
-import 'package:pikapi/basic/enum/PagerDirection.dart';
-import 'package:pikapi/basic/enum/PagerType.dart';
+import 'package:pikapi/basic/enum/ListLayout.dart';
+import 'package:pikapi/basic/enum/PagerAction.dart';
+import 'package:pikapi/basic/enum/ReaderDirection.dart';
+import 'package:pikapi/basic/enum/ReaderType.dart';
 import 'package:pikapi/basic/enum/Quality.dart';
 import 'package:pikapi/screens/components/NetworkSetting.dart';
 
@@ -39,26 +41,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             ListTile(
               title: Text("阅读器模式"),
-              subtitle: Text(pagerTypeName(storedPagerType)),
+              subtitle: Text(readerTypeName(storedReaderType)),
               onTap: () async {
-                PagerType? t = await choosePagerType(context);
+                ReaderType? t = await choosePagerType(context);
                 if (t != null) {
-                  await pica.savePagerType(t);
+                  await pica.saveReaderType(t);
                   setState(() {
-                    storedPagerType = t;
+                    storedReaderType = t;
                   });
                 }
               },
             ),
             ListTile(
               title: Text("阅读器方向"),
-              subtitle: Text(pagerDirectionName(storedPagerDirection)),
+              subtitle: Text(readerDirectionName(storedReaderDirection)),
               onTap: () async {
-                PagerDirection? t = await choosePagerDirection(context);
+                ReaderDirection? t = await choosePagerDirection(context);
                 if (t != null) {
-                  await pica.savePagerDirection(t);
+                  await pica.saveReaderDirection(t);
                   setState(() {
-                    storedPagerDirection = t;
+                    storedReaderDirection = t;
                   });
                 }
               },
@@ -89,6 +91,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   pica.saveFullScreenAction(result);
                   setState(() {
                     storedFullScreenAction = result;
+                  });
+                }
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Text("列表页加载方式"),
+              subtitle: Text(pagerActionName(storedPagerAction)),
+              onTap: () async {
+                PagerAction? result = await chooseMapDialog<PagerAction>(
+                    context, pagerActionMap, "选择列表页加载方式");
+                if (result != null) {
+                  pica.savePagerAction(result);
+                  setState(() {
+                    storedPagerAction = result;
                   });
                 }
               },
