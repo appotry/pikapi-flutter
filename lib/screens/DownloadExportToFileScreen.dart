@@ -7,26 +7,28 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:pikapi/basic/Channels.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/screens/DownloadExportToSocketScreen.dart';
 
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 import 'components/DownloadInfoCard.dart';
 
 // 导出
-class DownloadExportScreen extends StatefulWidget {
+class DownloadExportToFileScreen extends StatefulWidget {
   final String comicId;
   final String comicTitle;
 
-  DownloadExportScreen({
+  DownloadExportToFileScreen({
     required this.comicId,
     required this.comicTitle,
   });
 
   @override
-  State<StatefulWidget> createState() => _DownloadExportScreenState();
+  State<StatefulWidget> createState() => _DownloadExportToFileScreenState();
 }
 
-class _DownloadExportScreenState extends State<DownloadExportScreen> {
+class _DownloadExportToFileScreenState
+    extends State<DownloadExportToFileScreen> {
   late DownloadComic _task;
   late Future _future = _load();
   late bool exporting = false;
@@ -91,6 +93,10 @@ class _DownloadExportScreenState extends State<DownloadExportScreen> {
               DownloadInfoCard(task: _task),
               Container(
                 padding: EdgeInsets.all(8),
+                child: exportResult != "" ? Text(exportResult) : Container(),
+              ),
+              Container(
+                padding: EdgeInsets.all(8),
                 child: Text('TIPS : 选择一个目录'),
               ),
               MaterialButton(
@@ -147,10 +153,23 @@ class _DownloadExportScreenState extends State<DownloadExportScreen> {
                   child: Text('选择导出位置'),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.all(8),
-                child: exportResult != "" ? Text(exportResult) : Container(),
-              )
+              MaterialButton(
+                onPressed: () async {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DownloadExportToSocketScreen(
+                        task: _task,
+                        comicId: widget.comicId,
+                        comicTitle: widget.comicTitle,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  child: Text('传输到其他设备'),
+                ),
+              ),
             ],
           );
         },

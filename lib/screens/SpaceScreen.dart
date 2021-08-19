@@ -8,7 +8,6 @@ import 'package:pikapi/screens/FavouritePaperScreen.dart';
 import 'package:pikapi/screens/ViewLogsScreen.dart';
 import 'package:pikapi/basic/Pica.dart';
 
-import 'MyCommentsScreen.dart';
 import 'SettingsScreen.dart';
 import 'components/UserProfileCard.dart';
 
@@ -89,16 +88,6 @@ class _SpaceScreenState extends State<SpaceScreen> {
               );
             },
             title: Text('我的收藏'),
-          ),
-          Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MyCommentsScreen()),
-              );
-            },
-            title: Text('我的评论'),
           ),
           Divider(),
           ListTile(

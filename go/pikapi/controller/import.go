@@ -1,10 +1,15 @@
 package controller
 
 import (
+	"archive/tar"
 	"archive/zip"
+	"compress/gzip"
 	"encoding/json"
 	"gorm.io/gorm"
+	"io"
 	"io/ioutil"
+	"net"
+	"os"
 	path2 "path"
 	"pgo/pikapi/const_value"
 	"pgo/pikapi/database/comic_center"
@@ -12,6 +17,64 @@ import (
 	"strconv"
 	"strings"
 )
+
+func importComicDownloadUsingSocket(addr string) error {
+	//
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	gr, err := gzip.NewReader(conn)
+	if err != nil {
+		return err
+	}
+	tr := tar.NewReader(gr)
+	//
+	zipPath := path2.Join(tmpDir, "tmp.zip")
+	closed := false
+	zipFile, err := os.Create(zipPath)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if !closed {
+			zipFile.Close()
+		}
+		os.Remove(zipPath)
+	}()
+	zipWriter := zip.NewWriter(zipFile)
+	defer func() {
+		if !closed {
+			zipWriter.Close()
+		}
+	}()
+	//
+	for {
+		header, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if header.Typeflag != tar.TypeReg {
+			continue
+		}
+		writer, err := zipWriter.Create(header.Name)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(writer, tr)
+		if err != nil {
+			return err
+		}
+	}
+	err = zipWriter.Close()
+	zipFile.Close()
+	closed = true
+	return importComicDownload(zipPath)
+}
 
 func importComicDownload(zipPath string) error {
 	zip, err := zip.OpenReader(zipPath)

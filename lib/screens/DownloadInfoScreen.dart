@@ -6,7 +6,7 @@ import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Navigatior.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'ComicInfoScreen.dart';
-import 'DownloadExportScreen.dart';
+import 'DownloadExportToFileScreen.dart';
 import 'DownloadReaderScreen.dart';
 import 'components/ComicDescriptionCard.dart';
 import 'components/ComicTagsCard.dart';
@@ -56,7 +56,7 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DownloadExportScreen(
+                          builder: (context) => DownloadExportToFileScreen(
                             comicId: widget.comicId,
                             comicTitle: widget.comicTitle,
                           ),

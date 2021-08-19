@@ -197,3 +197,49 @@ String formatTimeToDate(String str) {
     return "-";
   }
 }
+
+final TextEditingController _textEditController =
+    TextEditingController(text: '');
+
+Future<String?> inputString(BuildContext context, String title,
+    {String hint = ""}) async {
+  _textEditController.clear();
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        content: Card(
+          child: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Text(title),
+                Container(
+                  child: TextField(
+                    controller: _textEditController,
+                    decoration: new InputDecoration(
+                      labelText: "$hint",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: <Widget>[
+          MaterialButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('取消'),
+          ),
+          MaterialButton(
+            onPressed: () {
+              Navigator.pop(context, _textEditController.text);
+            },
+            child: Text('确定'),
+          ),
+        ],
+      );
+    },
+  );
+}

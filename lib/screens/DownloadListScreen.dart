@@ -66,7 +66,8 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
           ...(Platform.isWindows ||
                   Platform.isMacOS ||
                   Platform.isLinux ||
-                  Platform.isAndroid)
+                  Platform.isAndroid ||
+                  Platform.isIOS)
               ? [
                   MaterialButton(
                       minWidth: 0,

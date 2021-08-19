@@ -73,7 +73,8 @@ class Pica {
     }));
   }
 
-  Future<dynamic> saveFullScreenAction(FullScreenAction fullScreenAction) async {
+  Future<dynamic> saveFullScreenAction(
+      FullScreenAction fullScreenAction) async {
     return await _flatInvoke("saveProperty", {
       "name": "fullScreenAction",
       "value": fullScreenAction.toString(),
@@ -461,8 +462,24 @@ class Pica {
     });
   }
 
+  Future<int> exportComicUsingSocket(String comicId) async {
+    return int.parse(await _flatInvoke("exportComicUsingSocket", comicId));
+  }
+
+  Future<dynamic> exportComicUsingSocketExit() {
+    return _flatInvoke("exportComicUsingSocketExit", "");
+  }
+
   Future<dynamic> importComicDownload(String zipPath) {
     return _flatInvoke("importComicDownload", zipPath);
+  }
+
+  Future<dynamic> importComicDownloadUsingSocket(String addr) {
+    return _flatInvoke("importComicDownloadUsingSocket", addr);
+  }
+
+  Future<String> clientIpSet() async {
+    return await _flatInvoke("clientIpSet", "");
   }
 
   Future<dynamic> open(String url) {

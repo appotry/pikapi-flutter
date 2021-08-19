@@ -22,11 +22,13 @@ import (
 var (
 	remoteDir   string
 	downloadDir string
+	tmpDir      string
 )
 
-func InitPlugin(_remoteDir string, _downloadDir string) {
+func InitPlugin(_remoteDir string, _downloadDir string, _tmpDir string) {
 	remoteDir = _remoteDir
 	downloadDir = _downloadDir
+	tmpDir = _tmpDir
 	comic_center.ResetAll()
 	go downloadBackground()
 	downloadRunning = true
@@ -501,10 +503,19 @@ func FlatInvoke(method string, params string) (string, error) {
 		return "", comic_center.ResetAll()
 	case "exportComicDownload":
 		return "", exportComicDownload(params)
+	case "exportComicUsingSocket":
+		i, e := exportComicUsingSocket(params)
+		return fmt.Sprintf("%d", i), e
+	case "exportComicUsingSocketExit":
+		return "", exportComicUsingSocketExit()
 	case "importComicDownload":
 		return "", importComicDownload(params)
+	case "importComicDownloadUsingSocket":
+		return "", importComicDownloadUsingSocket(params)
 	case "remoteImageData":
 		return remoteImageData(params)
+	case "clientIpSet":
+		return clientIpSet()
 	case "downloadImagePath":
 		return downloadImagePath(params)
 	case "open":
