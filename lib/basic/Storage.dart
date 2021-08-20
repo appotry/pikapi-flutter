@@ -18,3 +18,4 @@ late FullScreenAction storedFullScreenAction;
 late ReaderType storedReaderType;
 late ReaderDirection storedReaderDirection;
 late PagerAction storedPagerAction;
+late List<String> storedShadowCategories;

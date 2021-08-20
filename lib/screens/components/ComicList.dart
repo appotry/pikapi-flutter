@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
+import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/ListLayout.dart';
 
 import 'ComicInfoCard.dart';
@@ -58,18 +59,41 @@ class _ComicListState extends State<ComicList> {
     List<Widget> wraps = [];
     List<Widget> tmp = [];
     widget.comicList.forEach((e) {
-      tmp.add(LinkToComicInfo(
-        comicId: e.id,
-        child: Container(
-          padding: EdgeInsets.all(gap),
-          child: RemoteImage(
-            fileServer: e.thumb.fileServer,
-            path: e.thumb.path,
-            width: width,
-            height: height,
+      var shadow = e.categories
+          .map((e) => storedShadowCategories.contains(e))
+          .reduce((value, element) => value || element);
+      if (shadow) {
+        tmp.add(
+          Container(
+            padding: EdgeInsets.all(gap),
+            child: Container(
+              width: width,
+              height: height,
+              child: Card(
+                child: Center(
+                  child: Text(
+                    '被封印的本子',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
-      ));
+        );
+      } else {
+        tmp.add(LinkToComicInfo(
+          comicId: e.id,
+          child: Container(
+            padding: EdgeInsets.all(gap),
+            child: RemoteImage(
+              fileServer: e.thumb.fileServer,
+              path: e.thumb.path,
+              width: width,
+              height: height,
+            ),
+          ),
+        ));
+      }
       if (tmp.length == rowCap) {
         wraps.add(Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,12 +142,33 @@ class _ComicListState extends State<ComicList> {
       controller: widget.controller,
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        ...widget.comicList
-            .map((e) => LinkToComicInfo(
-                  comicId: e.id,
-                  child: ComicInfoCard(e),
-                ))
-            .toList(),
+        ...widget.comicList.map((e) {
+          var shadow = e.categories
+              .map((e) => storedShadowCategories.contains(e))
+              .reduce((value, element) => value || element);
+          if (shadow) {
+            return LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Container(
+                  width: constraints.maxWidth,
+                  padding: EdgeInsets.all(5),
+                  child: Card(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 20, bottom: 20),
+                      child: Center(
+                        child: Text('被封印的本子'),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+          return LinkToComicInfo(
+            comicId: e.id,
+            child: ComicInfoCard(e),
+          );
+        }).toList(),
         ...widget.appendWidget != null
             ? [
                 Container(

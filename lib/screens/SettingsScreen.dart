@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/Storage.dart';
@@ -108,6 +112,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     storedPagerAction = result;
                   });
                 }
+              },
+            ),
+            ListTile(
+              title: Text("列表页屏蔽的分类"),
+              subtitle: Text(jsonEncode(storedShadowCategories)),
+              onTap: () async {
+                await showDialog(
+                  context: context,
+                  builder: (ctx) {
+                    var initialValue = <String>[];
+                    storedShadowCategories.forEach((element) {
+                      if (storedCategories.contains(element)) {
+                        initialValue.add(element);
+                      }
+                    });
+                    return MultiSelectDialog<String>(
+                      items: storedCategories
+                          .map((e) => MultiSelectItem(e, e))
+                          .toList(),
+                      initialValue: initialValue,
+                      onConfirm: (List<String>? value) async {
+                        if (value != null) {
+                          await pica.setShadowCategories(value);
+                          setState(() {
+                            storedShadowCategories = value;
+                          });
+                        }
+                      },
+                    );
+                  },
+                );
               },
             ),
             Divider(),

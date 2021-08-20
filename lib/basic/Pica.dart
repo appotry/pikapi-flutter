@@ -520,4 +520,19 @@ class Pica {
       "value": "$value",
     });
   }
+
+  Future<List<String>> getShadowCategories() async {
+    var value = await _flatInvoke("loadProperty", {
+      "name": "shadowCategories",
+      "defaultValue": jsonEncode(<String>[]),
+    });
+    return List.of(jsonDecode(value)).map((e) => "$e").toList();
+  }
+
+  Future<dynamic> setShadowCategories(List<String> value) {
+    return _flatInvoke("saveProperty", {
+      "name": "shadowCategories",
+      "value": jsonEncode(value),
+    });
+  }
 }
