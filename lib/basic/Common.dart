@@ -198,6 +198,15 @@ String formatTimeToDate(String str) {
   }
 }
 
+String formatTimeToDateTime(String str) {
+  try {
+    var c = DateTime.parse(str);
+    return "${add0(c.year, 4)}-${add0(c.month, 2)}-${add0(c.day, 2)} ${add0(c.hour, 2)}:${add0(c.minute, 2)}";
+  } catch (e) {
+    return "-";
+  }
+}
+
 final TextEditingController _textEditController =
     TextEditingController(text: '');
 

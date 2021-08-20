@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/ItemBuilder.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -76,10 +77,12 @@ class _ComicCommentState extends State<ComicComment> {
   Widget _buildComment(Comment e) {
     var theme = Theme.of(context);
     var nameStyle = TextStyle(fontWeight: FontWeight.bold);
-    var levelStyle =
-        TextStyle(fontSize: 12, color: theme.colorScheme.secondary.withOpacity(.8));
+    var levelStyle = TextStyle(
+        fontSize: 12, color: theme.colorScheme.secondary.withOpacity(.8));
     var connectStyle =
         TextStyle(color: theme.textTheme.bodyText1?.color?.withOpacity(.8));
+    var datetimeStyle = TextStyle(
+        color: theme.textTheme.bodyText1?.color?.withOpacity(.6), fontSize: 12);
     return Container(
       padding: EdgeInsets.all(5),
       decoration: BoxDecoration(
@@ -102,15 +105,33 @@ class _ComicCommentState extends State<ComicComment> {
           PicaAvatar(e.user.avatar),
           Container(width: 5),
           Expanded(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(e.user.name, style: nameStyle),
-              Text("Lv. ${e.user.level} (${e.user.title})", style: levelStyle),
-              Container(height: 3),
-              Text(e.content, style: connectStyle),
-            ],
-          )),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return Container(
+                      width: constraints.maxWidth,
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        alignment: WrapAlignment.spaceBetween,
+                        children: [
+                          Text(e.user.name, style: nameStyle),
+                          Text(formatTimeToDateTime(e.createdAt),
+                              style: datetimeStyle),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                Container(height: 3),
+                Text("Lv. ${e.user.level} (${e.user.title})",
+                    style: levelStyle),
+                Container(height: 5),
+                Text(e.content, style: connectStyle),
+              ],
+            ),
+          ),
         ],
       ),
     );

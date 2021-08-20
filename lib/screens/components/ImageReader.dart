@@ -202,7 +202,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
       child: Stack(
         children: [
           _buildList(),
-          SafeArea(child: Stack(children: _buildControllers())),
+          ..._buildControllers(),
         ],
       ),
     );
@@ -299,7 +299,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
       return [];
     }
     return [
-      _buildImageCount(_current, widget.images.length),
+      _buildImageCount(context, "$_current / ${widget.images.length}"),
       _buildScrollController(
         context,
         _current,
@@ -400,12 +400,16 @@ abstract class _WebToonReaderImage extends StatefulWidget {
 }
 
 class _WebToonReaderImageState extends State<_WebToonReaderImage> {
-  late Future<RemoteImageData> _future = widget.imageData().then((value) {
-    widget.onTrueSize?.call(
-      Size(value.width.toDouble(), value.height.toDouble()),
-    );
-    return value;
-  });
+  late Future<RemoteImageData> _future = _load();
+
+  Future<RemoteImageData> _load() {
+    return widget.imageData().then((value) {
+      widget.onTrueSize?.call(
+        Size(value.width.toDouble(), value.height.toDouble()),
+      );
+      return value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -418,7 +422,20 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
             AsyncSnapshot<RemoteImageData> snapshot,
           ) {
             if (snapshot.hasError) {
-              return buildError(widget.size.width, widget.size.height);
+              return GestureDetector(
+                onLongPress: () async {
+                  String? choose =
+                      await chooseListDialog(context, '请选择', ['重新加载图片']);
+                  switch (choose) {
+                    case '重新加载图片':
+                      setState(() {
+                        _future = _load();
+                      });
+                      break;
+                  }
+                },
+                child: buildError(widget.size.width, widget.size.height),
+              );
             }
             if (snapshot.connectionState != ConnectionState.done) {
               return buildLoading(widget.size.width, widget.size.height);
@@ -500,7 +517,7 @@ class _GalleryReaderState extends State<_GalleryReader> {
     return Stack(
       children: [
         _buildViewer(),
-        SafeArea(child: Stack(children: _buildControllers())),
+        ..._buildControllers(),
       ],
     );
   }
@@ -562,7 +579,7 @@ class _GalleryReaderState extends State<_GalleryReader> {
     var controllers = <Widget>[];
     if (!widget.struct.fullScreen) {
       controllers.addAll([
-        _buildImageCount(_current, widget.images.length),
+        _buildImageCount(context, "$_current / ${widget.images.length}"),
         _buildScrollController(
           context,
           _current,
@@ -586,7 +603,7 @@ class _GalleryReaderState extends State<_GalleryReader> {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Widget _buildImageCount(int current, int total) {
+Widget _buildImageCount(BuildContext context, String info) {
   return Align(
     alignment: Alignment.topRight,
     child: Material(
@@ -605,7 +622,7 @@ Widget _buildImageCount(int current, int total) {
           onTap: () {
             // TODO 输入跳转页数
           },
-          child: Text("$current/$total", style: TextStyle(color: Colors.white)),
+          child: Text("$info", style: TextStyle(color: Colors.white)),
         ),
       ),
     ),

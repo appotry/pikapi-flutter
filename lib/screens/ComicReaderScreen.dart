@@ -185,10 +185,10 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
 
   Future _onFullScreenChange(bool fullScreen) async {
     setState(() {
+      SystemChrome.setEnabledSystemUIOverlays(
+          fullScreen ? [] : SystemUiOverlay.values);
       _fullScreen = fullScreen;
     });
-    SystemChrome.setEnabledSystemUIOverlays(
-        fullScreen ? [] : SystemUiOverlay.values);
   }
 
   Future _next() async {
