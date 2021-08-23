@@ -21,8 +21,6 @@ late ReaderDirection storedReaderDirection;
 late PagerAction storedPagerAction;
 late List<String> storedShadowCategories;
 
-late List<String> storedHomepageShadowCategories;
+class StoredShadowCategoriesEventArgs extends EventArgs {}
 
-class StoredHomepageShadowCategoriesEventArgs extends EventArgs {}
-
-var storedHomepageShadowCategoriesEvent = Event<EventArgs>();
+var storedShadowCategoriesEvent = Event<EventArgs>();

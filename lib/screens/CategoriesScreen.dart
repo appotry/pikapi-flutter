@@ -65,13 +65,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   @override
   void initState() {
-    storedHomepageShadowCategoriesEvent.subscribe(_onShadowChange);
+    storedShadowCategoriesEvent.subscribe(_onShadowChange);
     super.initState();
   }
 
   @override
   void dispose() {
-    storedHomepageShadowCategoriesEvent.unsubscribe(_onShadowChange);
+    storedShadowCategoriesEvent.unsubscribe(_onShadowChange);
     super.dispose();
   }
 
@@ -179,7 +179,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     for (var i = 0; i < cList.length; i++) {
       var c = cList[i];
       if (c.isWeb) continue;
-      if (storedHomepageShadowCategories.contains(c.title)) continue;
+      if (storedShadowCategories.contains(c.title)) continue;
       append(
         RemoteImage(
           fileServer: c.thumb.fileServer,
