@@ -1,3 +1,4 @@
+import 'package:event/src/eventargs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Entities.dart';
@@ -60,6 +61,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     setState(() {
       this._categoriesFuture = _fetch();
     });
+  }
+
+  @override
+  void initState() {
+    storedHomepageShadowCategoriesEvent.subscribe(_onShadowChange);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    storedHomepageShadowCategoriesEvent.unsubscribe(_onShadowChange);
+    super.dispose();
+  }
+
+  void _onShadowChange(EventArgs? args) {
+    _reloadCategories();
   }
 
   @override
@@ -162,6 +179,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     for (var i = 0; i < cList.length; i++) {
       var c = cList[i];
       if (c.isWeb) continue;
+      if (storedHomepageShadowCategories.contains(c.title)) continue;
       append(
         RemoteImage(
           fileServer: c.thumb.fileServer,
@@ -170,7 +188,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           height: imageSize,
         ),
         c.title,
-        () => _navigateToCategory(c.title),
+            () => _navigateToCategory(c.title),
       );
     }
 

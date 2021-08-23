@@ -69,11 +69,18 @@ class _ComicListState extends State<ComicList> {
             child: Container(
               width: width,
               height: height,
-              child: Card(
-                child: Center(
-                  child: Text(
-                    '被封印的本子',
-                    textAlign: TextAlign.center,
+              color: (Theme.of(context).textTheme.bodyText1?.color ??
+                  Colors.black)
+                  .withOpacity(.05),
+              child: Center(
+                child: Text(
+                  '被封印的本子',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: (Theme.of(context).textTheme.bodyText1?.color ??
+                        Colors.black)
+                        .withOpacity(.5),
                   ),
                 ),
               ),
@@ -147,21 +154,29 @@ class _ComicListState extends State<ComicList> {
               .map((e) => storedShadowCategories.contains(e))
               .reduce((value, element) => value || element);
           if (shadow) {
-            return LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return Container(
-                  width: constraints.maxWidth,
-                  padding: EdgeInsets.all(5),
-                  child: Card(
-                    child: Container(
-                      padding: EdgeInsets.only(top: 20, bottom: 20),
-                      child: Center(
-                        child: Text('被封印的本子'),
-                      ),
+            return InkWell(
+              onTap: () {},
+              child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).dividerColor,
                     ),
                   ),
-                );
-              },
+                ),
+                child: Center(
+                  child: Text(
+                    '被封印的本子',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: (Theme.of(context).textTheme.bodyText1?.color ??
+                              Colors.black)
+                          .withOpacity(.3),
+                    ),
+                  ),
+                ),
+              ),
             );
           }
           return LinkToComicInfo(

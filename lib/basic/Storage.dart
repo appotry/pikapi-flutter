@@ -1,3 +1,4 @@
+import 'package:event/event.dart';
 import 'package:pikapi/basic/enum/ReaderDirection.dart';
 import 'package:pikapi/basic/enum/ReaderType.dart';
 
@@ -19,3 +20,9 @@ late ReaderType storedReaderType;
 late ReaderDirection storedReaderDirection;
 late PagerAction storedPagerAction;
 late List<String> storedShadowCategories;
+
+late List<String> storedHomepageShadowCategories;
+
+class StoredHomepageShadowCategoriesEventArgs extends EventArgs {}
+
+var storedHomepageShadowCategoriesEvent = Event<EventArgs>();

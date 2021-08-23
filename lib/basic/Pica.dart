@@ -535,4 +535,19 @@ class Pica {
       "value": jsonEncode(value),
     });
   }
+
+  Future<List<String>> getHomepageShadowCategories() async {
+    var value = await _flatInvoke("loadProperty", {
+      "name": "homepageShadowCategories",
+      "defaultValue": jsonEncode(<String>[]),
+    });
+    return List.of(jsonDecode(value)).map((e) => "$e").toList();
+  }
+
+  Future<dynamic> setHomepageShadowCategories(List<String> value) {
+    return _flatInvoke("saveProperty", {
+      "name": "homepageShadowCategories",
+      "value": jsonEncode(value),
+    });
+  }
 }

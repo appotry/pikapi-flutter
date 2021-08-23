@@ -128,6 +128,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       }
                     });
                     return MultiSelectDialog<String>(
+                      title: Text('列表页屏蔽的分类'),
+                      searchHint: '搜索',
+                      cancelText: Text('取消'),
+                      confirmText: Text('确定'),
                       items: storedCategories
                           .map((e) => MultiSelectItem(e, e))
                           .toList(),
@@ -138,6 +142,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           setState(() {
                             storedShadowCategories = value;
                           });
+                        }
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Text("浏览页屏蔽的分类"),
+              subtitle: Text(jsonEncode(storedHomepageShadowCategories)),
+              onTap: () async {
+                await showDialog(
+                  context: context,
+                  builder: (ctx) {
+                    var initialValue = <String>[];
+                    storedHomepageShadowCategories.forEach((element) {
+                      if (storedCategories.contains(element)) {
+                        initialValue.add(element);
+                      }
+                    });
+                    return MultiSelectDialog<String>(
+                      title: Text('浏览页屏蔽的分类'),
+                      searchHint: '搜索',
+                      cancelText: Text('取消'),
+                      confirmText: Text('确定'),
+                      items: storedCategories
+                          .map((e) => MultiSelectItem(e, e))
+                          .toList(),
+                      initialValue: initialValue,
+                      onConfirm: (List<String>? value) async {
+                        if (value != null) {
+                          await pica.setHomepageShadowCategories(value);
+                          setState(() {
+                            storedHomepageShadowCategories = value;
+                          });
+                          storedHomepageShadowCategoriesEvent.broadcast();
                         }
                       },
                     );
