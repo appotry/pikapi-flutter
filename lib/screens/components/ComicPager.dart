@@ -333,6 +333,7 @@ class _StreamComicPagerState extends State<StreamComicPager> {
                   value: _currentSort,
                   onChanged: (String? value) {
                     if (value != null) {
+                      _list = [];
                       _currentPage = 1;
                       _currentSort = value;
                       _load();
