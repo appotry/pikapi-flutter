@@ -1,3 +1,5 @@
+/// 与平台交互的操作
+
 import 'dart:io';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/cupertino.dart';

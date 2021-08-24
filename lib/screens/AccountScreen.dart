@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Themes.dart';
-import 'package:pikapi/basic/enum/Address.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/enum/ErrorTypes.dart';
 import 'package:pikapi/screens/RegisterScreen.dart';

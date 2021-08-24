@@ -7,7 +7,6 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/Storage.dart';
 import 'package:pikapi/basic/enum/FullScreenAction.dart';
-import 'package:pikapi/basic/enum/ListLayout.dart';
 import 'package:pikapi/basic/enum/PagerAction.dart';
 import 'package:pikapi/basic/enum/ReaderDirection.dart';
 import 'package:pikapi/basic/enum/ReaderType.dart';

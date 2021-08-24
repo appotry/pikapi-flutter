@@ -1,3 +1,4 @@
+
 enum FullScreenAction {
   CONTROLLER,
   TOUCH_ONCE,

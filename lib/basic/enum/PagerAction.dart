@@ -1,3 +1,5 @@
+/// 列表页下一页的行为
+
 enum PagerAction {
   CONTROLLER,
   STREAM,

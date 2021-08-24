@@ -1,3 +1,5 @@
+/// 图片质量的枚举
+
 import 'package:flutter/material.dart';
 
 const ImageQualityOriginal = "original";

@@ -4,8 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pikapi/basic/Cross.dart';
-import 'package:pikapi/basic/Pica.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatelessWidget {
   @override

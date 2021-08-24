@@ -1,3 +1,5 @@
+/// 全局配置文件, 项目启动时加载
+
 import 'package:event/event.dart';
 import 'package:pikapi/basic/enum/ReaderDirection.dart';
 import 'package:pikapi/basic/enum/ReaderType.dart';

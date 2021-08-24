@@ -1,3 +1,5 @@
+/// 哔咔官方提供的排序方式
+
 import 'package:flutter/material.dart';
 
 const SORT_DEFAULT = "ua";

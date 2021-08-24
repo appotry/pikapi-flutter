@@ -8,6 +8,7 @@ import 'ComicInfoCard.dart';
 import 'Images.dart';
 import 'LinkToComicInfo.dart';
 
+// 漫画列表页
 class ComicList extends StatefulWidget {
   final Widget? appendWidget;
   final List<ComicSimple> comicList;
