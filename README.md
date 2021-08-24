@@ -5,6 +5,7 @@ PIKAPI - 哔咔客户端
 [![downloads](https://img.shields.io/github/downloads/niuhuan/pikapi-flutter/total)](https://github.com/niuhuan/pikapi-flutter/releases)
 
 - 美观易用且无广告的哔咔漫画客户端, 能运行在Windows/MacOS/Linux/Android/IOS中。
+- 您的点赞是对开发者的莫大鼓励, 可下载的同时点亮小星星进行支持。
 
 ## 界面 / 功能
 
