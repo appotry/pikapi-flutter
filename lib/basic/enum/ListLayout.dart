@@ -9,11 +9,13 @@ import '../Pica.dart';
 enum ListLayout {
   INFO_CARD,
   ONLY_IMAGE,
+  COVER_AND_TITLE,
 }
 
 const Map<String, ListLayout> listLayoutMap = {
   '详情': ListLayout.INFO_CARD,
   '封面': ListLayout.ONLY_IMAGE,
+  '封面+标题': ListLayout.COVER_AND_TITLE,
 };
 
 ListLayout listLayoutFromString(String layoutString) {
@@ -41,8 +43,8 @@ void chooseListLayout(BuildContext context) async {
 }
 
 IconButton chooseLayoutAction(BuildContext context) => IconButton(
-  onPressed: () {
-    chooseListLayout(context);
-  },
-  icon: Icon(Icons.view_quilt),
-);
+      onPressed: () {
+        chooseListLayout(context);
+      },
+      icon: Icon(Icons.view_quilt),
+    );
