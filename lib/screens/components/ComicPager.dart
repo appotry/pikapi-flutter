@@ -2,8 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/enum/PagerAction.dart';
+import 'package:pikapi/basic/config/PagerAction.dart';
 import 'package:pikapi/basic/enum/Sort.dart';
 import 'package:pikapi/screens/components/ComicList.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
@@ -18,7 +17,7 @@ class ComicPager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (storedPagerAction) {
+    switch (currentPagerAction) {
       case PagerAction.CONTROLLER:
         return ControllerComicPager(fetchPage: fetchPage);
       case PagerAction.STREAM:
@@ -247,10 +246,11 @@ class _StreamComicPagerState extends State<StreamComicPager> {
     if (_over || _error || _loading) {
       return;
     }
-    if (_scrollController.position.maxScrollExtent - _scrollController.offset <
-        10) {
-      _load();
+    if (_scrollController.offset + MediaQuery.of(context).size.height / 2 <
+        _scrollController.position.maxScrollExtent) {
+      return;
     }
+    _load();
   }
 
   Future<dynamic> _load() async {

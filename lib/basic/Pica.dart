@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/basic/enum/ReaderDirection.dart';
-import 'package:pikapi/basic/enum/ReaderType.dart';
-import 'package:pikapi/basic/enum/Quality.dart';
+import 'package:pikapi/basic/config/ReaderDirection.dart';
+import 'package:pikapi/basic/config/ReaderType.dart';
+import 'package:pikapi/basic/config/Quality.dart';
 
-import 'enum/FullScreenAction.dart';
-import 'enum/ListLayout.dart';
-import 'enum/PagerAction.dart';
+import 'config/FullScreenAction.dart';
+import 'config/ListLayout.dart';
+import 'config/PagerAction.dart';
 
 final pica = Pica._();
 
@@ -38,74 +38,17 @@ class Pica {
     });
   }
 
-  Future<ReaderType> loadReaderType() async {
-    return pagerTypeFromString(await _flatInvoke("loadProperty", {
-      "name": "readerType",
-      "defaultValue": ReaderType.WEB_TOON.toString(),
-    }));
-  }
-
-  Future<dynamic> saveReaderType(ReaderType pagerType) async {
-    return await _flatInvoke("saveProperty", {
-      "name": "readerType",
-      "value": pagerType.toString(),
+  Future<String> loadProperty(String propertyName, String defaultValue) async {
+    return await _flatInvoke("loadProperty", {
+      "name": propertyName,
+      "defaultValue": defaultValue,
     });
   }
 
-  Future<ReaderDirection> loadReaderDirection() async {
-    return pagerDirectionFromString(await _flatInvoke("loadProperty", {
-      "name": "readerDirection",
-      "defaultValue": ReaderDirection.TOP_TO_BOTTOM.toString(),
-    }));
-  }
-
-  Future<dynamic> saveReaderDirection(ReaderDirection pagerDirection) async {
-    return await _flatInvoke("saveProperty", {
-      "name": "readerDirection",
-      "value": pagerDirection.toString(),
-    });
-  }
-
-  Future<FullScreenAction> loadFullScreenAction() async {
-    return fullScreenActionFromString(await _flatInvoke("loadProperty", {
-      "name": "fullScreenAction",
-      "defaultValue": FullScreenAction.CONTROLLER.toString(),
-    }));
-  }
-
-  Future<dynamic> saveFullScreenAction(
-      FullScreenAction fullScreenAction) async {
-    return await _flatInvoke("saveProperty", {
-      "name": "fullScreenAction",
-      "value": fullScreenAction.toString(),
-    });
-  }
-
-  Future<PagerAction> loadPagerAction() async {
-    return pagerActionFromString(await _flatInvoke("loadProperty", {
-      "name": "pagerAction",
-      "defaultValue": PagerAction.CONTROLLER.toString(),
-    }));
-  }
-
-  Future<dynamic> savePagerAction(PagerAction pagerAction) async {
-    return await _flatInvoke("saveProperty", {
-      "name": "pagerAction",
-      "value": pagerAction.toString(),
-    });
-  }
-
-  Future<ListLayout> loadListLayout() async {
-    return listLayoutFromString(await _flatInvoke("loadProperty", {
-      "name": "listLayout",
-      "defaultValue": ListLayout.INFO_CARD.toString(),
-    }));
-  }
-
-  Future<dynamic> saveListLayout(ListLayout layout) async {
-    return await _flatInvoke("saveProperty", {
-      "name": "listLayout",
-      "value": layout.toString(),
+  Future<dynamic> saveProperty(String propertyName, String value) {
+    return _flatInvoke("saveProperty", {
+      "name": propertyName,
+      "value": value,
     });
   }
 
@@ -350,13 +293,21 @@ class Pica {
     return MyCommentsPage.fromJson(jsonDecode(response));
   }
 
-  Future<List<ViewLog>> viewLogPage(int page, int pageSize) async {
+  Future<List<ViewLog>> viewLogPage(int offset, int limit) async {
     var data = await _flatInvoke("viewLogPage", {
-      "page": page,
-      "pageSize": pageSize,
+      "offset": offset,
+      "limit": limit,
     });
     List list = json.decode(data);
     return list.map((e) => ViewLog.fromJson(e)).toList();
+  }
+
+  Future<dynamic> clearAllViewLog() {
+    return _flatInvoke("clearAllViewLog", "");
+  }
+
+  Future<dynamic> deleteViewLog(String id) {
+    return _flatInvoke("deleteViewLog", id);
   }
 
   Future<GamePage> games(int page) async {
@@ -535,5 +486,4 @@ class Pica {
       "value": jsonEncode(value),
     });
   }
-
 }

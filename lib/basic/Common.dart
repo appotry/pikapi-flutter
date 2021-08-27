@@ -122,14 +122,13 @@ Future<T?> chooseMapDialog<T>(
 
 var _controller = TextEditingController.fromValue(TextEditingValue(text: ''));
 
-Future<void> displayTextInputDialog(
+Future<String?> displayTextInputDialog(
   BuildContext context,
   String title,
   String hint,
   String src,
   String desc,
-  void Function(String) onConfirm,
-) async {
+) {
   _controller.text = src;
   return showDialog(
     context: context,
@@ -165,14 +164,13 @@ Future<void> displayTextInputDialog(
           MaterialButton(
             child: Text('取消'),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.of(context).pop();
             },
           ),
           MaterialButton(
             child: Text('确认'),
             onPressed: () {
-              onConfirm(_controller.text);
-              Navigator.pop(context);
+              Navigator.of(context).pop(_controller.text);
             },
           ),
         ],

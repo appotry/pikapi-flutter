@@ -3,16 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/enum/ReaderDirection.dart';
-import 'package:pikapi/basic/enum/ReaderType.dart';
-import 'package:pikapi/screens/DownloadReaderScreen.dart';
+import 'package:pikapi/basic/store/Categories.dart';
+import 'package:pikapi/basic/config/AutoFullScreen.dart';
+import 'package:pikapi/basic/config/Quality.dart';
+import 'package:pikapi/basic/config/ReaderDirection.dart';
+import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
-
-import 'components/ContentError.dart';
-import 'components/ContentLoading.dart';
 import 'components/ImageReader.dart';
-import 'components/Images.dart';
 
 // 在线阅读漫画
 class ComicReaderScreen extends StatefulWidget {
@@ -20,8 +17,8 @@ class ComicReaderScreen extends StatefulWidget {
   final List<Ep> epList;
   final currentEpOrder;
   final int? initPictureRank;
-  final ReaderType pagerType = storedReaderType;
-  final ReaderDirection pagerDirection = storedReaderDirection;
+  final ReaderType pagerType = gReaderType;
+  final ReaderDirection pagerDirection = gReaderDirection;
   late final bool autoFullScreen;
 
   ComicReaderScreen({
@@ -32,7 +29,7 @@ class ComicReaderScreen extends StatefulWidget {
     this.initPictureRank,
     bool? autoFullScreen,
   }) : super(key: key) {
-    this.autoFullScreen = autoFullScreen ?? storedAutoFullScreen;
+    this.autoFullScreen = autoFullScreen ?? gAutoFullScreen;
   }
 
   @override
@@ -49,7 +46,6 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     if (widget.initPictureRank == null) {
       await pica.storeViewEp(widget.comicInfo.id, _ep.order, _ep.title, 1);
     }
-    var _quality = await pica.loadQuality();
     List<PicaImage> list = [];
     var _needLoadPage = 0;
     late PicturePage page;
@@ -58,7 +54,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
         widget.comicInfo.id,
         widget.currentEpOrder,
         ++_needLoadPage,
-        _quality,
+        currentQualityCode,
       );
       list.addAll(page.docs.map((element) => element.media));
     } while (page.pages > page.page);
@@ -101,44 +97,18 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
               actions: [
                 IconButton(
                   onPressed: () async {
-                    ReaderDirection? t = await choosePagerDirection(context);
-                    if (t != null) {
-                      if (widget.pagerDirection != t) {
-                        pica.saveReaderDirection(t);
-                        storedReaderDirection = t;
-                        // 重新加载本页
-                        Navigator.of(context).pop(ComicReaderScreen(
-                          comicInfo: widget.comicInfo,
-                          epList: widget.epList,
-                          currentEpOrder: widget.currentEpOrder,
-                          initPictureRank:
-                              _lastChangeRank ?? widget.initPictureRank,
-                          // maybe null
-                          autoFullScreen: _fullScreen,
-                        ));
-                      }
+                    await choosePagerDirection(context);
+                    if (widget.pagerDirection != gReaderDirection) {
+                      _reloadReader();
                     }
                   },
                   icon: Icon(Icons.grid_goldenratio),
                 ),
                 IconButton(
                   onPressed: () async {
-                    ReaderType? t = await choosePagerType(context);
-                    if (t != null) {
-                      if (widget.pagerType != t) {
-                        pica.saveReaderType(t);
-                        storedReaderType = t;
-                        // 重新加载本页
-                        Navigator.of(context).pop(ComicReaderScreen(
-                          comicInfo: widget.comicInfo,
-                          epList: widget.epList,
-                          currentEpOrder: widget.currentEpOrder,
-                          initPictureRank:
-                              _lastChangeRank ?? widget.initPictureRank,
-                          // maybe null
-                          autoFullScreen: _fullScreen,
-                        ));
-                      }
+                    await choosePagerType(context);
+                    if (widget.pagerType != gReaderType) {
+                      _reloadReader();
                     }
                   },
                   icon: Icon(Icons.view_day_outlined),
@@ -206,5 +176,17 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     } else {
       defaultToast(context, "找不到下一章啦");
     }
+  }
+
+  // 重新加载本页
+  void _reloadReader() {
+    Navigator.of(context).pop(ComicReaderScreen(
+      comicInfo: widget.comicInfo,
+      epList: widget.epList,
+      currentEpOrder: widget.currentEpOrder,
+      initPictureRank: _lastChangeRank ?? widget.initPictureRank,
+      // maybe null
+      autoFullScreen: _fullScreen,
+    ));
   }
 }

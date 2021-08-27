@@ -1,8 +1,9 @@
+import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/screens/InitScreen.dart';
 import 'package:pikapi/basic/Navigatior.dart';
 
-import 'basic/Themes.dart';
+import 'basic/config/Themes.dart';
 
 void main() {
   runApp(PikachuApp());
@@ -30,16 +31,14 @@ class _PikachuAppState extends State<PikachuApp> {
     super.dispose();
   }
 
-  void _onChangeTheme(ThemeEventArgs? args) {
-    setState(() {
-      _themeData = args?.themeData;
-    });
+  void _onChangeTheme(EventArgs? args) {
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: _themeData,
+      theme: currentThemeData(),
       navigatorObservers: [navigatorObserver],
       home: InitScreen(),
     );

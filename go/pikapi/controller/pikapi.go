@@ -312,13 +312,11 @@ func downloadEpList(comicId string) (string, error) {
 
 func viewLogPage(params string) (string, error) {
 	var paramsStruct struct {
-		Page     int `json:"page"`
-		PageSize int `json:"pageSize"`
+		Offset int `json:"offset"`
+		Limit  int `json:"limit"`
 	}
 	json.Unmarshal([]byte(params), &paramsStruct)
-	page := paramsStruct.Page
-	pageSize := paramsStruct.PageSize
-	return serialize(comic_center.ViewLogPage(page, pageSize))
+	return serialize(comic_center.ViewLogPage(paramsStruct.Offset, paramsStruct.Limit))
 }
 
 func downloadPicturesByEpId(epId string) (string, error) {
@@ -471,6 +469,12 @@ func FlatInvoke(method string, params string) (string, error) {
 		return games(params)
 	case "viewLogPage":
 		return viewLogPage(params)
+	case "clearAllViewLog":
+		comic_center.ClearAllViewLog()
+		return "", nil
+	case "deleteViewLog":
+		comic_center.DeleteViewLog(params)
+		return "", nil
 	case "clean":
 		return "", clean()
 	case "storeViewEp":

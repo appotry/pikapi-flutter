@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
-import 'package:pikapi/basic/Themes.dart';
+import 'package:pikapi/basic/config/Themes.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/enum/ErrorTypes.dart';
 import 'package:pikapi/screens/RegisterScreen.dart';
@@ -58,7 +58,7 @@ class _AccountScreenState extends State<AccountScreen> {
         title: Text('配置选项'),
         actions: [
           IconButton(
-            onPressed: (){
+            onPressed: () {
               chooseTheme(context);
             },
             icon: Text('主题'),
@@ -78,39 +78,39 @@ class _AccountScreenState extends State<AccountScreen> {
           ListTile(
             title: Text("哔咔账号"),
             subtitle: Text(_username == "" ? "未设置" : _username),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '哔咔账号',
                 '请输入哔咔账号',
                 _username,
                 "",
-                (value) async {
-                  await pica.setUsername(value);
-                  setState(() {
-                    _username = value;
-                  });
-                },
               );
+              if (input != null) {
+                await pica.setUsername(input);
+                setState(() {
+                  _username = input;
+                });
+              }
             },
           ),
           ListTile(
             title: Text("哔咔密码"),
             subtitle: Text(_password == "" ? "未设置" : _password),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '哔咔密码',
                 '请输入哔咔密码',
                 _password,
                 "",
-                (value) async {
-                  await pica.setPassword(value);
-                  setState(() {
-                    _password = value;
-                  });
-                },
               );
+              if (input != null) {
+                await pica.setPassword(input);
+                setState(() {
+                  _password = input;
+                });
+              }
             },
           ),
           NetworkSetting(),

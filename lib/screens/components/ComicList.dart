@@ -1,8 +1,10 @@
+import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/enum/ListLayout.dart';
+import 'package:pikapi/basic/store/Categories.dart';
+import 'package:pikapi/basic/config/ShadowCategories.dart';
+import 'package:pikapi/basic/config/ListLayout.dart';
 
 import 'ComicInfoCard.dart';
 import 'Images.dart';
@@ -33,7 +35,7 @@ class _ComicListState extends State<ComicList> {
     super.dispose();
   }
 
-  void _onLayoutChange(ListLayoutArgs? args) {
+  void _onLayoutChange(EventArgs? args) {
     setState(() {});
   }
 
@@ -58,7 +60,7 @@ class _ComicListState extends State<ComicList> {
       children: [
         ...widget.comicList.map((e) {
           var shadow = e.categories
-              .map((e) => storedShadowCategories.contains(e))
+              .map((e) => shadowCategories.contains(e))
               .reduce((value, element) => value || element);
           if (shadow) {
             return InkWell(
@@ -115,7 +117,7 @@ class _ComicListState extends State<ComicList> {
     List<Widget> tmp = [];
     widget.comicList.forEach((e) {
       var shadow = e.categories
-          .map((e) => storedShadowCategories.contains(e))
+          .map((e) => shadowCategories.contains(e))
           .reduce((value, element) => value || element);
       if (shadow) {
         tmp.add(
@@ -211,7 +213,7 @@ class _ComicListState extends State<ComicList> {
     List<Widget> tmp = [];
     widget.comicList.forEach((e) {
       var shadow = e.categories
-          .map((e) => storedShadowCategories.contains(e))
+          .map((e) => shadowCategories.contains(e))
           .reduce((value, element) => value || element);
       if (shadow) {
         tmp.add(

@@ -2,7 +2,6 @@
 
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
-
 import '../Common.dart';
 import '../Pica.dart';
 
@@ -12,13 +11,26 @@ enum ListLayout {
   COVER_AND_TITLE,
 }
 
-const Map<String, ListLayout> listLayoutMap = {
+late ListLayout currentLayout;
+
+Future<void> initListLayout() async {
+  currentLayout = _listLayoutFromString(await pica.loadProperty(
+    _propertyName,
+    ListLayout.INFO_CARD.toString(),
+  ));
+}
+
+const _propertyName = "listLayout";
+
+var listLayoutEvent = Event<EventArgs>();
+
+const Map<String, ListLayout> _listLayoutMap = {
   '详情': ListLayout.INFO_CARD,
   '封面': ListLayout.ONLY_IMAGE,
   '封面+标题': ListLayout.COVER_AND_TITLE,
 };
 
-ListLayout listLayoutFromString(String layoutString) {
+ListLayout _listLayoutFromString(String layoutString) {
   for (var value in ListLayout.values) {
     if (layoutString == value.toString()) {
       return value;
@@ -27,16 +39,10 @@ ListLayout listLayoutFromString(String layoutString) {
   return ListLayout.INFO_CARD;
 }
 
-late ListLayout currentLayout;
-
-class ListLayoutArgs extends EventArgs {}
-
-var listLayoutEvent = Event<ListLayoutArgs>();
-
 void chooseListLayout(BuildContext context) async {
-  ListLayout? layout = await chooseMapDialog(context, listLayoutMap, '请选择布局');
+  ListLayout? layout = await chooseMapDialog(context, _listLayoutMap, '请选择布局');
   if (layout != null) {
-    await pica.saveListLayout(layout);
+    await pica.saveProperty(_propertyName, layout.toString());
     currentLayout = layout;
     listLayoutEvent.broadcast();
   }
@@ -48,3 +54,4 @@ IconButton chooseLayoutAction(BuildContext context) => IconButton(
       },
       icon: Icon(Icons.view_quilt),
     );
+

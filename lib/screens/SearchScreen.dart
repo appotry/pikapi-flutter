@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Common.dart';
-import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/enum/ListLayout.dart';
-import 'package:pikapi/basic/enum/Sort.dart';
+import 'package:pikapi/basic/store/Categories.dart';
+import 'package:pikapi/basic/config/ListLayout.dart';
 import 'package:pikapi/basic/Pica.dart';
 import '../basic/Entities.dart';
 import 'components/ComicPager.dart';

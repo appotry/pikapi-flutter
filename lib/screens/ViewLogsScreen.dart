@@ -1,8 +1,10 @@
+
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
 
 import 'ComicInfoScreen.dart';
-import 'components/ComicWrap.dart';
+import 'components/ViewLogWrap.dart';
 
 // 浏览记录
 class ViewLogsScreen extends StatefulWidget {
@@ -17,11 +19,51 @@ class _ViewLogsScreenState extends State<ViewLogsScreen> {
   static const _scrollPhysics = AlwaysScrollableScrollPhysics(); // 即使不足一页仍可滚动
 
   final _scrollController = ScrollController();
-  final _comicList = <ComicWrapEntity>[];
+  final _comicList = <ViewLogWrapEntity>[];
 
   var _isLoading = false; // 是否加载中
   var _scrollOvered = false; // 滚动到最后
-  var _needLoadingPage = 1; // 加载到了第几页
+  var _offset = 0;
+
+  Future _clearAll() async {
+    if (await confirmDialog(
+      context,
+      "您要清除所有浏览记录吗? ",
+      "将会同时删除浏览进度!",
+    )) {
+      await pica.clearAllViewLog();
+      setState(() {
+        _comicList.clear();
+        _isLoading = false;
+        _scrollOvered = true;
+        _offset = 0;
+      });
+    }
+  }
+
+  Future _clearOnce(String id) async {
+    if (await confirmDialog(
+      context,
+      "您要清除这条浏览记录吗? ",
+      "将会同时删除浏览进度!",
+    )) {
+      await pica.deleteViewLog(id);
+      setState(() {
+        for (var i = 0; i < _comicList.length; i++) {
+          if (_comicList[i].id == id) {
+            _comicList[i] = ViewLogWrapEntity(
+              _comicList[i].id,
+              _comicList[i].title,
+              _comicList[i].fileServer,
+              _comicList[i].path,
+              deleted: true,
+            );
+            break;
+          }
+        }
+      });
+    }
+  }
 
   // 加载一页
   Future<dynamic> _loadPage() async {
@@ -29,14 +71,14 @@ class _ViewLogsScreenState extends State<ViewLogsScreen> {
       _isLoading = true;
     });
     try {
-      var page = await pica.viewLogPage(_needLoadingPage, _pageSize);
+      var page = await pica.viewLogPage(_offset, _pageSize);
       if (page.isEmpty) {
         _scrollOvered = true;
       } else {
         _comicList.addAll(page.map((e) =>
-            ComicWrapEntity(e.id, e.title, e.thumbFileServer, e.thumbPath)));
+            ViewLogWrapEntity(e.id, e.title, e.thumbFileServer, e.thumbPath)));
       }
-      _needLoadingPage++;
+      _offset += _pageSize;
     } finally {
       setState(() {
         _isLoading = false;
@@ -46,7 +88,8 @@ class _ViewLogsScreenState extends State<ViewLogsScreen> {
 
   // 滚动事件
   void _handScroll() {
-    if (_scrollController.position.pixels <
+    if (_scrollController.position.pixels +
+            MediaQuery.of(context).size.height / 2 <
         _scrollController.position.maxScrollExtent) {
       return;
     }
@@ -72,13 +115,20 @@ class _ViewLogsScreenState extends State<ViewLogsScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('浏览记录'),
+          actions: [
+            IconButton(onPressed: _clearAll, icon: Icon(Icons.auto_delete)),
+          ],
         ),
         body: ListView(
           physics: _scrollPhysics,
           controller: _scrollController,
           children: [
             Container(height: 10),
-            ComicWrap(onTapComic: _chooseComic, comics: _comicList),
+            ViewLogWrap(
+              onTapComic: _chooseComic,
+              comics: _comicList,
+              onDelete: _clearOnce,
+            ),
           ],
         ),
       ),

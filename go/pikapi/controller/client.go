@@ -194,21 +194,33 @@ func leaderboard(typeName string) (string, error) {
 }
 
 func comicInfo(comicId string) (string, error) {
+	var err error
+	var comic *pica.ComicInfo
 	// cache
 	key := fmt.Sprintf("COMIC_INFO$%s", comicId)
 	expire := time.Hour * 24 * 7
 	cache := network_cache.LoadCache(key, expire)
 	if cache != "" {
-		err := comic_center.ViewComic(comicId)
+		var co pica.ComicInfo
+		err = json.Unmarshal([]byte(cache), &co)
+		if err != nil {
+			panic(err)
+			return "", err
+		}
+		comic = &co
+	} else {
+		// get
+		comic, err = client.ComicInfo(comicId)
 		if err != nil {
 			return "", err
 		}
-		return cache, nil
-	}
-	// get
-	comic, err := client.ComicInfo(comicId)
-	if err != nil {
-		return "", err
+		var buff []byte
+		buff, err = json.Marshal(comic)
+		if err != nil {
+			return "", err
+		}
+		cache = string(buff)
+		network_cache.SaveCache(key, cache)
 	}
 	// 标记历史记录
 	view := comic_center.ComicView{}
@@ -240,12 +252,6 @@ func comicInfo(comicId string) (string, error) {
 		return "", err
 	}
 	// return
-	buff, err := json.Marshal(comic)
-	if err != nil {
-		return "", err
-	}
-	cache = string(buff)
-	network_cache.SaveCache(key, cache)
 	return cache, nil
 }
 

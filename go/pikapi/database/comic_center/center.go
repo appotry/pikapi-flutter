@@ -433,10 +433,18 @@ func ResetAll() error {
 	})
 }
 
-func ViewLogPage(page int, pageSize int) (*[]ComicView, error) {
+func ViewLogPage(offset int, limit int) (*[]ComicView, error) {
 	var list []ComicView
-	err := db.Offset((page - 1) * pageSize).Limit(pageSize).Order("last_view_time DESC").Find(&list).Error
+	err := db.Offset(offset).Limit(limit).Order("last_view_time DESC").Find(&list).Error
 	return &list, err
+}
+
+func ClearAllViewLog() {
+	db.Unscoped().Where("1 = 1").Delete(&ComicView{})
+}
+
+func DeleteViewLog(id string) {
+	db.Unscoped().Where("id = ?", id).Delete(&ComicView{})
 }
 
 func DeletingComic() (*ComicDownload, error) {

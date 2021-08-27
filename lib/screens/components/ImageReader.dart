@@ -7,10 +7,9 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/enum/FullScreenAction.dart';
-import 'package:pikapi/basic/enum/ReaderDirection.dart';
-import 'package:pikapi/basic/enum/ReaderType.dart';
+import 'package:pikapi/basic/config/FullScreenAction.dart';
+import 'package:pikapi/basic/config/ReaderDirection.dart';
+import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
@@ -77,7 +76,7 @@ class ImageReader extends StatelessWidget {
         reader = Container();
         break;
     }
-    switch (storedFullScreenAction) {
+    switch (fullScreenAction) {
       case FullScreenAction.CONTROLLER:
         return Stack(
           children: [

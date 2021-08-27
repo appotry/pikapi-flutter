@@ -2,7 +2,8 @@ import 'package:event/src/eventargs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/basic/Storage.dart';
+import 'package:pikapi/basic/store/Categories.dart';
+import 'package:pikapi/basic/config/ShadowCategories.dart';
 import 'package:pikapi/screens/RankingsScreen.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
@@ -65,13 +66,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   @override
   void initState() {
-    storedShadowCategoriesEvent.subscribe(_onShadowChange);
+    shadowCategoriesEvent.subscribe(_onShadowChange);
     super.initState();
   }
 
   @override
   void dispose() {
-    storedShadowCategoriesEvent.unsubscribe(_onShadowChange);
+    shadowCategoriesEvent.unsubscribe(_onShadowChange);
     super.dispose();
   }
 
@@ -179,7 +180,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     for (var i = 0; i < cList.length; i++) {
       var c = cList[i];
       if (c.isWeb) continue;
-      if (storedShadowCategories.contains(c.title)) continue;
+      if (shadowCategories.contains(c.title)) continue;
       append(
         RemoteImage(
           fileServer: c.thumb.fileServer,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/basic/enum/ListLayout.dart';
+import 'package:pikapi/basic/config/ListLayout.dart';
 
 import 'components/ComicListBuilder.dart';
 

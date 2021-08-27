@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/Themes.dart';
+import 'package:pikapi/basic/store/Categories.dart';
+import 'package:pikapi/basic/config/Address.dart';
+import 'package:pikapi/basic/config/AutoFullScreen.dart';
+import 'package:pikapi/basic/config/FullScreenAction.dart';
+import 'package:pikapi/basic/config/PagerAction.dart';
+import 'package:pikapi/basic/config/Proxy.dart';
+import 'package:pikapi/basic/config/Quality.dart';
+import 'package:pikapi/basic/config/ReaderDirection.dart';
+import 'package:pikapi/basic/config/ReaderType.dart';
+import 'package:pikapi/basic/config/ShadowCategories.dart';
+import 'package:pikapi/basic/config/Themes.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/basic/enum/ListLayout.dart';
+import 'package:pikapi/basic/config/ListLayout.dart';
 
 import 'AccountScreen.dart';
 import 'AppScreen.dart';
@@ -22,17 +31,17 @@ class _InitScreenState extends State<InitScreen> {
 
   Future<dynamic> _init() async {
     // 初始化配置文件
-    storedAddress = await pica.getSwitchAddress();
-    storedProxy = await pica.getProxy();
-    storedQuality = await pica.loadQuality();
-    changeThemeByCode(await pica.loadTheme());
-    currentLayout = await pica.loadListLayout();
-    storedReaderType = await pica.loadReaderType();
-    storedReaderDirection = await pica.loadReaderDirection();
-    storedAutoFullScreen = await pica.getAutoFullScreen();
-    storedFullScreenAction = await pica.loadFullScreenAction();
-    storedPagerAction = await pica.loadPagerAction();
-    storedShadowCategories = await pica.getShadowCategories();
+    await initAddress();
+    await initProxy();
+    await initQuality();
+    await loadTheme();
+    await initListLayout();
+    await initReaderType();
+    await initReaderDirection();
+    await initAutoFullScreen();
+    await initFullScreenAction();
+    await initPagerAction();
+    await initShadowCategories();
     // 登录, 如果token失效重新登录, 网络不好的时候可能需要1分钟
     if (await pica.preLogin()) {
       // 如果token或username+password有效则直接进入登录好的界面

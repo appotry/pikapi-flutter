@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
-import 'package:pikapi/basic/Themes.dart';
+import 'package:pikapi/basic/config/Themes.dart';
 import 'package:pikapi/screens/AboutScreen.dart';
 import 'package:pikapi/screens/AccountScreen.dart';
 import 'package:pikapi/screens/DownloadListScreen.dart';

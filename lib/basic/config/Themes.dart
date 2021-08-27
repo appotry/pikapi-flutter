@@ -2,16 +2,9 @@
 
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
+import '../Pica.dart';
 
-import 'Pica.dart';
-
-class ThemeEventArgs extends EventArgs {
-  ThemeData? themeData;
-
-  ThemeEventArgs(this.themeData);
-}
-
-abstract class ThemePackage {
+abstract class _ThemePackage {
   String code();
 
   String name();
@@ -19,7 +12,7 @@ abstract class ThemePackage {
   ThemeData themeData();
 }
 
-class _OriginTheme extends ThemePackage {
+class _OriginTheme extends _ThemePackage {
   @override
   String code() => "origin";
 
@@ -30,7 +23,7 @@ class _OriginTheme extends ThemePackage {
   ThemeData themeData() => ThemeData();
 }
 
-class _PinkTheme extends ThemePackage {
+class _PinkTheme extends _ThemePackage {
   @override
   String code() => "pink";
 
@@ -58,7 +51,7 @@ class _PinkTheme extends ThemePackage {
       );
 }
 
-class _BlackTheme extends ThemePackage {
+class _BlackTheme extends _ThemePackage {
   @override
   String code() => "black";
 
@@ -87,7 +80,7 @@ class _BlackTheme extends ThemePackage {
       );
 }
 
-class _DarkTheme extends ThemePackage {
+class _DarkTheme extends _ThemePackage {
   @override
   String code() => "dark";
 
@@ -114,27 +107,32 @@ class _DarkTheme extends ThemePackage {
       );
 }
 
-final themePackages = <ThemePackage>[
+final themePackages = <_ThemePackage>[
   _OriginTheme(),
   _PinkTheme(),
   _BlackTheme(),
   _DarkTheme(),
 ];
 
-var themeEvent = Event<ThemeEventArgs>();
+var themeEvent = Event<EventArgs>();
 
-changeThemeByCode(String themeCode) {
+String? _themeCode;
+ThemeData? _themeData;
+
+void _changeThemeByCode(String themeCode) {
   for (var package in themePackages) {
     if (themeCode == package.code()) {
       _themeCode = themeCode;
-      themeEvent.broadcast(ThemeEventArgs(package.themeData()));
-      return;
+      _themeData = package.themeData();
+      break;
     }
   }
-  themeEvent.broadcast(ThemeEventArgs(ThemeData()));
+  themeEvent.broadcast();
 }
 
-String? _themeCode;
+Future<dynamic> loadTheme() async {
+  _changeThemeByCode(await pica.loadTheme());
+}
 
 String currentThemeName() {
   for (var package in themePackages) {
@@ -143,6 +141,10 @@ String currentThemeName() {
     }
   }
   return "";
+}
+
+ThemeData? currentThemeData() {
+  return _themeData;
 }
 
 Future<dynamic> chooseTheme(BuildContext buildContext) async {
@@ -164,6 +166,6 @@ Future<dynamic> chooseTheme(BuildContext buildContext) async {
   );
   if (theme != null) {
     pica.saveTheme(theme);
-    changeThemeByCode(theme);
+    _changeThemeByCode(theme);
   }
 }

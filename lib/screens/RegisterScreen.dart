@@ -119,55 +119,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ListTile(
             title: Text("哔咔账号 (不一定是邮箱/登录使用)"),
             subtitle: Text(_email == "" ? "未设置" : _email),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '哔咔账号',
                 '请输入哔咔账号',
                 _email,
                 "",
-                    (value) {
-                  setState(() {
-                    _email = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _email = input;
+                });
+              }
             },
           ),
           ListTile(
             title: Text("哔咔密码 (8位以上)"),
             subtitle: Text(_password == "" ? "未设置" : _password),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '哔咔密码',
                 '请输入哔咔密码',
                 _password,
                 "",
-                    (value) {
-                  setState(() {
-                    _password = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _password = input;
+                });
+              }
             },
           ),
           ListTile(
             title: Text("昵称 (2-50字)"),
             subtitle: Text(_name == "" ? "未设置" : _name),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '昵称',
                 '请输入昵称',
                 _name,
                 "",
-                    (value) {
-                  setState(() {
-                    _name = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _name = input;
+                });
+              }
             },
           ),
           ListTile(
@@ -227,111 +227,111 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           Divider(),
           ListTile(
-            title: Text("回答1"),
-            subtitle: Text(_answer1 == "" ? "未设置" : _answer1),
-            onTap: () {
-              displayTextInputDialog(
-                context,
-                '回答1',
-                '请输入回答1',
-                _answer1,
-                "",
-                    (value) {
-                  setState(() {
-                    _answer1 = value;
-                  });
-                },
-              );
-            },
-          ),
-          ListTile(
             title: Text("问题1"),
             subtitle: Text(_question1 == "" ? "未设置" : _question1),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '问题1',
                 '请输入问题1',
                 _question1,
                 "",
-                    (value) {
-                  setState(() {
-                    _question1 = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _question1 = input;
+                });
+              }
             },
           ),
           ListTile(
-            title: Text("回答2"),
-            subtitle: Text(_answer2 == "" ? "未设置" : _answer2),
-            onTap: () {
-              displayTextInputDialog(
+            title: Text("回答1"),
+            subtitle: Text(_answer1 == "" ? "未设置" : _answer1),
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
-                '回答2',
-                '请输入回答2',
-                _answer2,
+                '回答1',
+                '请输入回答1',
+                _answer1,
                 "",
-                    (value) {
-                  setState(() {
-                    _answer2 = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _answer1 = input;
+                });
+              }
             },
           ),
           ListTile(
             title: Text("问题2"),
             subtitle: Text(_question2 == "" ? "未设置" : _question2),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '问题2',
                 '请输入问题2',
                 _question2,
                 "",
-                    (value) {
-                  setState(() {
-                    _question2 = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _question2 = input;
+                });
+              }
             },
           ),
           ListTile(
-            title: Text("回答3"),
-            subtitle: Text(_answer3 == "" ? "未设置" : _answer3),
-            onTap: () {
-              displayTextInputDialog(
+            title: Text("回答2"),
+            subtitle: Text(_answer2 == "" ? "未设置" : _answer2),
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
-                '回答3',
-                '请输入回答3',
-                _answer3,
+                '回答2',
+                '请输入回答2',
+                _answer2,
                 "",
-                    (value) {
-                  setState(() {
-                    _answer3 = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _answer2 = input;
+                });
+              }
             },
           ),
           ListTile(
             title: Text("问题3"),
             subtitle: Text(_question3 == "" ? "未设置" : _question3),
-            onTap: () {
-              displayTextInputDialog(
+            onTap: () async {
+              String? input = await displayTextInputDialog(
                 context,
                 '问题3',
                 '请输入问题3',
                 _question3,
                 "",
-                    (value) {
-                  setState(() {
-                    _question3 = value;
-                  });
-                },
               );
+              if (input != null) {
+                setState(() {
+                  _question3 = input;
+                });
+              }
+            },
+          ),
+          ListTile(
+            title: Text("回答3"),
+            subtitle: Text(_answer3 == "" ? "未设置" : _answer3),
+            onTap: () async {
+              String? input = await displayTextInputDialog(
+                context,
+                '回答3',
+                '请输入回答3',
+                _answer3,
+                "",
+              );
+              if (input != null) {
+                setState(() {
+                  _answer3 = input;
+                });
+              }
             },
           ),
           Divider(),

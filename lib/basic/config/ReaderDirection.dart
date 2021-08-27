@@ -2,18 +2,28 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Pica.dart';
 
 enum ReaderDirection {
   TOP_TO_BOTTOM,
   LEFT_TO_RIGHT,
 }
 
-var types = {
+late ReaderDirection gReaderDirection;
+
+const _propertyName = "readerDirection";
+
+Future<void> initReaderDirection() async {
+  gReaderDirection = _pagerDirectionFromString(await pica.loadProperty(
+      _propertyName, ReaderDirection.TOP_TO_BOTTOM.toString()));
+}
+
+var _types = {
   '从上到下': ReaderDirection.TOP_TO_BOTTOM,
   '从左到右': ReaderDirection.LEFT_TO_RIGHT,
 };
 
-ReaderDirection pagerDirectionFromString(String pagerDirectionString) {
+ReaderDirection _pagerDirectionFromString(String pagerDirectionString) {
   for (var value in ReaderDirection.values) {
     if (pagerDirectionString == value.toString()) {
       return value;
@@ -22,22 +32,22 @@ ReaderDirection pagerDirectionFromString(String pagerDirectionString) {
   return ReaderDirection.TOP_TO_BOTTOM;
 }
 
-String readerDirectionName(ReaderDirection pagerDirection) {
-  for (var e in types.entries) {
-    if (e.value == pagerDirection) {
+String currentReaderDirectionName() {
+  for (var e in _types.entries) {
+    if (e.value == gReaderDirection) {
       return e.key;
     }
   }
   return '';
 }
 
-Future<ReaderDirection?> choosePagerDirection(BuildContext buildContext) async {
-  return await showDialog<ReaderDirection>(
+Future<void> choosePagerDirection(BuildContext buildContext) async {
+  ReaderDirection? choose = await showDialog<ReaderDirection>(
     context: buildContext,
     builder: (BuildContext context) {
       return SimpleDialog(
         title: Text("选择翻页方向"),
-        children: types.entries
+        children: _types.entries
             .map((e) => SimpleDialogOption(
                   child: Text(e.key),
                   onPressed: () {
@@ -48,4 +58,8 @@ Future<ReaderDirection?> choosePagerDirection(BuildContext buildContext) async {
       );
     },
   );
+  if (choose != null) {
+    await pica.saveProperty(_propertyName, choose.toString());
+    gReaderDirection = choose;
+  }
 }

@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/basic/Storage.dart';
-import 'package:pikapi/basic/enum/ReaderDirection.dart';
-import 'package:pikapi/basic/enum/ReaderType.dart';
+import 'package:pikapi/basic/store/Categories.dart';
+import 'package:pikapi/basic/config/AutoFullScreen.dart';
+import 'package:pikapi/basic/config/ReaderDirection.dart';
+import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'components/ImageReader.dart';
@@ -16,8 +17,8 @@ class DownloadReaderScreen extends StatefulWidget {
   final List<DownloadEp> epList;
   final int currentEpOrder;
   final int? initPictureRank;
-  final ReaderType pagerType = storedReaderType;
-  final ReaderDirection pagerDirection = storedReaderDirection;
+  final ReaderType pagerType = gReaderType;
+  final ReaderDirection pagerDirection = gReaderDirection;
   late final bool autoFullScreen;
 
   DownloadReaderScreen({
@@ -28,7 +29,7 @@ class DownloadReaderScreen extends StatefulWidget {
     this.initPictureRank,
     bool? autoFullScreen,
   }) : super(key: key) {
-    this.autoFullScreen = autoFullScreen ?? storedAutoFullScreen;
+    this.autoFullScreen = autoFullScreen ?? gAutoFullScreen;
   }
 
   @override
@@ -90,44 +91,18 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
               actions: [
                 IconButton(
                   onPressed: () async {
-                    ReaderDirection? t = await choosePagerDirection(context);
-                    if (t != null) {
-                      if (widget.pagerDirection != t) {
-                        pica.saveReaderDirection(t);
-                        storedReaderDirection = t;
-                        // 重新加载本页
-                        Navigator.of(context).pop(DownloadReaderScreen(
-                          comicInfo: widget.comicInfo,
-                          epList: widget.epList,
-                          currentEpOrder: widget.currentEpOrder,
-                          initPictureRank:
-                              _lastChangeRank ?? widget.initPictureRank,
-                          // maybe null
-                          autoFullScreen: _fullScreen,
-                        ));
-                      }
+                    await choosePagerDirection(context);
+                    if (widget.pagerDirection != gReaderDirection) {
+                      _reloadReader();
                     }
                   },
                   icon: Icon(Icons.grid_goldenratio),
                 ),
                 IconButton(
                   onPressed: () async {
-                    ReaderType? t = await choosePagerType(context);
-                    if (t != null) {
-                      if (widget.pagerType != t) {
-                        pica.saveReaderType(t);
-                        storedReaderType = t;
-                        // 重新加载本页
-                        Navigator.of(context).pop(DownloadReaderScreen(
-                          comicInfo: widget.comicInfo,
-                          epList: widget.epList,
-                          currentEpOrder: widget.currentEpOrder,
-                          initPictureRank:
-                              _lastChangeRank ?? widget.initPictureRank,
-                          // maybe null
-                          autoFullScreen: _fullScreen,
-                        ));
-                      }
+                    await choosePagerType(context);
+                    if (widget.pagerType != gReaderType) {
+                      _reloadReader();
                     }
                   },
                   icon: Icon(Icons.view_day_outlined),
@@ -188,5 +163,18 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     } else {
       defaultToast(context, "找不到下一章啦");
     }
+  }
+
+  // 重新加载本页
+  void _reloadReader(){
+    Navigator.of(context).pop(DownloadReaderScreen(
+      comicInfo: widget.comicInfo,
+      epList: widget.epList,
+      currentEpOrder: widget.currentEpOrder,
+      initPictureRank:
+      _lastChangeRank ?? widget.initPictureRank,
+      // maybe null
+      autoFullScreen: _fullScreen,
+    ));
   }
 }
