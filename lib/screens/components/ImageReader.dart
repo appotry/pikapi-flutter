@@ -235,6 +235,8 @@ class _WebToonReaderState extends State<_WebToonReader> {
             if (widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM) {
               renderSize = Size(constraints.maxWidth, constraints.maxWidth / 2);
             } else {
+              // ReaderDirection.LEFT_TO_RIGHT
+              // ReaderDirection.RIGHT_TO_LEFT
               renderSize =
                   Size(constraints.maxWidth / 2, constraints.maxHeight);
             }
@@ -273,6 +275,8 @@ class _WebToonReaderState extends State<_WebToonReader> {
               widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM
                   ? Axis.vertical
                   : Axis.horizontal,
+          reverse:
+              widget.struct.pagerDirection == ReaderDirection.RIGHT_TO_LEFT,
           padding: widget.struct.fullScreen
               ? EdgeInsets.only(
                   top: scaffold.appBarMaxHeight ?? 0,
@@ -527,6 +531,7 @@ class _GalleryReaderState extends State<_GalleryReader> {
           widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM
               ? Axis.vertical
               : Axis.horizontal,
+      reverse: widget.struct.pagerDirection == ReaderDirection.RIGHT_TO_LEFT,
       backgroundDecoration: BoxDecoration(color: Colors.black),
       loadingBuilder: (context, event) => LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {

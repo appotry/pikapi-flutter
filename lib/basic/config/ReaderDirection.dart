@@ -7,6 +7,7 @@ import 'package:pikapi/basic/Pica.dart';
 enum ReaderDirection {
   TOP_TO_BOTTOM,
   LEFT_TO_RIGHT,
+  RIGHT_TO_LEFT,
 }
 
 late ReaderDirection gReaderDirection;
@@ -21,6 +22,7 @@ Future<void> initReaderDirection() async {
 var _types = {
   '从上到下': ReaderDirection.TOP_TO_BOTTOM,
   '从左到右': ReaderDirection.LEFT_TO_RIGHT,
+  '从右到左': ReaderDirection.RIGHT_TO_LEFT,
 };
 
 ReaderDirection _pagerDirectionFromString(String pagerDirectionString) {
