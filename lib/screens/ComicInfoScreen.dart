@@ -6,7 +6,6 @@ import 'package:pikapi/screens/ComicsScreen.dart';
 import 'package:pikapi/basic/Navigatior.dart';
 import 'package:pikapi/screens/components/ItemBuilder.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/screens/components/PicaAvatar.dart';
 import 'ComicReaderScreen.dart';
 import 'DownloadConfirmScreen.dart';
 import 'components/ComicComment.dart';

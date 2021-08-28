@@ -38,7 +38,7 @@ class DownloadReaderScreen extends StatefulWidget {
 
 class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
   late DownloadEp _ep;
-  late bool _fullScreen = widget.autoFullScreen;
+  late bool _fullScreen = false;
   late List<DownloadPicture> pictures = [];
   late Future _future = _load();
   int? _lastChangeRank;
@@ -53,6 +53,12 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
         pictures.addAll((await pica.downloadPicturesByEpId(ep.id)));
       }
     }
+    if (widget.autoFullScreen) {
+      setState(() {
+        SystemChrome.setEnabledSystemUIOverlays([]);
+        _fullScreen = true;
+      });
+    }
   }
 
   Future _onPositionChange(int position) async {
@@ -63,9 +69,6 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
 
   @override
   void initState() {
-    if (widget.autoFullScreen) {
-      SystemChrome.setEnabledSystemUIOverlays([]);
-    }
     widget.epList.forEach((element) {
       if (element.epOrder == widget.currentEpOrder) {
         _ep = element;

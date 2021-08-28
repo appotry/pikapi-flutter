@@ -135,13 +135,19 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                                   iconMargin,
                                 ]
                               : []),
-                          iconPage,
-                          iconSpacing,
-                          Text(
-                            "${info.epsCount}E / ${info.pagesCount}P",
-                            style: countLabelStyle,
-                            strutStyle: iconLabelStrutStyle,
-                          ),
+                          info.epsCount > 0
+                              ? Row(
+                                  children: [
+                                    iconPage,
+                                    iconSpacing,
+                                    Text(
+                                      "${info.epsCount}E / ${info.pagesCount}P",
+                                      style: countLabelStyle,
+                                      strutStyle: iconLabelStrutStyle,
+                                    ),
+                                  ],
+                                )
+                              : Container(),
                           iconMargin,
                         ],
                       ),

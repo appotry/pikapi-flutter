@@ -38,7 +38,7 @@ class ComicReaderScreen extends StatefulWidget {
 
 class _ComicReaderScreenState extends State<ComicReaderScreen> {
   late Ep _ep;
-  late bool _fullScreen = widget.autoFullScreen;
+  late bool _fullScreen = false;
   late Future<List<PicaImage>> _future;
   int? _lastChangeRank;
 
@@ -58,6 +58,12 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
       );
       list.addAll(page.docs.map((element) => element.media));
     } while (page.pages > page.page);
+    if (widget.autoFullScreen) {
+      setState(() {
+        SystemChrome.setEnabledSystemUIOverlays([]);
+        _fullScreen = true;
+      });
+    }
     return list;
   }
 
@@ -69,9 +75,6 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
 
   @override
   void initState() {
-    if (widget.autoFullScreen) {
-      SystemChrome.setEnabledSystemUIOverlays([]);
-    }
     widget.epList.forEach((element) {
       if (element.order == widget.currentEpOrder) {
         _ep = element;
