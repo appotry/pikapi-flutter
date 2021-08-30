@@ -5,15 +5,16 @@ PIKAPI - 哔咔客户端
 [![downloads](https://img.shields.io/github/downloads/niuhuan/pikapi-flutter/total)](https://github.com/niuhuan/pikapi-flutter/releases)
 
 - 美观易用且无广告的哔咔漫画客户端, 能运行在Windows/MacOS/Linux/Android/IOS中。
-- 您的点赞是对开发者的莫大鼓励, 可下载的同时点亮小星星进行支持。
+- 您的点赞是对开发者的莫大鼓励, 可点亮小星星进行支持。
+- [https://github.com/niuhuan/pikapi-flutter](https://github.com/niuhuan/pikapi-flutter)
 
 ## 界面 / 功能
 
 ![阅读器](images/reader.png)
 
-### 登录/分流
+### 登录/注册/分流
 
-您还是需要一个哔卡账户登录的, 否则将无法使用本软件。
+您需要注册或登录一个哔卡账户, 才能使用本软件。注册只需要提供账号和密码。
 
 VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN上访问代理, 使用代理请求分流服务器, 所以最好只设置一个, 分流2/3在北京地区网速非常良好。
 

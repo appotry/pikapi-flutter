@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
 import 'package:pikapi/screens/components/ContentLoading.dart';
 import 'package:pikapi/screens/components/Images.dart';
 
-import 'GamedownloadScreen.dart';
+import 'GameDownloadScreen.dart';
 import 'components/GameTitleCard.dart';
 
 class GameInfoScreen extends StatefulWidget {
