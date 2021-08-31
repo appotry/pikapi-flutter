@@ -5,6 +5,7 @@ import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Pica.dart';
+import 'package:pikapi/basic/config/AutoClean.dart';
 import 'package:pikapi/basic/store/Categories.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
@@ -90,6 +91,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             Divider(),
+            ListTile(
+              title: Text("自动清理缓存"),
+              subtitle: Text(currentAutoCleanSec()),
+              onTap: () async {
+                await chooseAutoCleanSec(context);
+                setState(() {});
+              },
+            ),
             ListTile(
               onTap: () {
                 Navigator.push(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pikapi/basic/store/Categories.dart';
 import 'package:pikapi/basic/config/Address.dart';
+import 'package:pikapi/basic/config/AutoClean.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
 import 'package:pikapi/basic/config/PagerAction.dart';
@@ -31,6 +31,7 @@ class _InitScreenState extends State<InitScreen> {
 
   Future<dynamic> _init() async {
     // 初始化配置文件
+    await autoClean();
     await initAddress();
     await initProxy();
     await initQuality();

@@ -491,3 +491,25 @@ func RemoveAllRemoteImage() error {
 	}
 	return db.Raw("VACUUM").Error
 }
+
+func EarliestRemoteImage(earliest time.Time, pageSize int) ([]RemoteImage, error) {
+	var images []RemoteImage
+	err := db.Where("strftime('%s',updated_at) < strftime('%s',?)", earliest).
+		Order("updated_at").Limit(pageSize).Find(&images).Error
+	return images, err
+}
+
+func DeleteRemoteImages(images []RemoteImage) error {
+	if len(images) == 0 {
+		return nil
+	}
+	ids := make([]uint, len(images))
+	for i := 0; i < len(images); i++ {
+		ids[i] = images[i].ID
+	}
+	return db.Unscoped().Model(&RemoteImage{}).Delete("id in ?", ids).Error
+}
+
+func VACUUM() error {
+	return db.Raw("VACUUM").Error
+}

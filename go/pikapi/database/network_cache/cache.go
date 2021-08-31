@@ -72,3 +72,12 @@ func RemoveAll() error {
 	}
 	return db.Raw("VACUUM").Error
 }
+
+func RemoveEarliest(earliest time.Time) error {
+	err := db.Unscoped().Where("strftime('%s',updated_at) < strftime('%s',?)", earliest).
+		Delete(&NetworkCache{}).Error
+	if err != nil {
+		return err
+	}
+	return db.Raw("VACUUM").Error
+}

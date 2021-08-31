@@ -17,6 +17,7 @@ import (
 	"pica"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 var (
@@ -350,6 +351,37 @@ func clean() error {
 	return nil
 }
 
+func autoClean(expire int64) error {
+	now := time.Now()
+	earliest := now.Add(time.Second * time.Duration(0-expire))
+	err := network_cache.RemoveEarliest(earliest)
+	if err != nil {
+		return err
+	}
+	pageSize := 10
+	for true {
+		images, err := comic_center.EarliestRemoteImage(earliest, pageSize)
+		if err != nil {
+			return err
+		}
+		if len(images) == 0 {
+			return comic_center.VACUUM()
+		}
+		// delete data & remove pic
+		err = comic_center.DeleteRemoteImages(images)
+		if err != nil {
+			return err
+		}
+		for i := 0; i < len(images); i++ {
+			err = os.Remove(remotePath(images[i].LocalPath))
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func storeViewEp(params string) error {
 	var paramsStruct struct {
 		ComicId     string `json:"comicId"`
@@ -477,6 +509,12 @@ func FlatInvoke(method string, params string) (string, error) {
 		return "", nil
 	case "clean":
 		return "", clean()
+	case "autoClean":
+		expire, err := strconv.ParseInt(params, 10, 64)
+		if err != nil {
+			return "", err
+		}
+		return "", autoClean(expire)
 	case "storeViewEp":
 		return "", storeViewEp(params)
 	case "loadView":

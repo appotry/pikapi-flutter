@@ -324,6 +324,10 @@ class Pica {
     return _flatInvoke("clean", "");
   }
 
+  Future autoClean(String expireSec) {
+    return _flatInvoke("autoClean", expireSec);
+  }
+
   Future storeViewEp(
       String comicId, int epOrder, String epTitle, int pictureRank) {
     return _flatInvoke("storeViewEp", {
