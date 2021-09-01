@@ -132,7 +132,7 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
     return MaterialButton(
       height: 80,
       onPressed: () async {
-        var path = await inputString(context, '请输入导出设备提供的地址r\n例如 "192.168.1.2:50000"');
+        var path = await inputString(context, '请输入导出设备提供的地址\n例如 "192.168.1.2:50000"');
         if (path != null) {
           try {
             setState(() {

@@ -5,8 +5,8 @@ PIKAPI - 哔咔客户端
 [![downloads](https://img.shields.io/github/downloads/niuhuan/pikapi-flutter/total)](https://github.com/niuhuan/pikapi-flutter/releases)
 
 - 美观易用且无广告的哔咔漫画客户端, 能运行在Windows/MacOS/Linux/Android/IOS中。
-- 您的点赞是对开发者的莫大鼓励, 可点亮小星星进行支持。
-- [https://github.com/niuhuan/pikapi-flutter](https://github.com/niuhuan/pikapi-flutter)
+- 您的star和issue是对开发者的莫大鼓励, 可以源仓库下载最新的源码/安装包, 表示支持/提出建议。
+- 源仓库地址 [https://github.com/niuhuan/pikapi-flutter](https://github.com/niuhuan/pikapi-flutter)
 
 ## 界面 / 功能
 
@@ -68,7 +68,7 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 
 这个应用程序使用golang和dart(flutter)作为主要语言, 可以兼容Windows, linux, MacOS, Android, IOS
 
-他们使用框架桥接到桌面和移动平台上
+使用了不同的框架桥接到桌面和移动平台上
 - go-flutter => Windows / MacOS / Linux
 - gomobile => Android / IOS
 

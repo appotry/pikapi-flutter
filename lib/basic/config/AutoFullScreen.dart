@@ -20,7 +20,7 @@ Future<void> chooseAutoFullScreen(BuildContext context) async {
       await chooseListDialog<String>(context, "进入阅读器自动全屏", ["是", "否"]);
   if (result != null) {
     var target = result == "是";
-    pica.setAutoFullScreen(target);
+    await pica.setAutoFullScreen(target);
     gAutoFullScreen = target;
   }
 }
