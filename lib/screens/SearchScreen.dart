@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Common.dart';
+import 'package:pikapi/basic/config/ShadowCategories.dart';
 import 'package:pikapi/basic/store/Categories.dart';
 import 'package:pikapi/basic/config/ListLayout.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -58,7 +59,10 @@ class _SearchScreenState extends State<SearchScreen> {
         onPressed: () async {
           String? category = await chooseListDialog(context, '请选择分类', [
             categoryTitle(null),
-            ...storedCategories,
+            ...filteredList(
+              storedCategories,
+                  (c) => !shadowCategories.contains(c),
+            ),
           ]);
           if (category != null) {
             if (category == categoryTitle(null)) {

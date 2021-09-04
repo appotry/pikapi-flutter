@@ -2,13 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
-import 'package:pikapi/basic/config/ReaderDirection.dart';
-import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:pikapi/basic/config/Quality.dart';
-
-import 'config/FullScreenAction.dart';
-import 'config/ListLayout.dart';
-import 'config/PagerAction.dart';
 
 final pica = Pica._();
 

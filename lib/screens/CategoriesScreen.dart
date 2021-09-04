@@ -1,4 +1,4 @@
-import 'package:event/src/eventargs.dart';
+import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Entities.dart';
@@ -9,7 +9,7 @@ import 'package:pikapi/screens/SearchScreen.dart';
 import 'package:pikapi/screens/components/ContentError.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'ComicsScreen.dart';
-import 'GamePageScreen.dart';
+import 'GamesScreen.dart';
 import 'RandomComicsScreen.dart';
 import 'components/ContentLoading.dart';
 import 'components/Images.dart';

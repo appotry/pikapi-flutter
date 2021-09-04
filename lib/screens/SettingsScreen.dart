@@ -1,12 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:pikapi/basic/Common.dart';
-import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/config/AutoClean.dart';
-import 'package:pikapi/basic/store/Categories.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
 import 'package:pikapi/basic/config/PagerAction.dart';

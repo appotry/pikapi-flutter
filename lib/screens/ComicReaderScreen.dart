@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/basic/store/Categories.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/Quality.dart';
 import 'package:pikapi/basic/config/ReaderDirection.dart';

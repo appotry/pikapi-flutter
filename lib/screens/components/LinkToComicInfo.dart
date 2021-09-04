@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Navigatior.dart';
 
 import '../ComicInfoScreen.dart';
-import 'ComicInfoCard.dart';
 
 class LinkToComicInfo extends StatelessWidget {
   final String comicId;

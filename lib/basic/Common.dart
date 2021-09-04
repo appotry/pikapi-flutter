@@ -77,6 +77,16 @@ Future alertDialog(BuildContext context, String title, String content) {
           ));
 }
 
+List<T> filteredList<T>(List<T> list, bool Function(T) filter) {
+  List<T> result = [];
+  list.forEach((element) {
+    if (filter(element)) {
+      result.add(element);
+    }
+  });
+  return result;
+}
+
 Future<T?> chooseListDialog<T>(
   BuildContext context,
   String title,

@@ -8,6 +8,7 @@ import 'package:pikapi/basic/Common.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'Pica.dart';
 
+/// 复制内容到剪切板
 void copyToClipBoard(BuildContext context, String string) {
   if (Platform.isWindows || Platform.isMacOS) {
     FlutterClipboard.copy(string);
@@ -35,7 +36,7 @@ Future<dynamic> saveImage(String path, BuildContext context) async {
   Future? future;
   if (Platform.isIOS) {
     future = pica.iosSaveFileToImage(path);
-  } else {
+  } else if(Platform.isAndroid) {
     future = _saveImageAndroid(path, context);
   }
   if (future != null) {

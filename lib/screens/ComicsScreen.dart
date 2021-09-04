@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:pikapi/basic/Common.dart';
+import 'package:pikapi/basic/config/ShadowCategories.dart';
 import 'package:pikapi/basic/store/Categories.dart';
 import 'package:pikapi/basic/config/ListLayout.dart';
 import 'package:pikapi/basic/Pica.dart';
@@ -61,7 +62,10 @@ class _ComicsScreenState extends State<ComicsScreen> {
         onPressed: () async {
           String? category = await chooseListDialog(context, '请选择分类', [
             categoryTitle(null),
-            ...storedCategories,
+            ...filteredList(
+              storedCategories,
+              (c) => !shadowCategories.contains(c),
+            ),
           ]);
           if (category != null) {
             if (category == categoryTitle(null)) {
@@ -83,7 +87,7 @@ class _ComicsScreenState extends State<ComicsScreen> {
         icon: Icon(Icons.category),
       );
 
-  Future<ComicsPage> _load(String _currentSort,int _currentPage) {
+  Future<ComicsPage> _load(String _currentSort, int _currentPage) {
     return pica.comics(
       _currentSort,
       _currentPage,

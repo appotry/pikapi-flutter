@@ -17,7 +17,6 @@ class PikachuApp extends StatefulWidget {
 }
 
 class _PikachuAppState extends State<PikachuApp> {
-  ThemeData? _themeData;
 
   @override
   void initState() {

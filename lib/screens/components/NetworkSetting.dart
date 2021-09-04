@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pikapi/basic/Common.dart';
-import 'package:pikapi/basic/Pica.dart';
-import 'package:pikapi/basic/store/Categories.dart';
 import 'package:pikapi/basic/config/Address.dart';
 import 'package:pikapi/basic/config/Proxy.dart';
 
