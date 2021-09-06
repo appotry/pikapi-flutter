@@ -34,18 +34,22 @@ class ReaderImageInfo {
 }
 
 class ImageReaderStruct {
+  final List<ReaderImageInfo> images;
   final bool fullScreen;
   final FutureOr<dynamic> Function(bool fullScreen) onFullScreenChange;
-  final FutureOr<dynamic> Function() onNextEp;
+  final String onNextText;
+  final FutureOr<dynamic> Function() onNextAction;
   final FutureOr<dynamic> Function(int) onPositionChange;
   final int? initPosition;
   final ReaderType pagerType;
   final ReaderDirection pagerDirection;
 
   const ImageReaderStruct({
+    required this.images,
     required this.fullScreen,
     required this.onFullScreenChange,
-    required this.onNextEp,
+    required this.onNextText,
+    required this.onNextAction,
     required this.onPositionChange,
     this.initPosition,
     required this.pagerType,
@@ -54,23 +58,22 @@ class ImageReaderStruct {
 }
 
 class ImageReader extends StatelessWidget {
-  final List<ReaderImageInfo> images;
   final ImageReaderStruct struct;
 
-  const ImageReader(this.images, this.struct);
+  const ImageReader(this.struct);
 
   @override
   Widget build(BuildContext context) {
     late Widget reader;
     switch (struct.pagerType) {
       case ReaderType.WEB_TOON:
-        reader = _WebToonReader(images, struct);
+        reader = _WebToonReader(struct);
         break;
       case ReaderType.WEB_TOON_ZOOM:
-        reader = _WebToonZoomReader(images, struct);
+        reader = _WebToonZoomReader(struct);
         break;
       case ReaderType.GALLERY:
-        reader = _GalleryReader(images, struct);
+        reader = _GalleryReader(struct);
         break;
       default:
         reader = Container();
@@ -134,10 +137,9 @@ class ImageReader extends StatelessWidget {
 ///////////////////////////////////////////////////////////////////////////////
 
 class _WebToonReader extends StatefulWidget {
-  final List<ReaderImageInfo> images;
   final ImageReaderStruct struct;
 
-  const _WebToonReader(this.images, this.struct);
+  const _WebToonReader(this.struct);
 
   @override
   State<StatefulWidget> createState() => _WebToonReaderState();
@@ -158,7 +160,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
       setState(() {
         _current = to;
         _slider = to;
-        if (to - 1 < widget.images.length) {
+        if (to - 1 < widget.struct.images.length) {
           widget.struct.onPositionChange(to - 1);
         }
       });
@@ -167,7 +169,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
 
   @override
   void initState() {
-    widget.images.forEach((e) {
+    widget.struct.images.forEach((e) {
       if (e.downloadLocalPath != null) {
         _trueSizes.add(Size(e.width!.toDouble(), e.height!.toDouble()));
       } else {
@@ -178,7 +180,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
     _itemPositionsListener = ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onCurrentChange);
     if (widget.struct.initPosition != null &&
-        widget.images.length > widget.struct.initPosition!) {
+        widget.struct.images.length > widget.struct.initPosition!) {
       _initialPosition = widget.struct.initPosition!;
     } else {
       _initialPosition = 0;
@@ -213,7 +215,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
       builder: (BuildContext context, BoxConstraints constraints) {
         // reload _images size
         List<Widget> _images = [];
-        for (var index = 0; index < widget.images.length; index++) {
+        for (var index = 0; index < widget.struct.images.length; index++) {
           late Size renderSize;
           if (_trueSizes[index] != null) {
             if (widget.struct.pagerDirection == ReaderDirection.TOP_TO_BOTTOM) {
@@ -247,7 +249,7 @@ class _WebToonReaderState extends State<_WebToonReader> {
               _trueSizes[currentIndex] = size;
             });
           };
-          var e = widget.images[index];
+          var e = widget.struct.images[index];
           if (e.downloadLocalPath != null) {
             _images.add(_WebToonDownloadImage(
               fileServer: e.fileServer,
@@ -285,9 +287,9 @@ class _WebToonReaderState extends State<_WebToonReader> {
               : null,
           itemScrollController: _itemScrollController,
           itemPositionsListener: _itemPositionsListener,
-          itemCount: widget.images.length + 1,
+          itemCount: widget.struct.images.length + 1,
           itemBuilder: (BuildContext context, int index) {
-            if (widget.images.length == index) {
+            if (widget.struct.images.length == index) {
               return _buildNextEp();
             }
             return _images[index];
@@ -302,12 +304,12 @@ class _WebToonReaderState extends State<_WebToonReader> {
       return [];
     }
     return [
-      _buildImageCount(context, "$_current / ${widget.images.length}"),
+      _buildImageCount(context, "$_current / ${widget.struct.images.length}"),
       _buildScrollController(
         context,
         _current,
         _slider,
-        widget.images.length,
+        widget.struct.images.length,
         (value) => _slider = value,
         () {
           if (_slider != _current && _slider > 0) {
@@ -322,11 +324,11 @@ class _WebToonReaderState extends State<_WebToonReader> {
     return Container(
       padding: EdgeInsets.all(20),
       child: MaterialButton(
-        onPressed: widget.struct.onNextEp,
+        onPressed: widget.struct.onNextAction,
         textColor: Colors.white,
         child: Container(
           padding: EdgeInsets.only(top: 40, bottom: 40),
-          child: Text("下一章"),
+          child: Text(widget.struct.onNextText),
         ),
       ),
     );
@@ -476,9 +478,8 @@ class _WebToonReaderImageState extends State<_WebToonReaderImage> {
 
 class _WebToonZoomReader extends _WebToonReader {
   const _WebToonZoomReader(
-    List<ReaderImageInfo> images,
     ImageReaderStruct struct,
-  ) : super(images, struct);
+  ) : super(struct);
 
   @override
   State<StatefulWidget> createState() => _WebToonZoomReaderState();
@@ -494,10 +495,9 @@ class _WebToonZoomReaderState extends _WebToonReaderState {
 ///////////////////////////////////////////////////////////////////////////////
 
 class _GalleryReader extends StatefulWidget {
-  final List<ReaderImageInfo> images;
   final ImageReaderStruct struct;
 
-  _GalleryReader(this.images, this.struct);
+  _GalleryReader(this.struct);
 
   @override
   State<StatefulWidget> createState() => _GalleryReaderState();
@@ -546,9 +546,9 @@ class _GalleryReaderState extends State<_GalleryReader> {
           widget.struct.onPositionChange(value);
         });
       },
-      itemCount: widget.images.length,
+      itemCount: widget.struct.images.length,
       builder: (BuildContext context, int index) {
-        var item = widget.images[index];
+        var item = widget.struct.images[index];
         if (item.downloadLocalPath != null) {
           return PhotoViewGalleryPageOptions(
             imageProvider:
@@ -583,12 +583,12 @@ class _GalleryReaderState extends State<_GalleryReader> {
     var controllers = <Widget>[];
     if (!widget.struct.fullScreen) {
       controllers.addAll([
-        _buildImageCount(context, "$_current / ${widget.images.length}"),
+        _buildImageCount(context, "$_current / ${widget.struct.images.length}"),
         _buildScrollController(
           context,
           _current,
           _slider,
-          widget.images.length,
+          widget.struct.images.length,
           (value) => _slider = value,
           () {
             if (_slider != _current && _slider > 0) {
@@ -598,8 +598,11 @@ class _GalleryReaderState extends State<_GalleryReader> {
         ),
       ]);
     }
-    if (_current == widget.images.length) {
-      controllers.add(_buildNextEpController(widget.struct.onNextEp));
+    if (_current == widget.struct.images.length) {
+      controllers.add(_buildNextEpController(
+        widget.struct.onNextAction,
+        widget.struct.onNextText,
+      ));
     }
     return controllers;
   }
@@ -703,7 +706,7 @@ Widget _buildScrollController(
   );
 }
 
-Widget _buildNextEpController(Function() next) {
+Widget _buildNextEpController(Function() next, String text) {
   return Align(
     alignment: Alignment.bottomRight,
     child: Material(
@@ -722,7 +725,7 @@ Widget _buildNextEpController(Function() next) {
           onTap: () {
             next();
           },
-          child: Text("下一章", style: TextStyle(color: Colors.white)),
+          child: Text(text, style: TextStyle(color: Colors.white)),
         ),
       ),
     ),

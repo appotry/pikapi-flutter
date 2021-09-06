@@ -181,7 +181,11 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
                     tabs: _tabs,
                     indicatorColor: theme.colorScheme.secondary,
                     labelColor: theme.colorScheme.secondary,
-                    onTap: (val) async => setState(() => _tabIndex = val),
+                    onTap: (val) async {
+                      setState(() {
+                        _tabIndex = val;
+                      });
+                    },
                   ),
                 ),
                 Container(height: 15),
@@ -280,7 +284,11 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
           ],
         );
       },
-      onRefresh: () async => setState(() => _epListFuture = _loadEps()),
+      onRefresh: () async {
+        setState(() {
+          _epListFuture = _loadEps();
+        });
+      },
     );
   }
 

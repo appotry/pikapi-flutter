@@ -30,8 +30,12 @@ class _GameDownloadScreenState extends State<GameDownloadScreen> {
           GameTitleCard(widget.info),
           ItemBuilder(
             future: _future,
-            onRefresh: () async => setState(() => _future =
-                pica.downloadGame("${widget.info.androidLinks[0]}")),
+            onRefresh: () async  {
+              setState(() {
+                _future =
+                    pica.downloadGame("${widget.info.androidLinks[0]}");
+              });
+            },
             successBuilder:
                 (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
               return Container(

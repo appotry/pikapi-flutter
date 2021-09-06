@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Common.dart';
@@ -72,13 +74,35 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
         widget.comicInfo.id, _ep.order, _ep.title, position + 1);
   }
 
+  String _nextText = "";
+  FutureOr<dynamic> Function() _nextAction = () => null;
+
   @override
   void initState() {
+    // NEXT
+    var orderMap = Map<int, Ep>();
+    widget.epList.forEach((element) {
+      orderMap[element.order] = element;
+    });
+    if (orderMap.containsKey(widget.currentEpOrder + 1)) {
+      _nextText = "下一章";
+      _nextAction = () => Navigator.of(context).pop(ComicReaderScreen(
+        comicInfo: widget.comicInfo,
+        epList: widget.epList,
+        currentEpOrder: widget.currentEpOrder + 1,
+        autoFullScreen: _fullScreen,
+      ));
+    } else {
+      _nextText = "阅读结束";
+      _nextAction = () => Navigator.of(context).pop();
+    }
+    // EP
     widget.epList.forEach((element) {
       if (element.order == widget.currentEpOrder) {
         _ep = element;
       }
     });
+    // INIT
     _future = _load();
     super.initState();
   }
@@ -127,21 +151,22 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
         successBuilder:
             (BuildContext context, AsyncSnapshot<List<PicaImage>> snapshot) {
           return ImageReader(
-            snapshot.data!
-                .map((e) => ReaderImageInfo(
-                      e.fileServer,
-                      e.path,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                    ))
-                .toList(),
             ImageReaderStruct(
+              images: snapshot.data!
+                  .map((e) => ReaderImageInfo(
+                        e.fileServer,
+                        e.path,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                      ))
+                  .toList(),
               fullScreen: _fullScreen,
               onFullScreenChange: _onFullScreenChange,
-              onNextEp: _next,
+              onNextText: _nextText,
+              onNextAction: _nextAction,
               onPositionChange: _onPositionChange,
               initPosition: widget.initPictureRank == null
                   ? null
@@ -161,23 +186,6 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
           fullScreen ? [] : SystemUiOverlay.values);
       _fullScreen = fullScreen;
     });
-  }
-
-  Future _next() async {
-    var orderMap = Map<int, Ep>();
-    widget.epList.forEach((element) {
-      orderMap[element.order] = element;
-    });
-    if (orderMap.containsKey(widget.currentEpOrder + 1)) {
-      Navigator.of(context).pop(ComicReaderScreen(
-        comicInfo: widget.comicInfo,
-        epList: widget.epList,
-        currentEpOrder: widget.currentEpOrder + 1,
-        autoFullScreen: _fullScreen,
-      ));
-    } else {
-      defaultToast(context, "找不到下一章啦");
-    }
   }
 
   // 重新加载本页

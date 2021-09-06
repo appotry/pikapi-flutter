@@ -35,15 +35,14 @@ func init() {
 		if i < 0 {
 			panic(errors.New(" can't find \"/\" or \"\\\""))
 		}
-		applicationDir = path2.Join(path[0:i+1], "data")
+		applicationDir = path2.Join(path[0:i+1], "data", "pikapi")
 	case "darwin":
-		applicationDir = path.Join(applicationDir, "Library", "Application Support")
+		applicationDir = path.Join(applicationDir, "Library", "Application Support", "pikapi")
 	case "linux":
-		applicationDir = path.Join(applicationDir)
+		applicationDir = path.Join(applicationDir, ".pikapi")
 	default:
 		panic(errors.New("not supported system"))
 	}
-	applicationDir = path.Join(applicationDir, "pikapi")
 	if _, err = os.Stat(applicationDir); err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(applicationDir, os.FileMode(0700))

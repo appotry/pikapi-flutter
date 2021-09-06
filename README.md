@@ -76,7 +76,7 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 
 ### 开发环境准备
 
-- [golang](https://golang.org/)
+- [golang](https://golang.org/) (1.16以上版本)
 - [flutter](https://flutter.dev/)
 
 ### 环境配置
@@ -94,6 +94,27 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
   ```shell
   hover run
   hover build $system
+  ```
+
+### Linux的附加说明
+
+- linux编译可能会遇到的问题
+  ```shell
+  # No package 'gl' found
+  sudo apt install libgl1-mesa-dev
+  # X11/Xlib.h: No such file or directory
+  # 或者更多x11的头找不到等
+  sudo apt install xorg-dev
+  ```
+- 字体不显示的问题
+  ```shell
+    cp /usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf fonts/
+  ```
+  ```yaml
+    fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/DroidSansFallbackFull.ttf
   ```
 
 ### 移动端 (gomobile)

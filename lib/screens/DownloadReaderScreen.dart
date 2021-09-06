@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -66,13 +68,35 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
         widget.comicInfo.id, _ep.epOrder, _ep.title, position + 1);
   }
 
+  String _nextText = "";
+  FutureOr<dynamic> Function() _nextAction = () => null;
+
   @override
   void initState() {
+    // NEXT
+    var orderMap = Map<int, DownloadEp>();
+    widget.epList.forEach((element) {
+      orderMap[element.epOrder] = element;
+    });
+    if (orderMap.containsKey(widget.currentEpOrder + 1)) {
+      _nextText = "下一章";
+      _nextAction = () => Navigator.of(context).pop(DownloadReaderScreen(
+        comicInfo: widget.comicInfo,
+        epList: widget.epList,
+        currentEpOrder: widget.currentEpOrder + 1,
+        autoFullScreen: _fullScreen,
+      ));
+    } else {
+      _nextText = "阅读结束";
+      _nextAction = () => Navigator.of(context).pop();
+    }
+    // EP
     widget.epList.forEach((element) {
       if (element.epOrder == widget.currentEpOrder) {
         _ep = element;
       }
     });
+    // INIT
     _future = _load();
     super.initState();
   }
@@ -121,14 +145,15 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
         successBuilder:
             (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           return ImageReader(
-            pictures
-                .map((e) => ReaderImageInfo(e.fileServer, e.path, e.localPath,
-                    e.width, e.height, e.format, e.fileSize))
-                .toList(),
             ImageReaderStruct(
+              images: pictures
+                  .map((e) => ReaderImageInfo(e.fileServer, e.path, e.localPath,
+                      e.width, e.height, e.format, e.fileSize))
+                  .toList(),
               fullScreen: _fullScreen,
               onFullScreenChange: _onFullScreenChange,
-              onNextEp: _next,
+              onNextText: _nextText,
+              onNextAction: _nextAction,
               onPositionChange: _onPositionChange,
               initPosition: widget.initPictureRank == null
                   ? null
@@ -150,31 +175,13 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     });
   }
 
-  Future _next() async {
-    var orderMap = Map<int, DownloadEp>();
-    widget.epList.forEach((element) {
-      orderMap[element.epOrder] = element;
-    });
-    if (orderMap.containsKey(widget.currentEpOrder + 1)) {
-      Navigator.of(context).pop(DownloadReaderScreen(
-        comicInfo: widget.comicInfo,
-        epList: widget.epList,
-        currentEpOrder: widget.currentEpOrder + 1,
-        autoFullScreen: _fullScreen,
-      ));
-    } else {
-      defaultToast(context, "找不到下一章啦");
-    }
-  }
-
   // 重新加载本页
-  void _reloadReader(){
+  void _reloadReader() {
     Navigator.of(context).pop(DownloadReaderScreen(
       comicInfo: widget.comicInfo,
       epList: widget.epList,
       currentEpOrder: widget.currentEpOrder,
-      initPictureRank:
-      _lastChangeRank ?? widget.initPictureRank,
+      initPictureRank: _lastChangeRank ?? widget.initPictureRank,
       // maybe null
       autoFullScreen: _fullScreen,
     ));

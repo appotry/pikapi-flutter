@@ -34,43 +34,18 @@ class _ComicCommentState extends State<ComicComment> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            page.page > 1
-                ? InkWell(
-                    onTap: () {
-                      setState(() {
-                        _currentPage = page.page - 1;
-                        _future = _loadPage();
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(30),
-                      child: Center(
-                        child: Text('上一页'),
-                      ),
-                    ),
-                  )
-                : Container(),
+            _buildPrePage(page),
             ...page.docs.map((e) => _buildComment(e)),
-            page.page < page.pages
-                ? InkWell(
-                    onTap: () {
-                      setState(() {
-                        _currentPage = page.page + 1;
-                        _future = _loadPage();
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(30),
-                      child: Center(
-                        child: Text('下一页'),
-                      ),
-                    ),
-                  )
-                : Container(),
+            _buildPostComment(),
+            _buildNextPage(page),
           ],
         );
       },
-      onRefresh: () async => setState(() => _future = _loadPage()),
+      onRefresh: () async => {
+        setState(() {
+          _future = _loadPage();
+        })
+      },
     );
   }
 
@@ -125,8 +100,36 @@ class _ComicCommentState extends State<ComicComment> {
                   },
                 ),
                 Container(height: 3),
-                Text("Lv. ${e.user.level} (${e.user.title})",
-                    style: levelStyle),
+                LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return Container(
+                      width: constraints.maxWidth,
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        alignment: WrapAlignment.spaceBetween,
+                        children: [
+                          Text("Lv. ${e.user.level} (${e.user.title})",
+                              style: levelStyle),
+                          e.commentsCount > 0
+                              ? Text.rich(TextSpan(children: [
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Icon(Icons.message,
+                                        size: 13,
+                                        color: theme.colorScheme.secondary
+                                            .withOpacity(.7)),
+                                  ),
+                                  WidgetSpan(child: Container(width: 5)),
+                                  TextSpan(
+                                      text: '${e.commentsCount}',
+                                      style: levelStyle),
+                                ]))
+                              : Container(),
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 Container(height: 5),
                 Text(e.content, style: connectStyle),
               ],
@@ -135,5 +138,83 @@ class _ComicCommentState extends State<ComicComment> {
         ],
       ),
     );
+  }
+
+  Widget _buildPostComment() {
+    return InkWell(
+      onTap: () async {
+        String? text = await inputString(context, '请输入评论内容');
+        if (text != null && text.isNotEmpty) {
+          try {
+            await pica.postComment(widget.comicId, text);
+            setState(() {
+              _future = _loadPage();
+            });
+          } catch (e) {
+            defaultToast(context, "评论失败");
+          }
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              width: .25,
+              style: BorderStyle.solid,
+              color: Colors.grey.shade500.withOpacity(.5),
+            ),
+            bottom: BorderSide(
+              width: .25,
+              style: BorderStyle.solid,
+              color: Colors.grey.shade500.withOpacity(.5),
+            ),
+          ),
+        ),
+        padding: EdgeInsets.all(30),
+        child: Center(
+          child: Text('我有话要讲'),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrePage(CommentPage page) {
+    if (page.page > 1) {
+      return InkWell(
+        onTap: () {
+          setState(() {
+            _currentPage = page.page - 1;
+            _future = _loadPage();
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.all(30),
+          child: Center(
+            child: Text('上一页'),
+          ),
+        ),
+      );
+    }
+    return Container();
+  }
+
+  Widget _buildNextPage(CommentPage page) {
+    if (page.page < page.pages) {
+      return InkWell(
+        onTap: () {
+          setState(() {
+            _currentPage = page.page + 1;
+            _future = _loadPage();
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.all(30),
+          child: Center(
+            child: Text('下一页'),
+          ),
+        ),
+      );
+    }
+    return Container();
   }
 }
