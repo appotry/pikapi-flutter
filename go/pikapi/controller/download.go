@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"pgo/pikapi/const_value"
@@ -263,7 +264,7 @@ func downloadThePicture(picturePoint *comic_center.ComicDownloadPicture) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, const_value.CreateDirMode)
 	}
-	err = os.WriteFile(downloadPath(picturePath), buff, const_value.CreateFileMode)
+	err = ioutil.WriteFile(downloadPath(picturePath), buff, const_value.CreateFileMode)
 	if err != nil {
 		return err
 	}

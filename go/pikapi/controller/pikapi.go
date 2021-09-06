@@ -180,7 +180,7 @@ func remoteImageData(params string) (string, error) {
 				md5.Sum([]byte(fmt.Sprintf("%s$%s", fileServer, path))),
 			)
 		real := remotePath(local)
-		err = os.WriteFile(
+		err = ioutil.WriteFile(
 			real,
 			buff, os.FileMode(0600),
 		)

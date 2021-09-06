@@ -74,13 +74,32 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 
 ![平台](images/platforms.png)
 
-在不同平台构建方式是不一样的
-- go-flutter
+### 开发环境准备
+
+- [golang](https://golang.org/)
+- [flutter](https://flutter.dev/)
+
+### 环境配置
+
+- 将~/go/bin (GoPath/bin) 设置到PATH环境变量内
+- golang开启模块化
+- 设置GoProxy (可选,在中国大陆网络建议设置)
+- 参考地址 [https://goproxy.cn/](https://goproxy.cn/)
+
+
+### 桌面平台 (go-flutter)
+
+- [安装hover(go-flutter编译脚手架)](https://github.com/go-flutter-desktop/hover)
+- 执行编译命令
   ```shell
   hover run
   hover build $system
   ```
-- gomobile
+
+### 移动端 (gomobile)
+
+- [安装gomobile](https://github.com/golang/mobile)
+- 执行编译命令 (bind-android.sh / bind-ios.sh 根据平台选择) 
   ```shell
   cd go/mobile
   sh bind-ios.sh
