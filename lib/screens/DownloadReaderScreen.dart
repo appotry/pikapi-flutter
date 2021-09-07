@@ -78,12 +78,16 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     });
     if (orderMap.containsKey(widget.currentEpOrder + 1)) {
       _nextText = "下一章";
-      _nextAction = () => Navigator.of(context).pop(DownloadReaderScreen(
-        comicInfo: widget.comicInfo,
-        epList: widget.epList,
-        currentEpOrder: widget.currentEpOrder + 1,
-        autoFullScreen: _fullScreen,
-      ));
+      _nextAction = () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => DownloadReaderScreen(
+                comicInfo: widget.comicInfo,
+                epList: widget.epList,
+                currentEpOrder: widget.currentEpOrder + 1,
+                autoFullScreen: _fullScreen,
+              ),
+            ),
+          );
     } else {
       _nextText = "阅读结束";
       _nextAction = () => Navigator.of(context).pop();
@@ -175,13 +179,16 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
 
   // 重新加载本页
   void _reloadReader() {
-    Navigator.of(context).pop(DownloadReaderScreen(
-      comicInfo: widget.comicInfo,
-      epList: widget.epList,
-      currentEpOrder: widget.currentEpOrder,
-      initPictureRank: _lastChangeRank ?? widget.initPictureRank,
-      // maybe null
-      autoFullScreen: _fullScreen,
-    ));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+          builder: (context) => DownloadReaderScreen(
+                comicInfo: widget.comicInfo,
+                epList: widget.epList,
+                currentEpOrder: widget.currentEpOrder,
+                initPictureRank: _lastChangeRank ?? widget.initPictureRank,
+                // maybe null
+                autoFullScreen: _fullScreen,
+              )),
+    );
   }
 }

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image/jpeg"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	path2 "path"
 	"pgo/pikapi/const_value"
 	"pgo/pikapi/database/comic_center"
@@ -15,7 +15,6 @@ import (
 	"pgo/pikapi/database/properties"
 	"pgo/pikapi/utils"
 	"pica"
-	"runtime"
 	"strconv"
 	"time"
 )
@@ -413,20 +412,26 @@ func loadView(comicId string) (string, error) {
 	return "", nil
 }
 
-var commands = map[string]string{
-	"windows": "cmd /c start",
-	"darwin":  "open",
-	"linux":   "xdg-open",
-}
-
-// Open calls the OS default program for uri
-func open(uri string) error {
-	run, ok := commands[runtime.GOOS]
-	if !ok {
-		return fmt.Errorf("don't know how to open things on %s platform", runtime.GOOS)
+func convertImageToJPEG100(params string) error {
+	var paramsStruct struct {
+		Path string `json:"path"`
+		Dir  string `json:"dir"`
 	}
-	cmd := exec.Command(run, uri)
-	return cmd.Start()
+	err := json.Unmarshal([]byte(params), &paramsStruct)
+	if err != nil {
+		return err
+	}
+	_, i, _, err := decodeFromFile(paramsStruct.Path)
+	if err != nil {
+		return err
+	}
+	to := path2.Join(paramsStruct.Dir, path2.Base(paramsStruct.Path)+".jpg")
+	stream, err := os.Create(to)
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+	return jpeg.Encode(stream, i, &jpeg.Options{Quality: 100})
 }
 
 func FlatInvoke(method string, params string) (string, error) {
@@ -562,10 +567,10 @@ func FlatInvoke(method string, params string) (string, error) {
 		return clientIpSet()
 	case "downloadImagePath":
 		return downloadImagePath(params)
-	case "open":
-		return "", open(params)
 	case "downloadGame":
 		return downloadGame(params)
+	case "convertImageToJPEG100":
+		return "", convertImageToJPEG100(params)
 	}
 	return "", errors.New("method not found : " + method)
 }

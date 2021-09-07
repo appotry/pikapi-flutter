@@ -2,12 +2,14 @@ package main
 
 import (
 	"github.com/go-flutter-desktop/go-flutter"
-	filePicker "github.com/miguelpruivo/flutter_file_picker/go"
-	pica2 "pgo/cmd/plugin/pica"
+	"github.com/go-flutter-desktop/plugins/url_launcher"
+	"github.com/miguelpruivo/flutter_file_picker/go"
+	"pgo/cmd/plugin/pica"
 )
 
 var options = []flutter.Option{
 	flutter.WindowInitialDimensions(600, 900),
-	flutter.AddPlugin(&pica2.Plugin{}),
-	flutter.AddPlugin(&filePicker.FilePickerPlugin{}),
+	flutter.AddPlugin(&pica.Plugin{}),
+	flutter.AddPlugin(&file_picker.FilePickerPlugin{}),
+	flutter.AddPlugin(&url_launcher.UrlLauncherPlugin{}),
 }

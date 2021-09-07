@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
@@ -86,12 +85,16 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     });
     if (orderMap.containsKey(widget.currentEpOrder + 1)) {
       _nextText = "下一章";
-      _nextAction = () => Navigator.of(context).pop(ComicReaderScreen(
-        comicInfo: widget.comicInfo,
-        epList: widget.epList,
-        currentEpOrder: widget.currentEpOrder + 1,
-        autoFullScreen: _fullScreen,
-      ));
+      _nextAction = () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => ComicReaderScreen(
+                comicInfo: widget.comicInfo,
+                epList: widget.epList,
+                currentEpOrder: widget.currentEpOrder + 1,
+                autoFullScreen: _fullScreen,
+              ),
+            ),
+          );
     } else {
       _nextText = "阅读结束";
       _nextAction = () => Navigator.of(context).pop();
@@ -190,13 +193,15 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
 
   // 重新加载本页
   void _reloadReader() {
-    Navigator.of(context).pop(ComicReaderScreen(
-      comicInfo: widget.comicInfo,
-      epList: widget.epList,
-      currentEpOrder: widget.currentEpOrder,
-      initPictureRank: _lastChangeRank ?? widget.initPictureRank,
-      // maybe null
-      autoFullScreen: _fullScreen,
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => ComicReaderScreen(
+        comicInfo: widget.comicInfo,
+        epList: widget.epList,
+        currentEpOrder: widget.currentEpOrder,
+        initPictureRank: _lastChangeRank ?? widget.initPictureRank,
+        // maybe null
+        autoFullScreen: _fullScreen,
+      ),
     ));
   }
 }

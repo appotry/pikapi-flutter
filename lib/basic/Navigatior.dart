@@ -38,13 +38,3 @@ class _NavigatorObserver extends NavigatorObserver {
   }
 }
 
-Future circularPush(BuildContext context, Widget? widget) async {
-  while (widget != null) {
-    widget = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => widget!,
-      ),
-    );
-  }
-}

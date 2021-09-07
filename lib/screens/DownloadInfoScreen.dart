@@ -41,32 +41,37 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.comicTitle),
         actions: [
-          ...(Platform.isWindows ||
-                  Platform.isMacOS ||
-                  Platform.isLinux ||
-                  Platform.isAndroid)
-              ? [
-                  IconButton(
-                    onPressed: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DownloadExportToFileScreen(
-                            comicId: widget.comicId,
-                            comicTitle: widget.comicTitle,
-                          ),
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.add_to_home_screen),
+          IconButton(
+            onPressed: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DownloadExportToFileScreen(
+                    comicId: widget.comicId,
+                    comicTitle: widget.comicTitle,
                   ),
-                ]
-              : [],
+                ),
+              );
+            },
+            icon: Icon(Icons.add_to_home_screen),
+          ),
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -153,16 +158,16 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
     int epOrder,
     int? rank,
   ) {
-    var readerScreen = DownloadReaderScreen(
-      comicInfo: _task,
-      epList: _epList,
-      currentEpOrder: epOrder,
-      initPictureRank: rank,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DownloadReaderScreen(
+          comicInfo: _task,
+          epList: _epList,
+          currentEpOrder: epOrder,
+          initPictureRank: rank,
+        ),
+      ),
     );
-    circularPush(context, readerScreen).whenComplete(() {
-      setState(() {
-        _viewFuture = pica.loadView(widget.comicId);
-      });
-    });
   }
 }

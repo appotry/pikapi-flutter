@@ -442,10 +442,6 @@ class Pica {
     return await _flatInvoke("clientIpSet", "");
   }
 
-  Future<dynamic> open(String url) {
-    return _flatInvoke("open", url);
-  }
-
   Future<List<String>> downloadGame(String url) async {
     if (url.startsWith("https://game.eroge.xyz/hhh.php")) {
       var data = await _flatInvoke("downloadGame", url);
@@ -463,6 +459,13 @@ class Pica {
   Future androidSaveFileToImage(String path) async {
     return _channel.invokeMethod("androidSaveFileToImage", {
       "path": path,
+    });
+  }
+
+  Future convertImageToJPEG100(String path, String dir) async {
+    return _flatInvoke("convertImageToJPEG100", {
+      "path": path,
+      "dir": dir,
     });
   }
 

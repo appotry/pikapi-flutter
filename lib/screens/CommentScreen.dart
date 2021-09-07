@@ -80,6 +80,7 @@ class _CommentScreenState extends State<CommentScreen> {
             await pica.postChildComment(widget.comment.id, text);
             setState(() {
               _future = _loadPage();
+              widget.comment.commentsCount++;
             });
           } catch (e) {
             defaultToast(context, "评论失败");

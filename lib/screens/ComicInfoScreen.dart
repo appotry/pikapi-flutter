@@ -1,3 +1,4 @@
+import 'package:event/event.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
@@ -293,16 +294,16 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
   }
 
   void _push(ComicInfo comicInfo, List<Ep> epList, int order, int? rank) {
-    var screen = ComicReaderScreen(
-      comicInfo: comicInfo,
-      epList: epList,
-      currentEpOrder: order,
-      initPictureRank: rank,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ComicReaderScreen(
+          comicInfo: comicInfo,
+          epList: epList,
+          currentEpOrder: order,
+          initPictureRank: rank,
+        ),
+      ),
     );
-    circularPush(context, screen).whenComplete(() {
-      setState(() {
-        _viewFuture = _loadViewLog();
-      });
-    });
   }
 }
