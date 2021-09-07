@@ -565,8 +565,11 @@ class CommentChildrenPage extends Page {
 
   CommentChildrenPage.fromJson(Map<String, dynamic> json)
       : super.fromJson(json) {
-    this.docs =
-        List.of(json["docs"]).map((e) => CommentChild.fromJson(e)).toList();
+    this.docs = [];
+    if (json["docs"] != null) {
+      docs.addAll(
+          List.of(json["docs"]).map((e) => CommentChild.fromJson(e)).toList());
+    }
   }
 }
 

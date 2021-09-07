@@ -8,7 +8,7 @@ import 'package:pikapi/screens/components/ItemBuilder.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'ComicReaderScreen.dart';
 import 'DownloadConfirmScreen.dart';
-import 'components/ComicComment.dart';
+import 'components/ComicCommentList.dart';
 import 'components/ComicDescriptionCard.dart';
 import 'components/ComicInfoCard.dart';
 import 'components/ComicTagsCard.dart';
@@ -84,7 +84,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
         ];
         var _views = <Widget>[
           _buildEpWrap(_epListFuture, _comicInfo),
-          ComicComment(_comicInfo.id),
+          ComicCommentList(_comicInfo.id),
         ];
         return DefaultTabController(
           length: _tabs.length,

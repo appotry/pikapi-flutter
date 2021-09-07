@@ -263,6 +263,13 @@ class Pica {
     });
   }
 
+  Future<dynamic> postChildComment(String commentId, String content) {
+    return _flatInvoke("postChildComment", {
+      "commentId": commentId,
+      "content": content,
+    });
+  }
+
   Future<CommentPage> comments(String comicId, int page) async {
     var rsp = await _flatInvoke("comments", {
       "comicId": comicId,
@@ -272,8 +279,12 @@ class Pica {
   }
 
   Future<CommentChildrenPage> commentChildren(
-      String commentId, int page) async {
+    String comicId,
+    String commentId,
+    int page,
+  ) async {
     var rsp = await _flatInvoke("commentChildren", {
+      "comicId": comicId,
       "commentId": commentId,
       "page": page,
     });

@@ -495,6 +495,8 @@ func FlatInvoke(method string, params string) (string, error) {
 		return myComments(params)
 	case "postComment":
 		return postComment(params)
+	case "postChildComment":
+		return postChildComment(params)
 	case "game":
 		return game(params)
 	case "games":

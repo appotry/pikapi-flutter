@@ -373,14 +373,14 @@ func comments(params string) (string, error) {
 
 func commentChildren(params string) (string, error) {
 	var paramsStruct struct {
-		CommentId string `json:"comicId"`
+		CommentId string `json:"commentId"`
 		Page      int    `json:"page"`
 	}
 	json.Unmarshal([]byte(params), &paramsStruct)
 	commentId := paramsStruct.CommentId
 	page := paramsStruct.Page
 	return cacheable(
-		fmt.Sprintf("COMMENT_CHILDREN%s$%d", commentId, page),
+		fmt.Sprintf("COMMENT_CHILDREN$%s$%d", commentId, page),
 		time.Hour*2,
 		func() (interface{}, error) {
 			return client.CommentChildren(commentId, page)
@@ -398,6 +398,23 @@ func postComment(params string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	network_cache.RemoveCaches("MY_COMMENTS$%")
+	network_cache.RemoveCaches(fmt.Sprintf("COMMENTS$%s$%%", paramsStruct.ComicId))
+	return "", nil
+}
+
+func postChildComment(params string) (string, error) {
+	var paramsStruct struct {
+		ComicId string `json:"comicId"`
+		CommentId string `json:"commentId"`
+		Content   string `json:"content"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	err := client.PostChildComment(paramsStruct.CommentId, paramsStruct.Content)
+	if err != nil {
+		return "", err
+	}
+	network_cache.RemoveCaches(fmt.Sprintf("COMMENT_CHILDREN$%s$%%", paramsStruct.CommentId))
 	network_cache.RemoveCaches("MY_COMMENTS$%")
 	network_cache.RemoveCaches(fmt.Sprintf("COMMENTS$%s$%%", paramsStruct.ComicId))
 	return "", nil

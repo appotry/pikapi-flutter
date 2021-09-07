@@ -1,6 +1,6 @@
 /// 自动全屏
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../Common.dart';
 import '../Pica.dart';
