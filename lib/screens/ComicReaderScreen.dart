@@ -41,6 +41,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
   late bool _fullScreen = false;
   late Future<List<PicaImage>> _future;
   int? _lastChangeRank;
+  bool _replacement = false;
 
   Future<List<PicaImage>> _load() async {
     if (widget.initPictureRank == null) {
@@ -85,16 +86,19 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     });
     if (orderMap.containsKey(widget.currentEpOrder + 1)) {
       _nextText = "下一章";
-      _nextAction = () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => ComicReaderScreen(
-                comicInfo: widget.comicInfo,
-                epList: widget.epList,
-                currentEpOrder: widget.currentEpOrder + 1,
-                autoFullScreen: _fullScreen,
-              ),
+      _nextAction = () {
+        _replacement = true;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => ComicReaderScreen(
+              comicInfo: widget.comicInfo,
+              epList: widget.epList,
+              currentEpOrder: widget.currentEpOrder + 1,
+              autoFullScreen: _fullScreen,
             ),
-          );
+          ),
+        );
+      };
     } else {
       _nextText = "阅读结束";
       _nextAction = () => Navigator.of(context).pop();
@@ -112,7 +116,9 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    if (!_replacement) {
+      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    }
     super.dispose();
   }
 
@@ -193,6 +199,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
 
   // 重新加载本页
   void _reloadReader() {
+    _replacement = true;
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) => ComicReaderScreen(
         comicInfo: widget.comicInfo,

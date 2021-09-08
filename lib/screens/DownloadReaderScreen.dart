@@ -41,6 +41,7 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
   late List<DownloadPicture> pictures = [];
   late Future _future = _load();
   int? _lastChangeRank;
+  bool _replacement = false;
 
   Future _load() async {
     if (widget.initPictureRank == null) {
@@ -78,16 +79,19 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     });
     if (orderMap.containsKey(widget.currentEpOrder + 1)) {
       _nextText = "下一章";
-      _nextAction = () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => DownloadReaderScreen(
-                comicInfo: widget.comicInfo,
-                epList: widget.epList,
-                currentEpOrder: widget.currentEpOrder + 1,
-                autoFullScreen: _fullScreen,
-              ),
+      _nextAction = () {
+        _replacement = true;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DownloadReaderScreen(
+              comicInfo: widget.comicInfo,
+              epList: widget.epList,
+              currentEpOrder: widget.currentEpOrder + 1,
+              autoFullScreen: _fullScreen,
             ),
-          );
+          ),
+        );
+      };
     } else {
       _nextText = "阅读结束";
       _nextAction = () => Navigator.of(context).pop();
@@ -105,7 +109,9 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    if (_replacement) {
+      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    }
     super.dispose();
   }
 
@@ -179,16 +185,18 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
 
   // 重新加载本页
   void _reloadReader() {
+    _replacement = true;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-          builder: (context) => DownloadReaderScreen(
-                comicInfo: widget.comicInfo,
-                epList: widget.epList,
-                currentEpOrder: widget.currentEpOrder,
-                initPictureRank: _lastChangeRank ?? widget.initPictureRank,
-                // maybe null
-                autoFullScreen: _fullScreen,
-              )),
+        builder: (context) => DownloadReaderScreen(
+          comicInfo: widget.comicInfo,
+          epList: widget.epList,
+          currentEpOrder: widget.currentEpOrder,
+          initPictureRank: _lastChangeRank ?? widget.initPictureRank,
+          // maybe null
+          autoFullScreen: _fullScreen,
+        ),
+      ),
     );
   }
 }

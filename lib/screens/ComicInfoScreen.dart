@@ -27,7 +27,7 @@ class ComicInfoScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _ComicInfoScreenState();
 }
 
-class _ComicInfoScreenState extends State<ComicInfoScreen> {
+class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
   late var _tabIndex = 0;
   late Future<ComicInfo> _comicFuture = _loadComic();
   late Future<ViewLog?> _viewFuture = _loadViewLog();
@@ -35,10 +35,6 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
 
   Future<ComicInfo> _loadComic() async {
     return await pica.comicInfo(widget.comicId);
-  }
-
-  Future<ViewLog?> _loadViewLog() {
-    return pica.loadView(widget.comicId);
   }
 
   Future<List<Ep>> _loadEps() async {
@@ -50,6 +46,29 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> {
       eps.addAll(rsp.docs);
     } while (rsp.page < rsp.pages);
     return eps;
+  }
+
+  Future<ViewLog?> _loadViewLog() {
+    return pica.loadView(widget.comicId);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    setState(() {
+      _viewFuture = _loadViewLog();
+    });
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
   }
 
   @override

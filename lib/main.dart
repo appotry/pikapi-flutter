@@ -17,7 +17,6 @@ class PikachuApp extends StatefulWidget {
 }
 
 class _PikachuAppState extends State<PikachuApp> {
-
   @override
   void initState() {
     themeEvent.subscribe(_onChangeTheme);
@@ -38,7 +37,7 @@ class _PikachuAppState extends State<PikachuApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: currentThemeData(),
-      navigatorObservers: [navigatorObserver],
+      navigatorObservers: [navigatorObserver, routeObserver],
       home: InitScreen(),
     );
   }

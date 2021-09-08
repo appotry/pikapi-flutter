@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
+
 Future<dynamic> navPushOrReplace(
     BuildContext context, WidgetBuilder builder) async {
   if (_depth < _depthMax) {
@@ -22,6 +25,10 @@ var navigatorObserver = _NavigatorObserver();
 const _depthMax = 15;
 var _depth = 0;
 
+int currentDepth() {
+  return _depth;
+}
+
 class _NavigatorObserver extends NavigatorObserver {
   @override
   void didPop(Route route, Route? previousRoute) {
@@ -37,4 +44,3 @@ class _NavigatorObserver extends NavigatorObserver {
     super.didPush(route, previousRoute);
   }
 }
-

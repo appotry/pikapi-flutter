@@ -29,8 +29,9 @@ class DownloadInfoScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _DownloadInfoScreenState();
 }
 
-class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
-  late Future<ViewLog?> _viewFuture = pica.loadView(widget.comicId);
+class _DownloadInfoScreenState extends State<DownloadInfoScreen>
+    with RouteAware {
+  late Future<ViewLog?> _viewFuture = _loadViewLog();
   late DownloadComic _task;
   late List<DownloadEp> _epList = [];
   late Future _future = _load();
@@ -40,15 +41,26 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen> {
     _epList = await pica.downloadEpList(widget.comicId);
   }
 
+  Future<ViewLog?> _loadViewLog() {
+    return pica.loadView(widget.comicId);
+  }
+
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    setState(() {
+      _viewFuture = _loadViewLog();
+    });
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    routeObserver.unsubscribe(this);
     super.dispose();
   }
 
