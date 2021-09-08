@@ -9,27 +9,29 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import androidx.annotation.NonNull
-import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.sync.Mutex
 import mobile.Mobile
-import java.io.File
-import kotlin.coroutines.EmptyCoroutineContext
+import java.util.concurrent.Executors
 
 class MainActivity : FlutterActivity() {
 
-    private val scope = CoroutineScope(newFixedThreadPoolContext(5, "worker-scope"))
+    // 为什么换成换成线程池而不继续使用携程 : 下载图片速度慢会占满携程造成拥堵, 接口无法请求
+    private val pool = Executors.newCachedThreadPool { runnable ->
+        Thread(runnable).also { it.isDaemon = true }
+    }
     private val uiThreadHandler = Handler(Looper.getMainLooper())
+    private val scope = CoroutineScope(newSingleThreadContext("worker-scope"))
 
     private val notImplementedToken = Any()
     private fun MethodChannel.Result.withCoroutine(exec: () -> Any?) {
-        scope.launch {
+        pool.submit {
             try {
                 val data = exec()
                 uiThreadHandler.post {

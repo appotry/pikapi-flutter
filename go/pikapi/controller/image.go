@@ -25,6 +25,7 @@ func init() {
 	}
 }
 
+// takeMutex 下载图片获取一个锁, 这样只能同时下载5张图片
 func takeMutex() *sync.Mutex {
 	busMutex.Lock()
 	defer busMutex.Unlock()

@@ -154,7 +154,7 @@ func importComicDownload(zipPath string) error {
 		view.IsFavourite = false
 		view.IsLiked = false
 		view.CommentsCount = 0
-		comic_center.ViewComicUpdateInfoDB(&view, tx)
+		err = comic_center.NoLockActionViewComicUpdateInfoDB(&view, tx)
 		if err != nil {
 			return err
 		}

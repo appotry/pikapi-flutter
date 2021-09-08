@@ -8,11 +8,15 @@ import (
 	"path"
 	"pgo/pikapi/const_value"
 	"strconv"
+	"sync"
 )
 
+var mutex = sync.Mutex{}
 var db *gorm.DB
 
 func InitDBConnect(databaseDir string) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var err error
 	db, err = gorm.Open(sqlite.Open(path.Join(databaseDir, "properties.db")), const_value.GormConfig)
 	if err != nil {
@@ -28,6 +32,8 @@ type Property struct {
 }
 
 func LoadProperty(name string, defaultValue string) (string, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var property Property
 	err := db.First(&property, "k", name).Error
 	if err == nil {
@@ -40,6 +46,8 @@ func LoadProperty(name string, defaultValue string) (string, error) {
 }
 
 func SaveProperty(name string, value string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "k"}},
 		DoUpdates: clause.AssignmentColumns([]string{"created_at", "updated_at", "v"}),

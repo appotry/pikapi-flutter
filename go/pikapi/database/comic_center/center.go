@@ -6,12 +6,16 @@ import (
 	"gorm.io/gorm/clause"
 	"path"
 	"pgo/pikapi/const_value"
+	"sync"
 	"time"
 )
 
+var mutex = sync.Mutex{}
 var db *gorm.DB
 
 func InitDBConnect(databaseDir string) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var err error
 	db, err = gorm.Open(sqlite.Open(path.Join(databaseDir, "comic_center.db")), const_value.GormConfig)
 	if err != nil {
@@ -26,10 +30,14 @@ func InitDBConnect(databaseDir string) {
 }
 
 func Transaction(t func(tx *gorm.DB) error) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Transaction(t)
 }
 
 func UpSetCategories(categories *[]Category) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Transaction(func(tx *gorm.DB) error {
 		var in []string
 		for _, c := range *categories {
@@ -68,7 +76,7 @@ func UpSetCategories(categories *[]Category) error {
 	})
 }
 
-func ViewComicUpdateInfoDB(view *ComicView, db *gorm.DB) error {
+func NoLockActionViewComicUpdateInfoDB(view *ComicView, db *gorm.DB) error {
 	view.LastViewTime = time.Now()
 	return db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "id"}},
@@ -99,7 +107,9 @@ func ViewComicUpdateInfoDB(view *ComicView, db *gorm.DB) error {
 }
 
 func ViewComicUpdateInfo(view *ComicView) error {
-	return ViewComicUpdateInfoDB(view, db)
+	mutex.Lock()
+	defer mutex.Unlock()
+	return NoLockActionViewComicUpdateInfoDB(view, db)
 }
 
 func ViewComic(comicId string) error {
@@ -112,6 +122,8 @@ func ViewComic(comicId string) error {
 }
 
 func ViewComicUpdateFavourite(comicId string, favourite bool) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicView{}).Where(
 		"id = ?", comicId,
 	).Update(
@@ -121,6 +133,8 @@ func ViewComicUpdateFavourite(comicId string, favourite bool) error {
 }
 
 func ViewComicUpdateLike(comicId string, like bool) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicView{}).Where(
 		"id = ?", comicId,
 	).Update(
@@ -130,6 +144,8 @@ func ViewComicUpdateLike(comicId string, like bool) error {
 }
 
 func ViewEpAndPicture(comicId string, epOrder int, epTitle string, pictureRank int) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicView{}).Where("id", comicId).Updates(
 		map[string]interface{}{
 			"last_view_time":         time.Now(),
@@ -141,6 +157,8 @@ func ViewEpAndPicture(comicId string, epOrder int, epTitle string, pictureRank i
 }
 
 func LoadViewLog(comicId string) (*ComicView, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var view ComicView
 	err := db.First(&view, "id = ?", comicId).Error
 	if err == gorm.ErrRecordNotFound {
@@ -153,6 +171,8 @@ func LoadViewLog(comicId string) (*ComicView, error) {
 }
 
 func FindRemoteImage(fileServer string, path string) *RemoteImage {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var remoteImage RemoteImage
 	err := db.First(&remoteImage, "file_server = ? AND path = ?", fileServer, path).Error
 	if err != nil {
@@ -166,6 +186,8 @@ func FindRemoteImage(fileServer string, path string) *RemoteImage {
 }
 
 func SaveRemoteImage(remote *RemoteImage) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "file_server"}, {Name: "path"}},
 		DoUpdates: clause.AssignmentColumns([]string{
@@ -180,6 +202,8 @@ func SaveRemoteImage(remote *RemoteImage) error {
 }
 
 func CreateDownload(comic *ComicDownload, epList *[]ComicDownloadEp) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	comic.SelectedEpCount = int32(len(*epList))
 	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Create(comic).Error
@@ -197,6 +221,8 @@ func CreateDownload(comic *ComicDownload, epList *[]ComicDownloadEp) error {
 }
 
 func AddDownload(comic *ComicDownload, epList *[]ComicDownloadEp) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(comic).Where("id = ?", comic.ID).Updates(map[string]interface{}{
 			"created_at":          comic.CreatedAt,
@@ -236,6 +262,8 @@ func AddDownload(comic *ComicDownload, epList *[]ComicDownloadEp) error {
 }
 
 func UpdateDownloadLogo(comicId string, fileSize int64, format string, width int32, height int32, localPath string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicDownload{}).Where("id = ?", comicId).Updates(map[string]interface{}{
 		"thumb_file_size":  fileSize,
 		"thumb_format":     format,
@@ -246,6 +274,8 @@ func UpdateDownloadLogo(comicId string, fileSize int64, format string, width int
 }
 
 func FindComicDownloadById(comicId string) (*ComicDownload, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var download ComicDownload
 	err := db.First(&download, "id = ?", comicId).Error
 	if err != nil {
@@ -258,18 +288,24 @@ func FindComicDownloadById(comicId string) (*ComicDownload, error) {
 }
 
 func ListDownloadEpByComicId(comicId string) ([]ComicDownloadEp, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var epList []ComicDownloadEp
 	err := db.Where("comic_id = ?", comicId).Order("ep_order ASC").Find(&epList).Error
 	return epList, err
 }
 
 func ListDownloadPictureByEpId(epId string) ([]ComicDownloadPicture, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var pictureList []ComicDownloadPicture
 	err := db.Where("ep_id = ?", epId).Order("rank_in_ep ASC").Find(&pictureList).Error
 	return pictureList, err
 }
 
 func AllDownloads() (*[]ComicDownload, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var downloads []ComicDownload
 	err := db.Table("comic_downloads").
 		Joins("LEFT JOIN comic_views ON comic_views.id = comic_downloads.id").
@@ -281,6 +317,8 @@ func AllDownloads() (*[]ComicDownload, error) {
 }
 
 func LoadFirstNeedDownload() (*ComicDownload, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var download ComicDownload
 	err := db.First(&download, "download_failed = 0 AND pause = 0 AND deleting = 0 AND download_finished = 0").Error
 	if err != nil {
@@ -293,6 +331,8 @@ func LoadFirstNeedDownload() (*ComicDownload, error) {
 }
 
 func LoadFirstNeedDownloadEp(comicId string) (*ComicDownloadEp, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var ep ComicDownloadEp
 	err := db.First(
 		&ep,
@@ -309,6 +349,8 @@ func LoadFirstNeedDownloadEp(comicId string) (*ComicDownloadEp, error) {
 }
 
 func LoadFirstNeedDownloadPicture(epId string) (*ComicDownloadPicture, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var picture ComicDownloadPicture
 	err := db.First(
 		&picture,
@@ -325,6 +367,8 @@ func LoadFirstNeedDownloadPicture(epId string) (*ComicDownloadPicture, error) {
 }
 
 func FetchPictures(comicId string, epId string, list *[]ComicDownloadPicture) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Transaction(func(tx *gorm.DB) error {
 		var rankInEp int32
 		for _, picture := range *list {
@@ -350,10 +394,14 @@ func FetchPictures(comicId string, epId string, list *[]ComicDownloadPicture) er
 }
 
 func DownloadFailed(comicId string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicDownload{}).Where("id = ?", comicId).Update("download_failed", true).Error
 }
 
 func DownloadSuccess(comicId string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicDownload{}).Where("id = ?", comicId).Updates(map[string]interface{}{
 		"download_finished":      true,
 		"download_finished_time": time.Now(),
@@ -361,10 +409,14 @@ func DownloadSuccess(comicId string) error {
 }
 
 func EpFailed(epId string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicDownloadEp{}).Where("id = ?", epId).Update("download_failed", true).Error
 }
 
 func EpSuccess(comicId string, epId string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&ComicDownloadEp{}).Where("id = ?", epId).Updates(map[string]interface{}{
 			"download_finished":      true,
@@ -381,6 +433,8 @@ func EpSuccess(comicId string, epId string) error {
 }
 
 func PictureFailed(pictureId string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicDownloadPicture{}).Where("id = ?", pictureId).Update("download_failed", true).Error
 }
 
@@ -388,6 +442,8 @@ func PictureSuccess(
 	comicId string, epId string, pictureId string,
 	fileSize int64, format string, width int32, height int32, localPath string,
 ) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&ComicDownloadPicture{}).Where("id = ?", pictureId).Updates(map[string]interface{}{
 			"file_size":              fileSize,
@@ -416,6 +472,8 @@ func PictureSuccess(
 }
 
 func ResetAll() error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&ComicDownload{}).Where("1 = 1").
 			Update("download_failed", false).Error
@@ -434,20 +492,28 @@ func ResetAll() error {
 }
 
 func ViewLogPage(offset int, limit int) (*[]ComicView, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var list []ComicView
 	err := db.Offset(offset).Limit(limit).Order("last_view_time DESC").Find(&list).Error
 	return &list, err
 }
 
 func ClearAllViewLog() {
+	mutex.Lock()
+	defer mutex.Unlock()
 	db.Unscoped().Where("1 = 1").Delete(&ComicView{})
 }
 
 func DeleteViewLog(id string) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	db.Unscoped().Where("id = ?", id).Delete(&ComicView{})
 }
 
 func DeletingComic() (*ComicDownload, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var download ComicDownload
 	err := db.First(&download, "deleting = 1").Error
 	if err == gorm.ErrRecordNotFound {
@@ -457,6 +523,8 @@ func DeletingComic() (*ComicDownload, error) {
 }
 
 func TrueDelete(comicId string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	err := db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Unscoped().Delete(&ComicDownload{}, "id = ?", comicId).Error
 		if err != nil {
@@ -479,12 +547,16 @@ func TrueDelete(comicId string) error {
 }
 
 func Deleting(comicId string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Model(&ComicDownload{}).Where("id = ?", comicId).Updates(map[string]interface{}{
 		"deleting": true,
 	}).Error
 }
 
 func RemoveAllRemoteImage() error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	err := db.Unscoped().Delete(&RemoteImage{}, "1 = 1").Error
 	if err != nil {
 		return err
@@ -493,6 +565,8 @@ func RemoveAllRemoteImage() error {
 }
 
 func EarliestRemoteImage(earliest time.Time, pageSize int) ([]RemoteImage, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var images []RemoteImage
 	err := db.Where("strftime('%s',updated_at) < strftime('%s',?)", earliest).
 		Order("updated_at").Limit(pageSize).Find(&images).Error
@@ -500,6 +574,8 @@ func EarliestRemoteImage(earliest time.Time, pageSize int) ([]RemoteImage, error
 }
 
 func DeleteRemoteImages(images []RemoteImage) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	if len(images) == 0 {
 		return nil
 	}
@@ -511,5 +587,7 @@ func DeleteRemoteImages(images []RemoteImage) error {
 }
 
 func VACUUM() error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return db.Raw("VACUUM").Error
 }

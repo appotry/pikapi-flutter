@@ -9,6 +9,7 @@ import (
 	"pgo/pikapi/utils"
 )
 
+// InitApplication 初始化文件保存的位置
 func InitApplication(applicationDir string) {
 	println("初始化 : " + applicationDir)
 	var databasesDir, remoteDir, downloadDir, tmpDir string
