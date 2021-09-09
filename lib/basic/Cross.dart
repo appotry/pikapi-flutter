@@ -20,6 +20,7 @@ void copyToClipBoard(BuildContext context, String string) {
   }
 }
 
+/// 打开web页面
 Future<dynamic> openUrl(String url) async {
   if (await canLaunch(url)) {
     await launch(
@@ -29,6 +30,7 @@ Future<dynamic> openUrl(String url) async {
   }
 }
 
+/// 保存图片
 Future<dynamic> saveImage(String path, BuildContext context) async {
   Future? future;
   if (Platform.isIOS) {
@@ -62,7 +64,7 @@ Future<dynamic> _saveImageAndroid(String path, BuildContext context) async {
   return pica.androidSaveFileToImage(path);
 }
 
-
+/// 选择一个文件夹用于保存文件
 Future<String?> chooseFolder(BuildContext context) async {
   late String root;
   if (Platform.isWindows) {

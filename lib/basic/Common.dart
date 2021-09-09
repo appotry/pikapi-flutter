@@ -8,6 +8,7 @@ String categoryTitle(String? categoryTitle) {
   return categoryTitle ?? "全分类";
 }
 
+/// 显示一个toast
 void defaultToast(BuildContext context, String title) {
   showToast(
     title,
@@ -22,6 +23,7 @@ void defaultToast(BuildContext context, String title) {
   );
 }
 
+/// 显示一个确认框, 用户关闭弹窗以及选择否都会返回false, 仅当用户选择确定时返回true
 Future<bool> confirmDialog(
     BuildContext context, String title, String content) async {
   return await showDialog(
@@ -53,6 +55,7 @@ Future<bool> confirmDialog(
       false;
 }
 
+/// 显示一个消息提示框
 Future alertDialog(BuildContext context, String title, String content) {
   return showDialog(
       context: context,
@@ -76,6 +79,7 @@ Future alertDialog(BuildContext context, String title, String content) {
           ));
 }
 
+/// stream-filter的替代方法
 List<T> filteredList<T>(List<T> list, bool Function(T) filter) {
   List<T> result = [];
   list.forEach((element) {
@@ -86,6 +90,7 @@ List<T> filteredList<T>(List<T> list, bool Function(T) filter) {
   return result;
 }
 
+/// 创建一个单选对话框, 用户取消选择返回null, 否则返回所选内容
 Future<T?> chooseListDialog<T>(
   BuildContext context,
   String title,
@@ -109,6 +114,7 @@ Future<T?> chooseListDialog<T>(
   );
 }
 
+/// 创建一个单选对话框, 用户取消选择返回null, 否则返回所选内容(value)
 Future<T?> chooseMapDialog<T>(
     BuildContext buildContext, Map<String, T> values, String title) async {
   return await showDialog<T>(
@@ -128,6 +134,8 @@ Future<T?> chooseMapDialog<T>(
     },
   );
 }
+
+/// 输入对话框1
 
 var _controller = TextEditingController.fromValue(TextEditingValue(text: ''));
 
@@ -188,6 +196,7 @@ Future<String?> displayTextInputDialog(
   );
 }
 
+/// 将字符串前面加0直至满足len位
 String add0(int num, int len) {
   var rsp = "$num";
   while (rsp.length < len) {
@@ -196,6 +205,7 @@ String add0(int num, int len) {
   return rsp;
 }
 
+/// 格式化时间 2012-34-56
 String formatTimeToDate(String str) {
   try {
     var c = DateTime.parse(str);
@@ -205,6 +215,7 @@ String formatTimeToDate(String str) {
   }
 }
 
+/// 格式化时间 2012-34-56 12:34:56
 String formatTimeToDateTime(String str) {
   try {
     var c = DateTime.parse(str);
@@ -213,6 +224,8 @@ String formatTimeToDateTime(String str) {
     return "-";
   }
 }
+
+/// 输入对话框2
 
 final TextEditingController _textEditController =
     TextEditingController(text: '');
