@@ -653,7 +653,7 @@ Widget _buildScrollController(
     child: Material(
       color: Color(0x0),
       child: Container(
-        width: 40,
+        width: 35,
         height: 300,
         decoration: BoxDecoration(
           color: Color(0x66000000),
@@ -662,7 +662,7 @@ Widget _buildScrollController(
             bottomLeft: Radius.circular(10),
           ),
         ),
-        padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 8),
+        padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 6),
         child: Center(
           child: FlutterSlider(
             axis: Axis.vertical,
