@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
+import 'package:pikapi/basic/config/FullScreenUI.dart';
 import 'package:pikapi/basic/config/Quality.dart';
 import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
@@ -117,7 +118,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
   @override
   void dispose() {
     if (!_replacement) {
-      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+      switchFullScreenUI();
     }
     super.dispose();
   }

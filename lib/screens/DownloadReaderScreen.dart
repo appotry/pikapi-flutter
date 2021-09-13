@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
+import 'package:pikapi/basic/config/FullScreenUI.dart';
 import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:pikapi/screens/components/ContentBuilder.dart';
@@ -109,8 +110,8 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
 
   @override
   void dispose() {
-    if (_replacement) {
-      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    if (!_replacement) {
+      switchFullScreenUI();
     }
     super.dispose();
   }

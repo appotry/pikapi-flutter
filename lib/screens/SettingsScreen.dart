@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pikapi/basic/config/AutoClean.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
+import 'package:pikapi/basic/config/FullScreenUI.dart';
 import 'package:pikapi/basic/config/PagerAction.dart';
 import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
@@ -69,6 +70,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             Divider(),
             ListTile(
+              title: Text("封印"),
+              subtitle: Text(jsonEncode(shadowCategories)),
+              onTap: () async {
+                await chooseShadowCategories(context);
+                setState(() {});
+              },
+            ),
+            ListTile(
               title: Text("列表页加载方式"),
               subtitle: Text(currentPagerActionName()),
               onTap: () async {
@@ -76,12 +85,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {});
               },
             ),
-            Divider(),
             ListTile(
-              title: Text("封印"),
-              subtitle: Text(jsonEncode(shadowCategories)),
+              title: Text("全屏UI"),
+              subtitle: Text(currentFullScreenUIName()),
               onTap: () async {
-                await chooseShadowCategories(context);
+                await chooseFullScreenUI(context);
                 setState(() {});
               },
             ),
