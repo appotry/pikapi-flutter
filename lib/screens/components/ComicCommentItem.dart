@@ -11,15 +11,6 @@ class ComicCommentItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: "COMMENT:${comment.id}",
-      child: Material(
-        child: _buildComment(context),
-      ),
-    );
-  }
-
-  Widget _buildComment(BuildContext context) {
     var theme = Theme.of(context);
     var nameStyle = TextStyle(fontWeight: FontWeight.bold);
     var levelStyle = TextStyle(
