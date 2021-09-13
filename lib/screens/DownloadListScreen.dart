@@ -7,8 +7,6 @@ import 'package:pikapi/basic/Channels.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
-
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'DownloadImportScreen.dart';
 import 'DownloadInfoScreen.dart';
 import 'components/ContentLoading.dart';
@@ -210,47 +208,36 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
           return ListView(
             children: [
               ...data.map(
-                (e) => Slidable(
-                  actionPane: SlidableDrawerActionPane(),
-                  actionExtentRatio: 0.2,
-                  secondaryActions: <Widget>[
-                    ...e.deleting
-                        ? []
-                        : [
-                            IconSlideAction(
-                              caption: '删除',
-                              color: Colors.red.shade500,
-                              icon: Icons.delete_forever,
-                              onTap: () async {
-                                await pica.deleteDownloadComic(e.id);
-                                setState(() => e.deleting = true);
-                              },
-                            ),
-                          ],
-                  ],
-                  child: InkWell(
-                    onTap: () {
-                      if (e.deleting) {
-                        return;
-                      }
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DownloadInfoScreen(
-                            comicId: e.id,
-                            comicTitle: e.title,
-                          ),
+                (e) => InkWell(
+                  onTap: () {
+                    if (e.deleting) {
+                      return;
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DownloadInfoScreen(
+                          comicId: e.id,
+                          comicTitle: e.title,
                         ),
-                      );
-                    },
-                    child: DownloadInfoCard(
-                      task: e,
-                      downloading:
-                          _downloading != null && _downloading!.id == e.id,
-                    ),
+                      ),
+                    );
+                  },
+                  onLongPress: () async {
+                    String? action =
+                        await chooseListDialog(context, e.title, ['删除']);
+                    if (action == '删除') {
+                      await pica.deleteDownloadComic(e.id);
+                      setState(() => e.deleting = true);
+                    }
+                  },
+                  child: DownloadInfoCard(
+                    task: e,
+                    downloading:
+                        _downloading != null && _downloading!.id == e.id,
                   ),
                 ),
-              )
+              ),
             ],
           );
         },
