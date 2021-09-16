@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/config/ContentFailedReloadAction.dart';
 import 'dart:ui';
 
 import 'package:pikapi/basic/enum/ErrorTypes.dart';
@@ -37,6 +38,47 @@ class ContentError extends StatelessWidget {
       var textSize = min / 16;
       var tipSize = min / 20;
       var infoSize = min / 30;
+      if (contentFailedReloadAction ==
+          ContentFailedReloadAction.TOUCH_LOADER) {
+        return GestureDetector(
+          onTap: onRefresh,
+          child: ListView(
+            children: [
+              Container(
+                height: height,
+                child: Column(
+                  children: [
+                    Expanded(child: Container()),
+                    Container(
+                      child: Icon(
+                        Icons.wifi_off_rounded,
+                        size: iconSize,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    Container(height: min / 10),
+                    Container(
+                      padding: EdgeInsets.only(
+                        left: 30,
+                        right: 30,
+                      ),
+                      child: Text(
+                        message,
+                        style: TextStyle(fontSize: textSize),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Text('(点击刷新)', style: TextStyle(fontSize: tipSize)),
+                    Container(height: min / 15),
+                    Text('$error', style: TextStyle(fontSize: infoSize)),
+                    Expanded(child: Container()),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
       return RefreshIndicator(
         onRefresh: onRefresh,
         child: ListView(

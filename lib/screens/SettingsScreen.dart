@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/config/AutoClean.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
+import 'package:pikapi/basic/config/ContentFailedReloadAction.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
 import 'package:pikapi/basic/config/FullScreenUI.dart';
 import 'package:pikapi/basic/config/PagerAction.dart';
@@ -90,6 +91,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: Text(currentFullScreenUIName()),
               onTap: () async {
                 await chooseFullScreenUI(context);
+                setState(() {});
+              },
+            ),
+            ListTile(
+              title: Text("加载失败时"),
+              subtitle: Text(currentContentFailedReloadActionName()),
+              onTap: () async {
+                await chooseContentFailedReloadAction(context);
                 setState(() {});
               },
             ),

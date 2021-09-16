@@ -80,7 +80,7 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
 ### 开发环境准备
 
 - [golang](https://golang.org/) (1.16以上版本)
-- [flutter](https://flutter.dev/)
+- [flutter](https://flutter.dev/) (桌面端 Tag 2.2.3 以兼容hover)
 
 ### 环境配置
 
