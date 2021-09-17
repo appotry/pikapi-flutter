@@ -11,6 +11,7 @@ import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:pikapi/basic/config/Quality.dart';
 import 'package:pikapi/basic/config/ShadowCategories.dart';
+import 'package:pikapi/basic/config/VolumeController.dart';
 import 'package:pikapi/screens/components/NetworkSetting.dart';
 
 import 'CleanScreen.dart';
@@ -66,6 +67,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: Text(currentFullScreenActionName()),
               onTap: () async {
                 await chooseFullScreenAction(context);
+                setState(() {});
+              },
+            ),
+            ListTile(
+              title: Text("阅读器音量键翻页(仅安卓WebToon)"),
+              subtitle: Text(volumeControllerName()),
+              onTap: () async {
+                await chooseVolumeController(context);
                 setState(() {});
               },
             ),

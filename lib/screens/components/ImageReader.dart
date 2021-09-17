@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:another_xlider/another_xlider.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:pikapi/basic/Channels.dart';
 import 'package:pikapi/basic/Common.dart';
 import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
@@ -10,6 +12,7 @@ import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
 import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
+import 'package:pikapi/basic/config/VolumeController.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
@@ -154,6 +157,8 @@ class _WebToonReaderState extends State<_WebToonReader> {
   var _current = 1;
   var _slider = 1;
 
+  StreamSubscription? _volumeButtonListener;
+
   void _onCurrentChange() {
     var to = _itemPositionsListener.itemPositions.value.first.index + 1;
     if (_current != to) {
@@ -185,13 +190,40 @@ class _WebToonReaderState extends State<_WebToonReader> {
     } else {
       _initialPosition = 0;
     }
+    if (Platform.isAndroid && volumeController) {
+      _volumeButtonListener =
+          volumeButtonChannel.receiveBroadcastStream().listen(_onVolumeEvent);
+    }
     super.initState();
   }
 
   @override
   void dispose() {
     _itemPositionsListener.itemPositions.removeListener(_onCurrentChange);
+    _volumeButtonListener?.cancel();
     super.dispose();
+  }
+
+  void _onVolumeEvent(event) {
+    print("EVENT : $event");
+    switch ("$event") {
+      case "UP":
+        if (_current > 1) {
+          _itemScrollController.scrollTo(
+            index: _current - 2, // 减1 当前position 再减少1 前一个
+            duration: Duration(milliseconds: 400),
+          );
+        }
+        break;
+      case "DOWN":
+        if (_current < widget.struct.images.length) {
+          _itemScrollController.scrollTo(
+            index: _current,
+            duration: Duration(milliseconds: 400),
+          );
+        }
+        break;
+    }
   }
 
   @override

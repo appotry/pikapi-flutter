@@ -14,6 +14,7 @@ import 'package:pikapi/basic/config/ShadowCategories.dart';
 import 'package:pikapi/basic/config/Themes.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/config/ListLayout.dart';
+import 'package:pikapi/basic/config/VolumeController.dart';
 
 import 'AccountScreen.dart';
 import 'AppScreen.dart';
@@ -48,6 +49,7 @@ class _InitScreenState extends State<InitScreen> {
     await initFullScreenUI();
     switchFullScreenUI();
     await initContentFailedReloadAction();
+    await initVolumeController();
     // 登录, 如果token失效重新登录, 网络不好的时候可能需要1分钟
     if (await pica.preLogin()) {
       // 如果token或username+password有效则直接进入登录好的界面
