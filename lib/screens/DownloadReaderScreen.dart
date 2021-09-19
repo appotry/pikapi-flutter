@@ -116,8 +116,13 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
+    return readerKeyboardHolder(_build(context));
+  }
+
+  Widget _build(BuildContext context) {
     return Scaffold(
       appBar: _fullScreen
           ? null

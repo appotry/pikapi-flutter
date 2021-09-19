@@ -79,6 +79,7 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+
         //
         var mutex = Mutex()
         val eventSinkMap = HashMap<String, HashMap<String, EventChannel.EventSink>>()
@@ -152,18 +153,9 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        //
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, "volume_button")
-                .setStreamHandler(object : EventChannel.StreamHandler {
-                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                        volumeEvents = events
-                    }
-
-                    override fun onCancel(arguments: Any?) {
-                        volumeEvents = null
-                    }
-
-
-                })
+                .setStreamHandler(volumeStreamHandler)
 
     }
 
@@ -189,18 +181,58 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
-    var volumeEvents: EventChannel.EventSink? = null
+
+
+    val volumeEvents = LinkedHashMap<Any, EventChannel.EventSink>()
+
+    val volumeStreamHandler = object : EventChannel.StreamHandler {
+
+        val mutex = Mutex()
+
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+            scope.launch {
+                mutex.lock()
+                try {
+                    arguments?.let {
+                        events?.let {
+                            volumeEvents[arguments] = events
+                        }
+                    }
+                } finally {
+                    mutex.unlock()
+                }
+            }
+        }
+
+        override fun onCancel(arguments: Any?) {
+            scope.launch {
+                mutex.lock()
+                try {
+                    arguments?.let {
+                        volumeEvents.remove(arguments)
+                    }
+                } finally {
+                    mutex.unlock()
+                }
+            }
+        }
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        volumeEvents?.let {
+        if (volumeEvents.isNotEmpty()) {
             if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                 uiThreadHandler.post {
-                    it.success("DOWN")
+                    volumeEvents.values.forEach {
+                        it.success("DOWN")
+                    }
                 }
                 return true
             }
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 uiThreadHandler.post {
-                    it.success("UP")
+                    volumeEvents.values.forEach {
+                        it.success("UP")
+                    }
                 }
                 return true
             }

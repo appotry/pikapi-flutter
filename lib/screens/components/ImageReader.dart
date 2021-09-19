@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:another_xlider/another_xlider.dart';
+import 'package:event/event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:pikapi/basic/Channels.dart';
 import 'package:pikapi/basic/Common.dart';
@@ -10,10 +12,12 @@ import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
+import 'package:pikapi/basic/config/KeyboardController.dart';
 import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:pikapi/basic/config/VolumeController.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:uuid/uuid.dart';
 import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
 
@@ -60,6 +64,40 @@ class ImageReaderStruct {
   });
 }
 
+//
+Event<_ReaderKeyboardEventArgs> _readerKeyboardEvent =
+    Event<_ReaderKeyboardEventArgs>();
+
+class _ReaderKeyboardEventArgs extends EventArgs {
+  final String key;
+
+  _ReaderKeyboardEventArgs(this.key);
+}
+
+Widget readerKeyboardHolder(Widget widget) {
+  if (keyboardController &&
+      (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
+    widget = RawKeyboardListener(
+      focusNode: FocusNode(),
+      child: widget,
+      autofocus: true,
+      onKey: (event) {
+        if (event is RawKeyDownEvent) {
+          if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+            _readerKeyboardEvent.broadcast(_ReaderKeyboardEventArgs("UP"));
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+            _readerKeyboardEvent.broadcast(_ReaderKeyboardEventArgs("DOWN"));
+          }
+        }
+      },
+    );
+  }
+  return widget;
+}
+
+//
+
 class ImageReader extends StatelessWidget {
   final ImageReaderStruct struct;
 
@@ -84,7 +122,7 @@ class ImageReader extends StatelessWidget {
     }
     switch (fullScreenAction) {
       case FullScreenAction.CONTROLLER:
-        return Stack(
+        reader = Stack(
           children: [
             reader,
             _buildFullScreenController(
@@ -93,14 +131,16 @@ class ImageReader extends StatelessWidget {
             ),
           ],
         );
+        break;
       case FullScreenAction.TOUCH_ONCE:
-        return GestureDetector(
+        reader = GestureDetector(
           onTap: () => struct.onFullScreenChange(!struct.fullScreen),
           child: reader,
         );
-      default:
-        return reader;
+        break;
     }
+    //
+    return reader;
   }
 
   Widget _buildFullScreenController(
@@ -191,9 +231,11 @@ class _WebToonReaderState extends State<_WebToonReader> {
       _initialPosition = 0;
     }
     if (Platform.isAndroid && volumeController) {
-      _volumeButtonListener =
-          volumeButtonChannel.receiveBroadcastStream().listen(_onVolumeEvent);
+      _volumeButtonListener = volumeButtonChannel
+          .receiveBroadcastStream(Uuid().v4())
+          .listen(_onVolumeEvent);
     }
+    _readerKeyboardEvent.subscribe(_onKeyBoardEvent);
     super.initState();
   }
 
@@ -201,14 +243,25 @@ class _WebToonReaderState extends State<_WebToonReader> {
   void dispose() {
     _itemPositionsListener.itemPositions.removeListener(_onCurrentChange);
     _volumeButtonListener?.cancel();
+    _readerKeyboardEvent.unsubscribe(_onKeyBoardEvent);
     super.dispose();
   }
 
-  void _onVolumeEvent(event) {
+  void _onKeyBoardEvent(_ReaderKeyboardEventArgs? args) {
+    if (args != null) {
+      _onVolumeEvent(args.key);
+    }
+  }
+
+  void _onVolumeEvent(dynamic event) {
     print("EVENT : $event");
     switch ("$event") {
       case "UP":
         if (_current > 1) {
+          if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
+            return;
+          }
+          _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
           _itemScrollController.scrollTo(
             index: _current - 2, // 减1 当前position 再减少1 前一个
             duration: Duration(milliseconds: 400),
@@ -217,6 +270,10 @@ class _WebToonReaderState extends State<_WebToonReader> {
         break;
       case "DOWN":
         if (_current < widget.struct.images.length) {
+          if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
+            return;
+          }
+          _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
           _itemScrollController.scrollTo(
             index: _current,
             duration: Duration(milliseconds: 400),
@@ -225,6 +282,8 @@ class _WebToonReaderState extends State<_WebToonReader> {
         break;
     }
   }
+
+  var _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
 
   @override
   Widget build(BuildContext context) {
@@ -541,10 +600,53 @@ class _GalleryReaderState extends State<_GalleryReader> {
   late PageController _pageController =
       PageController(initialPage: widget.struct.initPosition ?? 0);
 
+  StreamSubscription? _volumeButtonListener;
+
+  @override
+  void initState() {
+    if (Platform.isAndroid && volumeController) {
+      _volumeButtonListener = volumeButtonChannel
+          .receiveBroadcastStream(Uuid().v4())
+          .listen(_onVolumeEvent);
+    }
+    _readerKeyboardEvent.subscribe(_onKeyBoardEvent);
+    super.initState();
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
+    _volumeButtonListener?.cancel();
+    _readerKeyboardEvent.unsubscribe(_onKeyBoardEvent);
     super.dispose();
+  }
+
+  void _onKeyBoardEvent(_ReaderKeyboardEventArgs? args) {
+    if (args != null) {
+      _onVolumeEvent(args.key);
+    }
+  }
+
+  void _onVolumeEvent(event) {
+    print("EVENT : $event");
+    switch ("$event") {
+      case "UP":
+        if (_current > 1) {
+          _pageController.previousPage(
+            duration: Duration(milliseconds: 400),
+            curve: Curves.ease,
+          );
+        }
+        break;
+      case "DOWN":
+        if (_current < widget.struct.images.length) {
+          _pageController.nextPage(
+            duration: Duration(milliseconds: 400),
+            curve: Curves.ease,
+          );
+        }
+        break;
+    }
   }
 
   @override

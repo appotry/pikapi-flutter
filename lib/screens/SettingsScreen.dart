@@ -6,6 +6,7 @@ import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/ContentFailedReloadAction.dart';
 import 'package:pikapi/basic/config/FullScreenAction.dart';
 import 'package:pikapi/basic/config/FullScreenUI.dart';
+import 'package:pikapi/basic/config/KeyboardController.dart';
 import 'package:pikapi/basic/config/PagerAction.dart';
 import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
@@ -71,10 +72,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             ListTile(
-              title: Text("阅读器音量键翻页(仅安卓WebToon)"),
+              title: Text("阅读器音量键翻页(仅安卓)"),
               subtitle: Text(volumeControllerName()),
               onTap: () async {
                 await chooseVolumeController(context);
+                setState(() {});
+              },
+            ),
+            ListTile(
+              title: Text("阅读器键盘翻页(仅PC)"),
+              subtitle: Text(keyboardControllerName()),
+              onTap: () async {
+                await chooseKeyboardController(context);
                 setState(() {});
               },
             ),

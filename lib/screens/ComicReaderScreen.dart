@@ -125,6 +125,10 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return readerKeyboardHolder(_build(context));
+  }
+
+  Widget _build(BuildContext context) {
     return Scaffold(
       appBar: _fullScreen
           ? null
