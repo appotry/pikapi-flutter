@@ -5,7 +5,6 @@ import 'package:pikapi/screens/CommentScreen.dart';
 import 'package:pikapi/screens/components/ItemBuilder.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'ComicCommentItem.dart';
-import 'PicaAvatar.dart';
 
 // 漫画的评论列表
 class ComicCommentList extends StatefulWidget {

@@ -10,6 +10,7 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.view.KeyEvent
 import androidx.annotation.NonNull
+import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -185,7 +186,7 @@ class MainActivity : FlutterActivity() {
 
     val volumeEvents = LinkedHashMap<Any, EventChannel.EventSink>()
 
-    val volumeStreamHandler = object : EventChannel.StreamHandler {
+    private val volumeStreamHandler = object : EventChannel.StreamHandler {
 
         val mutex = Mutex()
 

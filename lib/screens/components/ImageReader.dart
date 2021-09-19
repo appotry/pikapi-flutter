@@ -65,13 +65,13 @@ class ImageReaderStruct {
 }
 
 //
-Event<_ReaderKeyboardEventArgs> _readerKeyboardEvent =
-    Event<_ReaderKeyboardEventArgs>();
+Event<_ReaderControllerEventArgs> _readerControllerEvent =
+    Event<_ReaderControllerEventArgs>();
 
-class _ReaderKeyboardEventArgs extends EventArgs {
+class _ReaderControllerEventArgs extends EventArgs {
   final String key;
 
-  _ReaderKeyboardEventArgs(this.key);
+  _ReaderControllerEventArgs(this.key);
 }
 
 Widget readerKeyboardHolder(Widget widget) {
@@ -84,10 +84,11 @@ Widget readerKeyboardHolder(Widget widget) {
       onKey: (event) {
         if (event is RawKeyDownEvent) {
           if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-            _readerKeyboardEvent.broadcast(_ReaderKeyboardEventArgs("UP"));
+            _readerControllerEvent.broadcast(_ReaderControllerEventArgs("UP"));
           }
           if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
-            _readerKeyboardEvent.broadcast(_ReaderKeyboardEventArgs("DOWN"));
+            _readerControllerEvent
+                .broadcast(_ReaderControllerEventArgs("DOWN"));
           }
         }
       },
@@ -98,10 +99,40 @@ Widget readerKeyboardHolder(Widget widget) {
 
 //
 
-class ImageReader extends StatelessWidget {
+class ImageReader extends StatefulWidget {
   final ImageReaderStruct struct;
 
   const ImageReader(this.struct);
+
+  @override
+  State<StatefulWidget> createState() => _ImageReaderState();
+}
+
+class _ImageReaderState extends State<ImageReader> {
+  late var struct = widget.struct;
+  StreamSubscription? _volumeButtonListener;
+
+  @override
+  void initState() {
+    var id = Uuid().v4();
+    if (Platform.isAndroid && volumeController) {
+      _volumeButtonListener =
+          volumeButtonChannel.receiveBroadcastStream(id).listen(_onVolumeEvent);
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (_volumeButtonListener != null) {
+      _volumeButtonListener!.cancel();
+    }
+    super.dispose();
+  }
+
+  void _onVolumeEvent(dynamic args) {
+    _readerControllerEvent.broadcast(_ReaderControllerEventArgs("$args"));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,8 +228,6 @@ class _WebToonReaderState extends State<_WebToonReader> {
   var _current = 1;
   var _slider = 1;
 
-  StreamSubscription? _volumeButtonListener;
-
   void _onCurrentChange() {
     var to = _itemPositionsListener.itemPositions.value.first.index + 1;
     if (_current != to) {
@@ -230,56 +259,47 @@ class _WebToonReaderState extends State<_WebToonReader> {
     } else {
       _initialPosition = 0;
     }
-    if (Platform.isAndroid && volumeController) {
-      _volumeButtonListener = volumeButtonChannel
-          .receiveBroadcastStream(Uuid().v4())
-          .listen(_onVolumeEvent);
-    }
-    _readerKeyboardEvent.subscribe(_onKeyBoardEvent);
+    _readerControllerEvent.subscribe(_onPageControllerEvent);
     super.initState();
   }
 
   @override
   void dispose() {
     _itemPositionsListener.itemPositions.removeListener(_onCurrentChange);
-    _volumeButtonListener?.cancel();
-    _readerKeyboardEvent.unsubscribe(_onKeyBoardEvent);
+    _readerControllerEvent.unsubscribe(_onPageControllerEvent);
     super.dispose();
   }
 
-  void _onKeyBoardEvent(_ReaderKeyboardEventArgs? args) {
+  void _onPageControllerEvent(_ReaderControllerEventArgs? args) {
     if (args != null) {
-      _onVolumeEvent(args.key);
-    }
-  }
-
-  void _onVolumeEvent(dynamic event) {
-    print("EVENT : $event");
-    switch ("$event") {
-      case "UP":
-        if (_current > 1) {
-          if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
-            return;
+      var event = args.key;
+      print("EVENT : $event");
+      switch ("$event") {
+        case "UP":
+          if (_current > 1) {
+            if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
+              return;
+            }
+            _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
+            _itemScrollController.scrollTo(
+              index: _current - 2, // 减1 当前position 再减少1 前一个
+              duration: Duration(milliseconds: 400),
+            );
           }
-          _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
-          _itemScrollController.scrollTo(
-            index: _current - 2, // 减1 当前position 再减少1 前一个
-            duration: Duration(milliseconds: 400),
-          );
-        }
-        break;
-      case "DOWN":
-        if (_current < widget.struct.images.length) {
-          if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
-            return;
+          break;
+        case "DOWN":
+          if (_current < widget.struct.images.length) {
+            if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
+              return;
+            }
+            _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
+            _itemScrollController.scrollTo(
+              index: _current,
+              duration: Duration(milliseconds: 400),
+            );
           }
-          _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
-          _itemScrollController.scrollTo(
-            index: _current,
-            duration: Duration(milliseconds: 400),
-          );
-        }
-        break;
+          break;
+      }
     }
   }
 
@@ -600,52 +620,41 @@ class _GalleryReaderState extends State<_GalleryReader> {
   late PageController _pageController =
       PageController(initialPage: widget.struct.initPosition ?? 0);
 
-  StreamSubscription? _volumeButtonListener;
-
   @override
   void initState() {
-    if (Platform.isAndroid && volumeController) {
-      _volumeButtonListener = volumeButtonChannel
-          .receiveBroadcastStream(Uuid().v4())
-          .listen(_onVolumeEvent);
-    }
-    _readerKeyboardEvent.subscribe(_onKeyBoardEvent);
+    _readerControllerEvent.subscribe(_onPageControllerEvent);
     super.initState();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _volumeButtonListener?.cancel();
-    _readerKeyboardEvent.unsubscribe(_onKeyBoardEvent);
+    _readerControllerEvent.unsubscribe(_onPageControllerEvent);
     super.dispose();
   }
 
-  void _onKeyBoardEvent(_ReaderKeyboardEventArgs? args) {
+  void _onPageControllerEvent(_ReaderControllerEventArgs? args) {
     if (args != null) {
-      _onVolumeEvent(args.key);
-    }
-  }
-
-  void _onVolumeEvent(event) {
-    print("EVENT : $event");
-    switch ("$event") {
-      case "UP":
-        if (_current > 1) {
-          _pageController.previousPage(
-            duration: Duration(milliseconds: 400),
-            curve: Curves.ease,
-          );
-        }
-        break;
-      case "DOWN":
-        if (_current < widget.struct.images.length) {
-          _pageController.nextPage(
-            duration: Duration(milliseconds: 400),
-            curve: Curves.ease,
-          );
-        }
-        break;
+      var event = args.key;
+      print("EVENT : $event");
+      switch ("$event") {
+        case "UP":
+          if (_current > 1) {
+            _pageController.previousPage(
+              duration: Duration(milliseconds: 400),
+              curve: Curves.ease,
+            );
+          }
+          break;
+        case "DOWN":
+          if (_current < widget.struct.images.length) {
+            _pageController.nextPage(
+              duration: Duration(milliseconds: 400),
+              curve: Curves.ease,
+            );
+          }
+          break;
+      }
     }
   }
 
