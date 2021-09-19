@@ -17,11 +17,72 @@ import 'package:pikapi/basic/config/ReaderDirection.dart';
 import 'package:pikapi/basic/config/ReaderType.dart';
 import 'package:pikapi/basic/config/VolumeController.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:uuid/uuid.dart';
 import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
 
 import 'Images.dart';
+
+///////////////
+
+Event<_ReaderControllerEventArgs> _readerControllerEvent =
+    Event<_ReaderControllerEventArgs>();
+
+class _ReaderControllerEventArgs extends EventArgs {
+  final String key;
+
+  _ReaderControllerEventArgs(this.key);
+}
+
+Widget readerKeyboardHolder(Widget widget) {
+  if (keyboardController &&
+      (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
+    widget = RawKeyboardListener(
+      focusNode: FocusNode(),
+      child: widget,
+      autofocus: true,
+      onKey: (event) {
+        if (event is RawKeyDownEvent) {
+          if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+            _readerControllerEvent.broadcast(_ReaderControllerEventArgs("UP"));
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+            _readerControllerEvent
+                .broadcast(_ReaderControllerEventArgs("DOWN"));
+          }
+        }
+      },
+    );
+  }
+  return widget;
+}
+
+void _onVolumeEvent(dynamic args) {
+  _readerControllerEvent.broadcast(_ReaderControllerEventArgs("$args"));
+}
+
+var _volumeListenCount = 0;
+
+// 仅支持安卓
+// 监听后会拦截安卓手机音量键
+// 仅最后一次监听生效
+// event可能为DOWN/UP
+EventChannel volumeButtonChannel = EventChannel("volume_button");
+StreamSubscription? volumeS;
+
+addVolumeListen() {
+  _volumeListenCount++;
+  if (_volumeListenCount == 1) {
+    volumeS =
+        volumeButtonChannel.receiveBroadcastStream().listen(_onVolumeEvent);
+  }
+}
+
+delVolumeListen() {
+  _volumeListenCount--;
+  if (_volumeListenCount == 0) {
+    volumeS?.cancel();
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -65,39 +126,6 @@ class ImageReaderStruct {
 }
 
 //
-Event<_ReaderControllerEventArgs> _readerControllerEvent =
-    Event<_ReaderControllerEventArgs>();
-
-class _ReaderControllerEventArgs extends EventArgs {
-  final String key;
-
-  _ReaderControllerEventArgs(this.key);
-}
-
-Widget readerKeyboardHolder(Widget widget) {
-  if (keyboardController &&
-      (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
-    widget = RawKeyboardListener(
-      focusNode: FocusNode(),
-      child: widget,
-      autofocus: true,
-      onKey: (event) {
-        if (event is RawKeyDownEvent) {
-          if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-            _readerControllerEvent.broadcast(_ReaderControllerEventArgs("UP"));
-          }
-          if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
-            _readerControllerEvent
-                .broadcast(_ReaderControllerEventArgs("DOWN"));
-          }
-        }
-      },
-    );
-  }
-  return widget;
-}
-
-//
 
 class ImageReader extends StatefulWidget {
   final ImageReaderStruct struct;
@@ -110,28 +138,21 @@ class ImageReader extends StatefulWidget {
 
 class _ImageReaderState extends State<ImageReader> {
   late var struct = widget.struct;
-  StreamSubscription? _volumeButtonListener;
 
   @override
   void initState() {
-    var id = Uuid().v4();
     if (Platform.isAndroid && volumeController) {
-      _volumeButtonListener =
-          volumeButtonChannel.receiveBroadcastStream(id).listen(_onVolumeEvent);
+      addVolumeListen();
     }
     super.initState();
   }
 
   @override
   void dispose() {
-    if (_volumeButtonListener != null) {
-      _volumeButtonListener!.cancel();
+    if (Platform.isAndroid && volumeController) {
+      delVolumeListen();
     }
     super.dispose();
-  }
-
-  void _onVolumeEvent(dynamic args) {
-    _readerControllerEvent.broadcast(_ReaderControllerEventArgs("$args"));
   }
 
   @override

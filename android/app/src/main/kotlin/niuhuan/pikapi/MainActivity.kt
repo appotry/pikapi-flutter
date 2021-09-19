@@ -184,56 +184,30 @@ class MainActivity : FlutterActivity() {
     }
 
 
-    val volumeEvents = LinkedHashMap<Any, EventChannel.EventSink>()
+    private var volumeEvents: EventChannel.EventSink? = null
 
     private val volumeStreamHandler = object : EventChannel.StreamHandler {
 
-        val mutex = Mutex()
-
         override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-            scope.launch {
-                mutex.lock()
-                try {
-                    arguments?.let {
-                        events?.let {
-                            volumeEvents[arguments] = events
-                        }
-                    }
-                } finally {
-                    mutex.unlock()
-                }
-            }
+            volumeEvents = events
         }
 
         override fun onCancel(arguments: Any?) {
-            scope.launch {
-                mutex.lock()
-                try {
-                    arguments?.let {
-                        volumeEvents.remove(arguments)
-                    }
-                } finally {
-                    mutex.unlock()
-                }
-            }
+            volumeEvents = null
         }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (volumeEvents.isNotEmpty()) {
+        volumeEvents?.let {
             if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                 uiThreadHandler.post {
-                    volumeEvents.values.forEach {
-                        it.success("DOWN")
-                    }
+                    it.success("DOWN")
                 }
                 return true
             }
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 uiThreadHandler.post {
-                    volumeEvents.values.forEach {
-                        it.success("UP")
-                    }
+                    it.success("UP")
                 }
                 return true
             }
