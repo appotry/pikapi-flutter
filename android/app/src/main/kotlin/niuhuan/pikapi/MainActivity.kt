@@ -10,7 +10,6 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.view.KeyEvent
 import androidx.annotation.NonNull
-import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -82,74 +81,39 @@ class MainActivity : FlutterActivity() {
         }
 
         //
-        var mutex = Mutex()
-        val eventSinkMap = HashMap<String, HashMap<String, EventChannel.EventSink>>()
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "event")
+        val eventMutex = Mutex()
+        var eventSink: EventChannel.EventSink? = null
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "flatEvent")
                 .setStreamHandler(object : EventChannel.StreamHandler {
                     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                        events?.also { events ->
-                            when (arguments) {
-                                is Map<*, *> -> {
-                                    val function = arguments["function"]
-                                    val id = arguments["id"]
-                                    when {
-                                        function is String && id is String -> {
-                                            scope.launch {
-                                                mutex.lock()
-                                                try {
-                                                    var map = eventSinkMap[function]
-                                                    if (map == null) {
-                                                        map = HashMap()
-                                                        eventSinkMap[function] = map
-                                                    }
-                                                    map[id] = events
-                                                } finally {
-                                                    mutex.unlock()
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                        events?.let { events ->
+                            scope.launch {
+                                eventMutex.lock()
+                                eventSink = events
+                                eventMutex.unlock()
                             }
                         }
                     }
 
                     override fun onCancel(arguments: Any?) {
-                        when (arguments) {
-                            is Map<*, *> -> {
-                                val function = arguments["function"]
-                                val id = arguments["id"]
-                                when {
-                                    function is String && id is String -> {
-                                        scope.launch {
-                                            mutex.lock()
-                                            try {
-                                                eventSinkMap[function]?.also {
-                                                    it.remove(id)
-                                                }
-                                            } finally {
-                                                mutex.unlock()
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                        scope.launch {
+                            eventMutex.lock()
+                            eventSink = null
+                            eventMutex.unlock()
                         }
                     }
                 })
-        Mobile.eventNotify { function, value ->
+        Mobile.eventNotify { message ->
             scope.launch {
-                mutex.lock()
+                eventMutex.lock()
                 try {
-                    eventSinkMap[function]?.also {
-                        it.values.forEach {
-                            uiThreadHandler.post {
-                                it.success(value)
-                            }
+                    eventSink?.let {
+                        uiThreadHandler.post {
+                            it.success(message)
                         }
                     }
                 } finally {
-                    mutex.unlock()
+                    eventMutex.unlock()
                 }
             }
         }
@@ -159,6 +123,8 @@ class MainActivity : FlutterActivity() {
                 .setStreamHandler(volumeStreamHandler)
 
     }
+
+    // save_image
 
     private fun saveImage(path: String) {
         BitmapFactory.decodeFile(path)?.let { bitmap ->
@@ -183,6 +149,9 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    //
+
+    // volume_buttons
 
     private var volumeEvents: EventChannel.EventSink? = null
 

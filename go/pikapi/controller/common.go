@@ -5,25 +5,35 @@ import (
 	"pgo/pikapi/database/comic_center"
 )
 
-var EventNotify func(function string, value string)
+var EventNotify func(message string)
 
-func downloadComicEventSend(comicDownload *comic_center.ComicDownload) {
+func onEvent(function string, content string) {
 	event := EventNotify
 	if event != nil {
-		buff, err := json.Marshal(comicDownload)
+		message := map[string]string{
+			"function": function,
+			"content":  content,
+		}
+		buff, err := json.Marshal(message)
 		if err == nil {
-			event("DOWNLOAD", string(buff))
+			event(string(buff))
 		} else {
 			print("SEND ERR?")
 		}
 	}
 }
 
-func notifyExport(str string) {
-	call := EventNotify
-	if call != nil {
-		call("EXPORT", str)
+func downloadComicEventSend(comicDownload *comic_center.ComicDownload) {
+	buff, err := json.Marshal(comicDownload)
+	if err == nil {
+		onEvent("DOWNLOAD", string(buff))
+	} else {
+		print("SEND ERR?")
 	}
+}
+
+func notifyExport(str string) {
+	onEvent("EXPORT", str)
 }
 
 func serialize(point interface{}, err error) (string, error) {

@@ -63,55 +63,34 @@ import Pikapi
         }
         
         //
-        let eventChannel = FlutterEventChannel.init(name: "event", binaryMessenger: controller as! FlutterBinaryMessenger)
+        let eventChannel = FlutterEventChannel.init(name: "flatEvent", binaryMessenger: controller as! FlutterBinaryMessenger)
         
         class EventChannelHandler:NSObject, FlutterStreamHandler {
              func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-                
-                if let args = arguments as? Dictionary<String, Any>,
-                   let function = args["function"] as? String,
-                   let id = args["id"] as? String
-                {
-                    objc_sync_enter(mutex)
-                        if dnMap[function] == nil{
-                            dnMap[function]=[:]
-                        }
-                        dnMap [function]?[id]=events
-                    objc_sync_exit(mutex)
-                }
-                return nil
-            }
+                 objc_sync_enter(mutex)
+                 sink = events
+                 objc_sync_exit(mutex)
+                 return nil
+             }
             
              func onCancel(withArguments arguments: Any?) -> FlutterError? {
-                if let args = arguments as? Dictionary<String, Any>,
-                   let function = args["function"] as? String,
-                   let id = args["id"] as? String
-                {
-                    objc_sync_enter(mutex)
-                        if dnMap[function] == nil{
-                            dnMap[function]=[:]
-                        }
-                        dnMap[function]?[id]=nil
-                    objc_sync_exit(mutex)
-                }
+                 objc_sync_enter(mutex)
+                 sink = nil
+                 objc_sync_exit(mutex)
                 return nil
             }
         }
         class EventNotifyHandler:NSObject, MobileEventNotifyHandlerProtocol {
-            func onNotify(_ function: String?, value: String?) {
-                if function != nil, value != nil,dnMap[function!] != nil{
-                    objc_sync_enter(mutex)
-                    for (_,v) in dnMap[function!]!{
-                        v(value)
-                    }
-                    objc_sync_exit(mutex)
+            func onNotify(_ message: String?) {
+                objc_sync_enter(mutex)
+                if sink != nil {
+                    sink?(message)
                 }
+                objc_sync_exit(mutex)
             }
         }
-        
         eventChannel.setStreamHandler(EventChannelHandler.init())
         MobileEventNotify(EventNotifyHandler.init())
-        
         
         //
         GeneratedPluginRegistrant.register(with: self)
@@ -120,6 +99,6 @@ import Pikapi
 }
 
 
-var dnMap : [String: [String : FlutterEventSink ]] = [:]
+var sink : FlutterEventSink?
 let mutex = NSObject.init()
-    .self
+

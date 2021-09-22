@@ -18,5 +18,5 @@ func EventNotify(notify EventNotifyHandler) {
 }
 
 type EventNotifyHandler interface {
-	OnNotify(function string, value string)
+	OnNotify(message string)
 }

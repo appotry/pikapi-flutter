@@ -28,21 +28,19 @@ class _DownloadExportToSocketScreenState
     extends State<DownloadExportToSocketScreen> {
   late Future<int> _future = pica.exportComicUsingSocket(widget.comicId);
   late Future<String> _ipFuture = pica.clientIpSet();
-  late StreamSubscription _listen;
 
   late String exportMessage = "";
 
   @override
   void initState() {
-    _listen = eventChannel.receiveBroadcastStream(
-        {"function": "EXPORT", "id": "NET"}).listen(_onMessageChange);
+    registerEvent(_onMessageChange, "EXPORT");
     super.initState();
   }
 
   @override
   void dispose() {
     pica.exportComicUsingSocketExit();
-    _listen.cancel();
+    unregisterEvent(_onMessageChange);
     super.dispose();
   }
 

@@ -15,27 +15,23 @@ class _CleanScreenState extends State<CleanScreen> {
   late bool _cleaning = false;
   late String _cleaningMessage = "清理中";
   late String _cleanResult = "";
-  late StreamSubscription _listen;
 
   @override
   void initState() {
-    _listen = eventChannel.receiveBroadcastStream(
-        {"function": "EXPORT", "id": "DEFAULT"}).listen(_onMessageChange);
+    registerEvent(_onMessageChange, "EXPORT");
     super.initState();
   }
 
   @override
   void dispose() {
-    _listen.cancel();
+    unregisterEvent(_onMessageChange);
     super.dispose();
   }
 
-  void _onMessageChange(event) {
-    if (event is String) {
-      setState(() {
-        _cleaningMessage = event;
-      });
-    }
+  void _onMessageChange(String event) {
+    setState(() {
+      _cleaningMessage = event;
+    });
   }
 
   @override

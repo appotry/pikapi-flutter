@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:pikapi/basic/Channels.dart';
 import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
@@ -35,7 +33,6 @@ class _DownloadExportToFileScreenState
   late bool exporting = false;
   late String exportMessage = "导出中";
   late String exportResult = "";
-  late StreamSubscription _listen;
 
   Future _load() async {
     _task = (await pica.loadDownloadComic(widget.comicId))!;
@@ -43,23 +40,20 @@ class _DownloadExportToFileScreenState
 
   @override
   void initState() {
-    _listen = eventChannel.receiveBroadcastStream(
-        {"function": "EXPORT", "id": "DEFAULT"}).listen(_onMessageChange);
+    registerEvent(_onMessageChange, "EXPORT");
     super.initState();
   }
 
   @override
   void dispose() {
-    _listen.cancel();
+    unregisterEvent(_onMessageChange);
     super.dispose();
   }
 
   void _onMessageChange(event) {
-    if (event is String) {
-      setState(() {
-        exportMessage = event;
-      });
-    }
+    setState(() {
+      exportMessage = event;
+    });
   }
 
   @override

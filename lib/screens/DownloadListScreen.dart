@@ -21,28 +21,26 @@ class DownloadListScreen extends StatefulWidget {
 class _DownloadListScreenState extends State<DownloadListScreen> {
   DownloadComic? _downloading;
   late bool _downloadRunning = false;
-  late StreamSubscription<dynamic> _sub;
   late Future<List<DownloadComic>> _f = pica.allDownloads();
+
+  void _onMessageChange(String event){
+    print("EVENT");
+    print(event);
+    if (event is String) {
+      try {
+        setState(() {
+          _downloading = DownloadComic.fromJson(json.decode(event));
+        });
+      } catch (e, s) {
+        print(e);
+        print(s);
+      }
+    }
+  }
 
   @override
   void initState() {
-    _sub = eventChannel.receiveBroadcastStream(
-        {"function": "DOWNLOAD", "id": "DOWNLOAD_LIST"}).listen(
-      (event) {
-        print("EVENT");
-        print(event);
-        if (event is String) {
-          try {
-            setState(() {
-              _downloading = DownloadComic.fromJson(json.decode(event));
-            });
-          } catch (e, s) {
-            print(e);
-            print(s);
-          }
-        }
-      },
-    );
+    registerEvent(_onMessageChange, "DOWNLOAD");
     pica
         .downloadRunning()
         .then((val) => setState(() => _downloadRunning = val));
@@ -51,7 +49,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
 
   @override
   void dispose() {
-    _sub.cancel();
+    unregisterEvent(_onMessageChange);
     super.dispose();
   }
 

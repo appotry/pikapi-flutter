@@ -19,18 +19,16 @@ class DownloadImportScreen extends StatefulWidget {
 class _DownloadImportScreenState extends State<DownloadImportScreen> {
   bool _importing = false;
   String _importMessage = "";
-  late StreamSubscription _listen;
 
   @override
   void initState() {
-    _listen = eventChannel.receiveBroadcastStream(
-        {"function": "EXPORT", "id": "DEFAULT"}).listen(_onMessageChange);
+    registerEvent(_onMessageChange, "EXPORT");
     super.initState();
   }
 
   @override
   void dispose() {
-    _listen.cancel();
+    unregisterEvent(_onMessageChange);
     super.dispose();
   }
 
