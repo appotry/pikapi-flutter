@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/niuhuan/pica-go"
 	"image/jpeg"
 	"io/ioutil"
 	"os"
@@ -14,7 +15,6 @@ import (
 	"pgo/pikapi/database/network_cache"
 	"pgo/pikapi/database/properties"
 	"pgo/pikapi/utils"
-	"pica"
 	"strconv"
 	"time"
 )
