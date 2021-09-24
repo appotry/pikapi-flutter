@@ -179,24 +179,26 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
                           ),
                         ],
                       )),
-                      Text.rich(
-                        TextSpan(
-                          text: "${_comicInfo.chineseTeam}",
+                      GestureDetector(
+                        onTap: () {
+                          if (_comicInfo.chineseTeam != "") {
+                            navPushOrReplace(
+                              context,
+                              (context) => ComicsScreen(
+                                chineseTeam: _comicInfo.chineseTeam,
+                              ),
+                            );
+                          }
+                        },
+                        onLongPress: () {
+                          confirmCopy(context, _comicInfo.chineseTeam);
+                        },
+                        child: Text(
+                          "${_comicInfo.chineseTeam}",
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey,
                           ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              if (_comicInfo.chineseTeam != "") {
-                                navPushOrReplace(
-                                  context,
-                                  (context) => ComicsScreen(
-                                    chineseTeam: _comicInfo.chineseTeam,
-                                  ),
-                                );
-                              }
-                            },
                         ),
                       ),
                     ],
