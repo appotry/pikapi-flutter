@@ -127,33 +127,10 @@ class ImageReaderStruct {
 
 //
 
-class ImageReader extends StatefulWidget {
+class ImageReader extends StatelessWidget {
   final ImageReaderStruct struct;
 
   const ImageReader(this.struct);
-
-  @override
-  State<StatefulWidget> createState() => _ImageReaderState();
-}
-
-class _ImageReaderState extends State<ImageReader> {
-  late var struct = widget.struct;
-
-  @override
-  void initState() {
-    if (Platform.isAndroid && volumeController) {
-      addVolumeListen();
-    }
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    if (Platform.isAndroid && volumeController) {
-      delVolumeListen();
-    }
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

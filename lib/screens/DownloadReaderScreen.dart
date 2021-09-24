@@ -105,6 +105,7 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     });
     // INIT
     _future = _load();
+    addVolumeListen();
     super.initState();
   }
 
@@ -113,6 +114,7 @@ class _DownloadReaderScreenState extends State<DownloadReaderScreen> {
     if (!_replacement) {
       switchFullScreenUI();
     }
+    delVolumeListen();
     super.dispose();
   }
 

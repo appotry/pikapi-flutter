@@ -112,6 +112,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     });
     // INIT
     _future = _load();
+    addVolumeListen();
     super.initState();
   }
 
@@ -120,6 +121,7 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
     if (!_replacement) {
       switchFullScreenUI();
     }
+    delVolumeListen();
     super.dispose();
   }
 
