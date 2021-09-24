@@ -118,7 +118,7 @@ class _DownloadInfoScreenState extends State<DownloadInfoScreen>
           List<String> tags = tagsDynamic.map((e) => "$e").toList();
           return ListView(
             children: [
-              DownloadInfoCard(task: _task),
+              DownloadInfoCard(task: _task, linkItem: true),
               ComicTagsCard(tags),
               ComicDescriptionCard(description: _task.description),
               Container(height: 5),

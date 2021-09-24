@@ -94,7 +94,7 @@ class _DownloadExportToFileScreenState
                 padding: EdgeInsets.all(8),
                 child: Text('TIPS : 选择一个目录'),
               ),
-              _buildExportToFileButton(),
+              ..._buildExportToFileButtons(),
               MaterialButton(
                 onPressed: () async {
                   Navigator.of(context).push(
@@ -107,10 +107,7 @@ class _DownloadExportToFileScreenState
                     ),
                   );
                 },
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  child: Text('传输到其他设备'),
-                ),
+                child: _buildButtonInner('传输到其他设备'),
               ),
             ],
           );
@@ -119,50 +116,91 @@ class _DownloadExportToFileScreenState
     );
   }
 
-  Widget _buildExportToFileButton() {
+  List<Widget> _buildExportToFileButtons() {
     if (Platform.isWindows ||
         Platform.isMacOS ||
         Platform.isLinux ||
         Platform.isAndroid) {
-      return MaterialButton(
-        onPressed: () async {
-          String? path = await chooseFolder(context);
-          print("path $path");
-          if (path != null) {
-            try {
-              setState(() {
-                exporting = true;
-              });
-              await pica.exportComicDownload(
-                widget.comicId,
-                path,
-              );
-              setState(() {
-                exportResult = "导出成功";
-              });
-            } catch (e) {
-              setState(() {
-                exportResult = "导出失败 $e";
-              });
-            } finally {
-              setState(() {
-                exporting = false;
-              });
+      return [
+        MaterialButton(
+          onPressed: () async {
+            String? path = await chooseFolder(context);
+            print("path $path");
+            if (path != null) {
+              try {
+                setState(() {
+                  exporting = true;
+                });
+                await pica.exportComicDownloadToJPG(
+                  widget.comicId,
+                  path,
+                );
+                setState(() {
+                  exportResult = "导出成功";
+                });
+              } catch (e) {
+                setState(() {
+                  exportResult = "导出失败 $e";
+                });
+              } finally {
+                setState(() {
+                  exporting = false;
+                });
+              }
             }
-          }
-        },
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Text('选择导出位置'),
+          },
+          child: _buildButtonInner('导出到HTML+JPG\n(可直接在相册中打开观看)'),
         ),
-      );
+        Container(height: 10),
+        MaterialButton(
+          onPressed: () async {
+            String? path = await chooseFolder(context);
+            print("path $path");
+            if (path != null) {
+              try {
+                setState(() {
+                  exporting = true;
+                });
+                await pica.exportComicDownload(
+                  widget.comicId,
+                  path,
+                );
+                setState(() {
+                  exportResult = "导出成功";
+                });
+              } catch (e) {
+                setState(() {
+                  exportResult = "导出失败 $e";
+                });
+              } finally {
+                setState(() {
+                  exporting = false;
+                });
+              }
+            }
+          },
+          child: _buildButtonInner('导出到HTML.zip\n(可从其他设备导入 / 解压后可阅读)'),
+        ),
+        Container(height: 10),
+      ];
     }
-    return MaterialButton(
-      onPressed: () async {},
-      child: Container(
-        padding: EdgeInsets.all(20),
-        child: Text('IOS暂不支持导出到文件'),
-      ),
+    return [];
+  }
+
+  Widget _buildButtonInner(String text) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Container(
+          width: constraints.maxWidth,
+          padding: EdgeInsets.only(top: 15, bottom: 15),
+          color: (Theme.of(context).textTheme.bodyText1?.color ?? Colors.black)
+              .withOpacity(.05),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+          ),
+        );
+      },
     );
   }
 }

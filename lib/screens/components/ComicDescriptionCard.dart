@@ -23,7 +23,7 @@ class ComicDescriptionCard extends StatelessWidget {
           ),
         ),
       ),
-      child: Text(description, style: _categoriesStyle),
+      child: SelectableText(description, style: _categoriesStyle),
     );
   }
 }

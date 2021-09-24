@@ -552,6 +552,8 @@ func FlatInvoke(method string, params string) (string, error) {
 		return "", comic_center.ResetAll()
 	case "exportComicDownload":
 		return "", exportComicDownload(params)
+	case "exportComicDownloadToJPG":
+		return "", exportComicDownloadToJPG(params)
 	case "exportComicUsingSocket":
 		i, e := exportComicUsingSocket(params)
 		return fmt.Sprintf("%d", i), e

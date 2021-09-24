@@ -1,7 +1,7 @@
-import 'package:event/event.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/Common.dart';
+import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/ComicsScreen.dart';
 import 'package:pikapi/basic/Navigatior.dart';
@@ -134,14 +134,9 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
                     children: [
                       Text.rich(TextSpan(
                         children: [
-                          TextSpan(
-                            text: "${_comicInfo.creator.name}",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
+                          WidgetSpan(
+                            child: GestureDetector(
+                              onTap: () {
                                 if (_comicInfo.creator.id != "") {
                                   navPushOrReplace(
                                     context,
@@ -152,6 +147,20 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
                                   );
                                 }
                               },
+                              onLongPress: () {
+                                confirmCopy(
+                                  context,
+                                  "${_comicInfo.creator.name}",
+                                );
+                              },
+                              child: Text(
+                                "${_comicInfo.creator.name}",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
                           ),
                           TextSpan(
                             text: "  ",

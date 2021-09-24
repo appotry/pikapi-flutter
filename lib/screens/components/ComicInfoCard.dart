@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/basic/Pica.dart';
 import 'package:pikapi/screens/SearchScreen.dart';
@@ -57,19 +58,29 @@ class _ComicInfoCard extends State<ComicInfoCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(info.title, style: titleStyle),
+                      widget.linkItem
+                          ? GestureDetector(
+                              onLongPress: () {
+                                confirmCopy(context, info.title);
+                              },
+                              child: Text(info.title, style: titleStyle),
+                            )
+                          : Text(info.title, style: titleStyle),
                       Container(height: 5),
-                      InkWell(
-                        onTap: widget.linkItem
-                            ? () {
+                      widget.linkItem
+                          ? InkWell(
+                              onTap: () {
                                 navPushOrReplace(
                                     context,
                                     (context) =>
                                         SearchScreen(keyword: info.author));
-                              }
-                            : null,
-                        child: Text(info.author, style: authorStyle),
-                      ),
+                              },
+                              onLongPress: () {
+                                confirmCopy(context, info.author);
+                              },
+                              child: Text(info.author, style: authorStyle),
+                            )
+                          : Text(info.author, style: authorStyle),
                       Container(height: 5),
                       Text.rich(
                         widget.linkItem

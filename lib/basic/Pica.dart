@@ -422,6 +422,13 @@ class Pica {
     });
   }
 
+  Future<dynamic> exportComicDownloadToJPG(String comicId, String dir) {
+    return _flatInvoke("exportComicDownloadToJPG", {
+      "comicId": comicId,
+      "dir": dir,
+    });
+  }
+
   Future<int> exportComicUsingSocket(String comicId) async {
     return int.parse(await _flatInvoke("exportComicUsingSocket", comicId));
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/Cross.dart';
 import 'package:pikapi/basic/Entities.dart';
 import 'package:pikapi/screens/components/Images.dart';
 
@@ -9,9 +10,14 @@ import 'ComicInfoCard.dart';
 class DownloadInfoCard extends StatelessWidget {
   final DownloadComic task;
   final bool downloading;
+  final bool linkItem;
 
-  DownloadInfoCard({Key? key, required this.task, this.downloading = false})
-      : super(key: key);
+  DownloadInfoCard({
+    Key? key,
+    required this.task,
+    this.downloading = false,
+    this.linkItem = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -71,14 +77,23 @@ class DownloadInfoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        task.title,
-                        style: titleStyle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      linkItem
+                          ? GestureDetector(
+                              onLongPress: () {
+                                confirmCopy(context, task.title);
+                              },
+                              child: Text(task.title, style: titleStyle),
+                            )
+                          : Text(task.title, style: titleStyle),
                       Container(height: 5),
-                      Text(task.author, style: authorStyle),
+                      linkItem
+                          ? GestureDetector(
+                              onLongPress: () {
+                                confirmCopy(context, task.author);
+                              },
+                              child: Text(task.author, style: authorStyle),
+                            )
+                          : Text(task.author, style: authorStyle),
                       Container(height: 5),
                       Text(
                         "分类: $categoriesString",

@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"path"
+	"pgo/pikapi/const_value"
 	"pgo/pikapi/database/comic_center"
 	"time"
 )
@@ -104,9 +105,6 @@ func exportComicDownload(params string) error {
 
 func exportComicDownloadFetch(comicId string, onWriteFile func(path string, size int64) (io.Writer, error)) error {
 	comic, err := comic_center.FindComicDownloadById(comicId)
-	if err != nil {
-		return err
-	}
 	if err != nil {
 		return err
 	}
@@ -320,8 +318,8 @@ const indexHtml = `
             for (var i = 0; i < ps.length; i++) {
                 if(epIndex == i){
                     as[i].classList = ["active"];
-                }else{                    as[i].className = "";
-
+                }else{
+                    as[i].className = "";
                 }
             }
         }
@@ -349,3 +347,129 @@ const indexHtml = `
 </body>
 </html>
 `
+
+func exportComicDownloadToJPG(params string) error {
+	var paramsStruct struct {
+		ComicId string `json:"comicId"`
+		Dir     string `json:"dir"`
+	}
+	json.Unmarshal([]byte(params), &paramsStruct)
+	comicId := paramsStruct.ComicId
+	dir := paramsStruct.Dir
+	println(fmt.Sprintf("导出 %s 到 %s", comicId, dir))
+	comic, err := comic_center.FindComicDownloadById(comicId)
+	if err != nil {
+		return err
+	}
+	if comic == nil {
+		return errors.New("not found")
+	}
+	if !comic.DownloadFinished {
+		return errors.New("not download finish")
+	}
+	dirPath := path.Join(dir, fmt.Sprintf("%s-%s", comic.Title, time.Now().Format("2006_01_02_15_04_05.999")))
+	println(fmt.Sprintf("DIR : %s", dirPath))
+	err = os.Mkdir(dirPath, const_value.CreateDirMode)
+	if err != nil {
+		return err
+	}
+	err = os.Mkdir(path.Join(dirPath, "pictures"), const_value.CreateDirMode)
+	if err != nil {
+		return err
+	}
+
+	epList, err := comic_center.ListDownloadEpByComicId(comicId)
+	if err != nil {
+		return err
+	}
+	jsonComic := JsonComicDownload{}
+	jsonComic.ComicDownload = *comic
+	jsonComic.EpList = make([]JsonComicDownloadEp, 0)
+	for _, ep := range epList {
+		jsonEp := JsonComicDownloadEp{}
+		jsonEp.ComicDownloadEp = ep
+		jsonEp.PictureList = make([]JsonComicDownloadPicture, 0)
+		pictures, err := comic_center.ListDownloadPictureByEpId(ep.ID)
+		if err != nil {
+			return err
+		}
+		for _, picture := range pictures {
+			jsonPicture := JsonComicDownloadPicture{}
+			jsonPicture.ComicDownloadPicture = picture
+			jsonPicture.SrcPath = fmt.Sprintf("pictures/%04d_%04d.%s", ep.EpOrder, picture.RankInEp, picture.Format)
+			notifyExport(fmt.Sprintf("正在导出 EP:%d PIC:%d", ep.EpOrder, picture.RankInEp))
+			entryWriter, err := os.Create(path.Join(dirPath, jsonPicture.SrcPath))
+			if err != nil {
+				return err
+			}
+			err = func() error {
+				defer entryWriter.Close()
+				source, err := os.Open(downloadPath(picture.LocalPath))
+				if err != nil {
+					return err
+				}
+				_, err = func() (int64, error) {
+					defer source.Close()
+					return io.Copy(entryWriter, source)
+				}()
+				return err
+			}()
+			jsonEp.PictureList = append(jsonEp.PictureList, jsonPicture)
+		}
+		jsonComic.EpList = append(jsonComic.EpList, jsonEp)
+	}
+	if comic.ThumbLocalPath != "" {
+		logoBuff, err := ioutil.ReadFile(downloadPath(comic.ThumbLocalPath))
+		if err == nil {
+			entryWriter, err := os.Create(path.Join(dirPath, "logo"))
+			if err != nil {
+				return err
+			}
+			defer entryWriter.Close()
+			if err != nil {
+				return err
+			}
+			_, err = entryWriter.Write(logoBuff)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// JS
+	{
+		buff, err := json.Marshal(&jsonComic)
+		if err != nil {
+			return err
+		}
+		logoBuff := append([]byte("data = "), buff...)
+		if err == nil {
+
+			entryWriter, err := os.Create(path.Join(dirPath, "data.js"))
+			if err != nil {
+				return err
+			}
+			defer entryWriter.Close()
+			_, err = entryWriter.Write(logoBuff)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// HTML
+	{
+		var htmlBuff = []byte(indexHtml)
+		if err == nil {
+			entryWriter, err := os.Create(path.Join(dirPath, "index.html"))
+			if err != nil {
+				return err
+			}
+			defer entryWriter.Close()
+			_, err = entryWriter.Write(htmlBuff)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	println("OK")
+	return nil
+}

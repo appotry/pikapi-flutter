@@ -90,3 +90,9 @@ Future<String?> chooseFolder(BuildContext context) async {
     rootDirectory: Directory(root),
   );
 }
+
+void confirmCopy(BuildContext context, String content) async {
+  if (await confirmDialog(context, "复制", content)) {
+    copyToClipBoard(context, content);
+  }
+}
