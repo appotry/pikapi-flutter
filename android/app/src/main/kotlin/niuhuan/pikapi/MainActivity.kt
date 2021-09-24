@@ -8,6 +8,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.view.Display
 import android.view.KeyEvent
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
@@ -72,6 +73,12 @@ class MainActivity : FlutterActivity() {
                     }
                     "androidSaveFileToImage" -> {
                         saveImage(call.argument("path")!!)
+                    }
+                    "androidGetModes" -> {
+                        modes()
+                    }
+                    "androidSetMode" -> {
+                        setMode(call.argument("mode")!!)
                     }
                     else -> {
                         notImplementedToken
@@ -149,7 +156,48 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    //
+    // fps mods
+    private fun mixDisplay(): Display? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            display?.let {
+                return it
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            windowManager.defaultDisplay?.let {
+                return it
+            }
+        }
+        return null
+    }
+
+    private fun modes(): List<String> {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mixDisplay()?.let { display ->
+                return display.supportedModes.map { mode ->
+                    mode.toString()
+                }
+            }
+        }
+        return ArrayList()
+    }
+
+    private fun setMode(string: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mixDisplay()?.let { display ->
+                return display.supportedModes.forEach { mode ->
+                    if (mode.toString() == string) {
+                        uiThreadHandler.post {
+                            window.attributes = window.attributes.also { attr ->
+                                attr.preferredDisplayModeId = mode.modeId
+                            }
+                        }
+                        return
+                    }
+                }
+            }
+        }
+    }
 
     // volume_buttons
 
@@ -183,5 +231,6 @@ class MainActivity : FlutterActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
+
 
 }

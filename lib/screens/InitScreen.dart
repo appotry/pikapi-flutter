@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapi/basic/config/Address.dart';
+import 'package:pikapi/basic/config/AndroidDisplayMode.dart';
 import 'package:pikapi/basic/config/AutoClean.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/ContentFailedReloadAction.dart';
@@ -52,6 +53,7 @@ class _InitScreenState extends State<InitScreen> {
     await initContentFailedReloadAction();
     await initVolumeController();
     await initKeyboardController();
+    await initAndroidDisplayMode();
     // 登录, 如果token失效重新登录, 网络不好的时候可能需要1分钟
     if (await pica.preLogin()) {
       // 如果token或username+password有效则直接进入登录好的界面

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:pikapi/basic/config/AndroidDisplayMode.dart';
 import 'package:pikapi/basic/config/AutoClean.dart';
 import 'package:pikapi/basic/config/AutoFullScreen.dart';
 import 'package:pikapi/basic/config/ContentFailedReloadAction.dart';
@@ -137,6 +138,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
               title: Text('清除缓存'),
+            ),
+            Divider(),
+            ListTile(
+              title: Text("屏幕刷新率(安卓)"),
+              subtitle: Text(androidDisplayModeName()),
+              onTap: () async {
+                await chooseAndroidDisplayMode(context);
+                setState(() {});
+              },
             ),
             Divider(),
           ],

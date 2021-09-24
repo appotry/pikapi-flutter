@@ -505,4 +505,15 @@ class Pica {
       "value": jsonEncode(value),
     });
   }
+
+  Future<List<String>> loadAndroidModes() async {
+    return List.of(await _channel.invokeMethod("androidGetModes"))
+        .map((e) => "$e")
+        .toList();
+  }
+
+  Future setAndroidMode(String androidDisplayMode) {
+    return _channel
+        .invokeMethod("androidSetMode", {"mode": androidDisplayMode});
+  }
 }
