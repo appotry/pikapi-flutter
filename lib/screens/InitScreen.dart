@@ -40,7 +40,7 @@ class _InitScreenState extends State<InitScreen> {
     await initAddress();
     await initProxy();
     await initQuality();
-    await loadTheme();
+    await initTheme();
     await initListLayout();
     await initReaderType();
     await initReaderDirection();

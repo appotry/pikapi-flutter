@@ -516,4 +516,12 @@ class Pica {
     return _channel
         .invokeMethod("androidSetMode", {"mode": androidDisplayMode});
   }
+
+  Future androidGetUiMode() {
+    return _channel.invokeMethod("androidGetUiMode", {});
+  }
+
+  Future<int> androidGetVersion() async {
+    return await _channel.invokeMethod("androidGetVersion", {});
+  }
 }

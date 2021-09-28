@@ -55,6 +55,10 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
     - [x] 导入导出 / 无线共享 / 移动设备与PC设备传输
 - [ ] 聊天室
 - [x] 缓存 / 清理
+- [x] 设备支持
+    - [x] 安卓
+        - [x] 高刷新频率屏幕适配 (90/120/144... Hz)
+        - [x] 安卓10以上随系统进入深色/夜间模式
 
 ## 其他说明
 
@@ -106,11 +110,11 @@ VPN->代理->分流, 这三个功能如果同时设置, 您会在您手机的VPN
   sudo apt install xorg-dev
   ```
 - 字体不显示
-  1. 将字体文件复制到项目目录下
+    1. 将字体文件复制到项目目录下
     ```shell
       cp /usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf fonts/
     ```
-  2. 设置flutter打包的字体
+    2. 设置flutter打包的字体
     ```yaml
       fonts:
       - family: Roboto
