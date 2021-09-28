@@ -10,6 +10,8 @@ import (
 	_ "image/png"
 	"os"
 	"path/filepath"
+	"pgo/pikapi/database/properties"
+	"strconv"
 	"strings"
 )
 
@@ -22,6 +24,20 @@ func main() {
 		flutter.OptionVMArguments(strings.Split(vmArguments, ";")),
 		flutter.WindowIcon(iconProvider),
 	}
+	// 窗口初始化大小的处理
+	widthStr, _ := properties.LoadProperty("window_width", "600")
+	heightStr, _ := properties.LoadProperty("window_height", "900")
+	width, _ := strconv.Atoi(widthStr)
+	height, _ := strconv.Atoi(heightStr)
+	if width <= 0 {
+		width = 600
+	}
+	if height <= 0 {
+		height = 900
+	}
+	sizeOption := flutter.WindowInitialDimensions(width, height)
+	options = append(options, sizeOption)
+	//
 	err := flutter.Run(append(options, mainOptions...)...)
 	if err != nil {
 		fmt.Println(err)
